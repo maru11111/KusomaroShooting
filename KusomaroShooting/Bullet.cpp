@@ -3,6 +3,7 @@
 
 int BaseBullet::numInstances = 0;
 
+
 BaseBullet::BaseBullet(Vec2 pos_)
 	: pos{ pos_ }
 {
@@ -12,15 +13,25 @@ BaseBullet::BaseBullet(Vec2 pos_)
 
 BaseBullet::~BaseBullet() {
 	numInstances--;
-	//Print << numInstances;
+	Print << numInstances;
 }
 
 void BaseBullet::update() {
 	move();
 }
 
+void BaseBullet::setIsHit(bool isHit_) {
+	isHit = isHit_;
+}
+
+bool BaseBullet::isOffScreen() {
+	if (pos.x < 0 - TextureAsset(U"Marshmallow").size().x || Scene::Size().x/3.0 + TextureAsset(U"Marshmallow").size().x < pos.x || pos.y < TextureAsset(U"UIBack").size().y*2 - TextureAsset(U"Marshmallow").size().y || Scene::Size().y / 3.0 + TextureAsset(U"Marshmallow").size().y < pos.y)return true;
+	else return false;
+}
+
 bool BaseBullet::isDestroy() {
-	if (pos.x < 0 - 50 || Scene::Size().x + 50 < pos.x || pos.y < 0 - 50 || Scene::Size().y + 50 < pos.y)return true;
+	if (isOffScreen())return true;
+	else  if (isHit) return true;
 	else return false;
 }
 
@@ -29,7 +40,7 @@ int BaseBullet::getDamageAmount() {
 }
 
 RectF BaseBullet::collision() {
-	return RectF(Arg::center(pos), 20, 20);
+	return RectF(Arg::center(pos), 7, 7);
 }
 
 MaroType BaseBullet::getType() {
@@ -121,5 +132,5 @@ void KusoMarshmallowSine::move()
 void KusoMarshmallowSine::draw() {
 	TextureAsset(U"KusomaroSine").drawAt(pos);
 	//Debug
-	//RectF(Arg::center(pos), 20, 20).draw(ColorF(1, 0, 0));
+	//RectF(Arg::center(pos), 7, 7).draw(ColorF(1, 0, 0));
 }

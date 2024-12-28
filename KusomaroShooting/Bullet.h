@@ -20,6 +20,10 @@ public:
 
 	virtual void move() = 0;
 
+	void setIsHit(bool isHit_);
+
+	bool isOffScreen();
+
 	bool isDestroy();
 
 	int getDamageAmount();
@@ -37,6 +41,7 @@ protected:
 	int damageAmount;
 	static int numInstances;
 	MaroType type;
+	bool isHit=false;
 };
 
 class NormalMarshmallow : public BaseBullet {
