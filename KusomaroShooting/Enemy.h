@@ -19,15 +19,20 @@ public:
 
 	virtual RectF collision()const=0;
 
+	int getDamageAmount();
+
+	Vec2 getPos();
+
 	virtual void draw()=0;
 	
 protected:
 	Objects& objects;
 	int maxHp;
-	int hp=maxHp;
+	int hp;
 	Vec2 pos;
 	Vec2 vec;
 	double speed;
+	int damageAmount;
 };
 
 class GarbageBag : public BaseEnemy {
