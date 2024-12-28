@@ -10,6 +10,11 @@ Player::Player(Objects& objects_)
 	}
 }
 
+Player::~Player() {
+	maroBox.clear();
+}
+
+
 void Player::update() {
 
 	//Debug
@@ -24,14 +29,19 @@ void Player::update() {
 	//	case MaroType::Beem: a[4]++; break;
 	//	}
 	//}
-	//Print << a;
+	//Print << U"aaaa";
 
-	move();
+	//移動
+	if (isMovable()) {
+		move();
+	}
 
+	//攻撃
 	if (KeyJ.down() || KeySpace.down() || KeyEnter.down()) {
 		attack();
 	}
 
+	//時間経過でマシュマロ補充
 	if (numMarshmallows < maxNumMarshmallows) {
 		marshmallowAddTimer += Scene::DeltaTime();
 
@@ -42,6 +52,33 @@ void Player::update() {
 	}
 	else marshmallowAddTimer = 0;
 
+	//無敵時間があったら更新
+	if (isInvincibility()) {
+		remainingInvincibilityTime -= Scene::DeltaTime();
+		if (remainingInvincibilityTime < 0)remainingInvincibilityTime = 0;
+	}
+
+	//ヒットバック中なら
+	if (isHitBack) {
+		hitBackTimer += Scene::DeltaTime();
+
+		pos.x -= hitBackSpeed *Scene::DeltaTime();
+
+		hitBackSpeed *= 0.9;
+
+		//画面外に出ない
+		if (pos.x < 0)pos.x = 0;
+		if (Scene::Size().x / 3.0 < pos.x)pos.x = Scene::Size().x / 3.0;
+		if (pos.y < 60)pos.y = 60;
+		if (Scene::Size().y / 3.0 < pos.y)pos.y = Scene::Size().y / 3.0;
+
+
+		if (hitBackTime <= hitBackTimer) {
+			//ヒットバック終了
+			hitBackSpeed = firstHitBackSpeed;
+			isHitBack = false;
+		}
+	}
 }
 
 void Player::move() {
@@ -61,13 +98,13 @@ void Player::move() {
 	pos += vec * speed * Scene::DeltaTime();
 
 	//ふわふわさせる
-	pos.y += 10 * Math::Sin(Scene::Time() * 1.25) * Scene::DeltaTime();
+	pos.y += 6 * Math::Sin(Scene::Time() * 1.25) * Scene::DeltaTime();
 
 	//画面外に出ない
 	if (pos.x < 0)pos.x = 0;
-	if (Scene::Size().x < pos.x)pos.x = Scene::Size().x;
-	if (pos.y < 0)pos.y = 0;
-	if (Scene::Size().y < pos.y)pos.y = Scene::Size().y;
+	if (Scene::Size().x/3.0 < pos.x)pos.x = Scene::Size().x/3.0;
+	if (pos.y < 60)pos.y = 60;
+	if (Scene::Size().y/3.0 < pos.y)pos.y = Scene::Size().y/3.0;
 
 	//簡易慣性
 	vec *= 0.9;
@@ -89,7 +126,23 @@ void Player::attack() {
 }
 
 void Player::damage(int damageAmount) {
-	hp -= damageAmount;
+	//無敵時間中
+	if (isInvincibility()) {
+		//ダメージを受けない
+		Print << U"MUTEKI";
+	}
+	//無敵時間外
+	else {
+		//無敵時間スタート
+		startInvincibilityTime();
+		//ダメージを受ける
+		hp -= damageAmount;
+		//0以下になったら0に戻す
+		if (hp < 0)hp = 0;
+		//ヒットバック開始
+		isHitBack = true;
+		hitBackTimer = 0;
+	}
 }
 
 MaroType Player::chooseMaro() {
@@ -133,8 +186,26 @@ void Player::addMarshmallow() {
 	}
 }
 
+void Player::setKusomaro(MaroType type) {
+	if (not maroBox.empty())maroBox[0] = type;
+	else maroBox << type;
+}
+
 RectF Player::collision() const {
-	return RectF(Arg::center(pos), 50, 50);
+	return RectF(Arg::center(pos.movedBy(5, -5)), 15, 15);
+}
+
+void Player::startInvincibilityTime() {
+	remainingInvincibilityTime = invincibilityTime;
+}
+bool Player::isInvincibility() {
+	if (0 < remainingInvincibilityTime) return true;
+	else return false;
+}
+
+bool Player::isMovable() {
+	if (not isHitBack) return true;
+	else return false;
 }
 
 int Player::getNumMarshmallows()const {
@@ -156,12 +227,28 @@ MaroType Player::getNextMaro()const {
 
 void Player::draw() {
 
-	//スプライトシートを再生
-
-	int n = (int)(Scene::Time() / 0.125) % 3;
-
-	TextureAsset(U"UiNormal")(n * 35, 0, 35, 28).drawAt(pos);
+	//無敵時間中
+	if (isInvincibility()) {
+		//点滅させる
+		int isDraw = (int)(Scene::Time() / (0.125 /1.5)) % 2;
+		if (isDraw) {
+			//スプライトシートを再生
+			int n = (int)(Scene::Time() / 0.250) % 3;
+			TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x/3.0, 0, TextureAsset(U"UiDamage").size().x/3.0, TextureAsset(U"UiDamage").size().y).drawAt(pos);
+		}
+		else {
+			//スプライトシートを再生
+			int n = (int)(Scene::Time() / 0.250) % 3;
+			TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x/3.0, 0, TextureAsset(U"UiDamage").size().x/3.0, TextureAsset(U"UiDamage").size().y).drawAt(pos,ColorF(1.0, 0.8));
+		}
+	}
+	//無敵時間外
+	else {
+		//スプライトシートを再生
+		int n = (int)(Scene::Time() / 0.0625) % 102;
+		TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x/102, 0, TextureAsset(U"UiNormalAndBlink").size().x/102, TextureAsset(U"UiNormalAndBlink").size().y).drawAt(pos);
+	}
 
 	//Debug
-	//RectF(Arg::center(pos), 50, 50).draw(ColorF(1, 0, 0));
+	//RectF(Arg::center(pos.movedBy(5,-5)), 15, 15).draw(ColorF(1, 0, 0));
 }

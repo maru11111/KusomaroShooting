@@ -7,6 +7,8 @@ class Player {
 public:
 	Player(Objects& obj);
 
+	~Player();
+
 	void update();
 
 	void move();
@@ -19,7 +21,13 @@ public:
 
 	void addMarshmallow();
 
+	void setKusomaro(MaroType type);
+
 	RectF collision()const;
+
+	void startInvincibilityTime();
+	bool isInvincibility();
+	bool isMovable();
 
 	int getNumMarshmallows()const;
 
@@ -40,17 +48,23 @@ private:
 	Vec2 pos = { 100,100 };
 	Vec2 vec = { 0,0 };
 	double speed = 100;
-	double damping = 0;
+	double remainingInvincibilityTime=0;
+	double invincibilityTime=2;
 	int numMarshmallows = 0;
 	int maxNumMarshmallows = 30;
 	double marshmallowAddTimer = 0;
-	double marshmallowAddInterval = 3;
+	const double marshmallowAddInterval = 3;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 0;
+	int normalMaroAppearProbability = 90;
 	//クソマロ判定をされたマロのなかでの確率(％)
 	int upMaroAppearProbability = 30;
 	int downMaroAppearProbability = 30;
 	int sineMaroAppearProbability = 30;
 	int beemMaroAppearProbability = 10;
 	Array<MaroType>maroBox;
+	bool isHitBack=false;
+	double hitBackTime=1;
+	double hitBackTimer=0;
+	double firstHitBackSpeed=100;
+	double hitBackSpeed = firstHitBackSpeed;
 };
