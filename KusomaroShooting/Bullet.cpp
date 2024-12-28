@@ -49,7 +49,7 @@ NormalMarshmallow::NormalMarshmallow(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 600;
+	speed = 400;
 	type = MaroType::Normal;
 }
 
@@ -64,13 +64,13 @@ KusoMarshmallowUp::KusoMarshmallowUp(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 600;
+	speed = 400;
 	type = MaroType::Up;
 }
 
 void KusoMarshmallowUp::move()
 {
-	vec.y -= 1 * Scene::DeltaTime();
+	vec.y -= 1.5 * Scene::DeltaTime();
 	pos += vec * speed * Scene::DeltaTime();
 }
 
@@ -86,13 +86,13 @@ KusoMarshmallowDown::KusoMarshmallowDown(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 600;
+	speed = 400;
 	type = MaroType::Down;
 }
 
 void KusoMarshmallowDown::move()
 {
-	vec.y += 1 * Scene::DeltaTime();
+	vec.y += 1.5 * Scene::DeltaTime();
 	pos += vec * speed * Scene::DeltaTime();
 }
 
@@ -108,13 +108,13 @@ KusoMarshmallowSine::KusoMarshmallowSine(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 600;
+	speed = 300;
 	type = MaroType::Sine;
 }
 
 void KusoMarshmallowSine::move()
 {
-	vec.y = Math::Sin(Scene::Time() * 6);
+	vec.y = Math::Sin(Scene::Time() * 7);
 	pos += vec * speed * Scene::DeltaTime();
 }
 
