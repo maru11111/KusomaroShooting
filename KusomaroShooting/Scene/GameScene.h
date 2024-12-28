@@ -19,5 +19,6 @@ private:
 	Objects objects;
 	RenderTexture renderTexture{ Size(320, 214) };
 	RenderTexture fontRenderTexture{ Size(320, 214) * 3 };
+	Effect effect;
 };
 
