@@ -50,6 +50,9 @@ void Main()
 	TextureAsset::Register(U"BossBarFront", Resource(U"texture/BossHpBarFront.png"));
 	TextureAsset::Register(U"MarshmallowBox", Resource(U"texture/MarshmallowBox.png"));
 	TextureAsset::Register(U"UIBack", Resource(U"texture/UIBack.png"));
+	TextureAsset::Register(U"UiDamage", Resource(U"texture/UIDamage.png"));
+	TextureAsset::Register(U"UiNormalAndBlink", Resource(U"texture/UiNormalAndBlink.png"));
+	TextureAsset::Register(U"DamageEffect", Resource(U"texture/DamageEffect.png"));
 	//フォント
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
@@ -74,6 +77,9 @@ void Main()
 	TextureAsset::Load(U"BossBarFront");
 	TextureAsset::Load(U"MarshmallowBox");
 	TextureAsset::Load(U"UIBack");
+	TextureAsset::Load(U"UiDamage");
+	TextureAsset::Load(U"UiNormalAndBlink");
+	TextureAsset::Load(U"DamageEffect");
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
 	FontAsset::Load(U"GameUI_BestTen");
