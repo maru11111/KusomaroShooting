@@ -142,6 +142,9 @@ Resource(texture/MarshmallowBarFront.png)
 Resource(texture/BossHpBarFront.png)
 Resource(texture/MarshmallowBox.png)
 Resource(texture/UIBack.png)
+Resource(texture/UiDamage.png)
+Resource(texture/UiNormalAndBlink.png)
+Resource(texture/DamageEffect.png)
 
 
 //フォント
