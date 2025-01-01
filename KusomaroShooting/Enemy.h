@@ -35,11 +35,21 @@ protected:
 	int damageAmount;
 };
 
-class GarbageBag : public BaseEnemy {
+class GarbageBagNormal : public BaseEnemy {
 public:
 
-	GarbageBag(Objects& objects_, Vec2 pos_);
+	GarbageBagNormal(Objects& objects_, Vec2 pos_);
 
+	void move()override;
+
+	RectF collision()const override;
+
+	void draw()override;
+};
+
+class GarbageBagFast : public BaseEnemy {
+public:
+	GarbageBagFast(Objects& objects_, Vec2 pos_);
 	void move()override;
 
 	RectF collision()const override;
