@@ -5,7 +5,7 @@ enum class MaroType {
 	Up,
 	Down,
 	Sine,
-	Beem,
+	Beam,
 	Empty
 };
 
@@ -14,9 +14,9 @@ public:
 
 	BaseBullet(Vec2 pos_);
 
-	~BaseBullet();
+	virtual ~BaseBullet();
 
-	void update();
+	virtual void update();
 
 	virtual void move() = 0;
 
@@ -24,11 +24,11 @@ public:
 
 	bool isOffScreen();
 
-	bool isDestroy();
+	virtual bool isDestroy();
 
 	int getDamageAmount();
 
-	RectF collision();
+	virtual RectF collision();
 
 	MaroType getType();
 
@@ -69,4 +69,20 @@ public:
 	KusoMarshmallowSine(Vec2 pos_);
 	void move()override;
 	void draw()override;
+};
+
+class KusoMarshmallowBeam : public BaseBullet {
+public:
+	KusoMarshmallowBeam(Vec2 pos_);
+	RectF collision()override;
+	void move()override;
+	bool isDestroy()override;
+	void update()override;
+	void draw()override;
+private:
+	double beamTimer=0;
+	double beamColTimer = 0;
+	int beamColTime=26*0.05;
+	bool isColliderActive=false;
+	bool isEndBeam=false;
 };
