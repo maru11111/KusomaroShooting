@@ -21,9 +21,12 @@ public:
 
 	void addMarshmallow();
 
+	void stayOnScreen();
+
 	void setKusomaro(MaroType type);
 
-	RectF collision()const;
+	RectF bodyCollision()const;
+	RectF attackCollision()const;
 
 	void startInvincibilityTime();
 	bool isInvincibility();
@@ -39,15 +42,22 @@ public:
 
 	MaroType getNextMaro()const;
 
+	int getDamageAmount()const;
+
+	bool getIsAttackColOn()const;
+
+	bool getIsBeamAttacking();
+
 	void draw();
 
 private:
 	Objects& objects;
 	int maxHp = 10;
 	int hp = maxHp;
+	int damageAmount=10;
 	Vec2 pos = { 100,100 };
 	Vec2 vec = { 0,0 };
-	double speed = 100;
+	double speed = 100*3;
 	double remainingInvincibilityTime=0;
 	double invincibilityTime=2;
 	int numMarshmallows = 0;
@@ -55,16 +65,25 @@ private:
 	double marshmallowAddTimer = 0;
 	const double marshmallowAddInterval = 3;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 90;
+	int normalMaroAppearProbability = 0;
 	//クソマロ判定をされたマロのなかでの確率(％)
-	int upMaroAppearProbability = 30;
-	int downMaroAppearProbability = 30;
-	int sineMaroAppearProbability = 30;
-	int beemMaroAppearProbability = 10;
+	int upMaroAppearProbability = 0;
+	int downMaroAppearProbability = 0;
+	int sineMaroAppearProbability = 0;
+	int beamMaroAppearProbability = 100;
 	Array<MaroType>maroBox;
 	bool isHitBack=false;
 	double hitBackTime=1;
 	double hitBackTimer=0;
-	double firstHitBackSpeed=100;
+	double firstHitBackSpeed=100*3;
 	double hitBackSpeed = firstHitBackSpeed;
+	bool isAttack = false;
+	bool isAttackColOn = false;
+	double attackTime = 0.5;
+	double attackTimer = 0;
+	double attackColTime=0.1;
+	bool isBeamAttacking = false;
+	double beamTimer=0;
+	bool startBlink = false;
+	bool keepBlink = false;
 };
