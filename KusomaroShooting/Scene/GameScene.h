@@ -9,6 +9,8 @@ public:
 
 	void update()override;
 
+	void destroyObjects();
+
 	void draw()const override;
 
 	void drawBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY)const;
@@ -17,8 +19,9 @@ public:
 
 private:
 	Objects objects;
-	RenderTexture renderTexture{ Size(320, 214) };
+	RenderTexture renderTexture{ Size(320, 214)*3 };
 	RenderTexture fontRenderTexture{ Size(320, 214) * 3 };
 	Effect effect;
+	bool isTimeStopped=false;
 };
 
