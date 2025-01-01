@@ -134,7 +134,7 @@ Resource(texture/GarbageBag.png)
 Resource(texture/kusomaroSine.png)
 Resource(texture/kusomaroUp.png)
 Resource(texture/kusomaroDown.png)
-Resource(texture/kusomaroBeem.png)
+Resource(texture/kusomaroBeam.png)
 Resource(texture/PlayerHpBarBack.png)
 Resource(texture/BossHpBarBack.png)
 Resource(texture/PlayerHpBarFront.png)
@@ -145,7 +145,8 @@ Resource(texture/UIBack.png)
 Resource(texture/UiDamage.png)
 Resource(texture/UiNormalAndBlink.png)
 Resource(texture/DamageEffect.png)
-
+Resource(texture/UiBeam.png)
+Resource(texture/UiBeamUimama.png)
 
 //フォント
 Resource(font/keifont.ttf)
