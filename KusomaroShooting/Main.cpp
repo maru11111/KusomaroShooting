@@ -26,7 +26,7 @@ void Main()
 {
 	// 
 	const int scaling = 3;
-	Scene::Resize(Size(320, 214) * scaling);
+	//Scene::Resize(Size(320, 214) * scaling);
 
 	// 最近傍補間
 	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
@@ -38,7 +38,7 @@ void Main()
 	//画像
 	TextureAsset::Register(U"UiNormal", Resource(U"texture/UiNormal_33_28_3sheet.png"));
 	TextureAsset::Register(U"Marshmallow", Resource(U"texture/mashumaro_27_30.png"));
-	TextureAsset::Register(U"KusomaroBeem", Resource(U"texture/kusomaroBeem.png"));
+	TextureAsset::Register(U"KusomaroBeam", Resource(U"texture/kusomaroBeam.png"));
 	TextureAsset::Register(U"KusomaroUp", Resource(U"texture/kusomaroUp.png"));
 	TextureAsset::Register(U"KusomaroDown", Resource(U"texture/kusomaroDown.png"));
 	TextureAsset::Register(U"KusomaroSine", Resource(U"texture/kusomaroSine.png"));
@@ -53,7 +53,9 @@ void Main()
 	TextureAsset::Register(U"UiDamage", Resource(U"texture/UIDamage.png"));
 	TextureAsset::Register(U"UiNormalAndBlink", Resource(U"texture/UiNormalAndBlink.png"));
 	TextureAsset::Register(U"DamageEffect", Resource(U"texture/DamageEffect.png"));
-	//フォント
+	TextureAsset::Register(U"UiBeam", Resource(U"texture/UiBeam.png"));
+	TextureAsset::Register(U"UiBeamUimama", Resource(U"texture/UiBeamUimama.png"));
+
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_BestTenDot", 25, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
@@ -69,7 +71,7 @@ void Main()
 	TextureAsset::Load(U"KusomaroUp");
 	TextureAsset::Load(U"KusomaroDown");
 	TextureAsset::Load(U"KusomaroSine");
-	TextureAsset::Load(U"KusomaroBeem");
+	TextureAsset::Load(U"KusomaroBeam");
 	TextureAsset::Load(U"PlayerBarBack");
 	TextureAsset::Load(U"BossBarBack");
 	TextureAsset::Load(U"PlayerHpFront");
@@ -80,6 +82,9 @@ void Main()
 	TextureAsset::Load(U"UiDamage");
 	TextureAsset::Load(U"UiNormalAndBlink");
 	TextureAsset::Load(U"DamageEffect");
+	TextureAsset::Load(U"UiBeam");
+	TextureAsset::Load(U"UiBeamUimama");
+
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
 	FontAsset::Load(U"GameUI_BestTen");
