@@ -147,6 +147,9 @@ Resource(texture/UiNormalAndBlink.png)
 Resource(texture/DamageEffect.png)
 Resource(texture/UiBeam.png)
 Resource(texture/UiBeamUimama.png)
+Resource(texture/RedCan.png)
+Resource(texture/Fish.png)
+Resource(texture/FishWait.png)
 
 //フォント
 Resource(font/keifont.ttf)
