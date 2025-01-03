@@ -69,6 +69,8 @@ public:
 	KusoMarshmallowSine(Vec2 pos_);
 	void move()override;
 	void draw()override;
+private:
+	double timer=0;
 };
 
 class KusoMarshmallowBeam : public BaseBullet {

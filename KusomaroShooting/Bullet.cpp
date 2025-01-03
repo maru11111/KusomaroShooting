@@ -126,8 +126,10 @@ KusoMarshmallowSine::KusoMarshmallowSine(Vec2 pos_)
 
 void KusoMarshmallowSine::move()
 {
-	vec.y = Math::Sin(Scene::Time() * 7);
+	vec.y = Math::Sin(timer*10 - 90_deg);
 	pos += vec * speed * Scene::DeltaTime();
+
+	timer += Scene::DeltaTime();
 }
 
 void KusoMarshmallowSine::draw() {
