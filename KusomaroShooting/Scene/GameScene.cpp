@@ -18,7 +18,7 @@ struct DamageEffect : IEffect
 	double timer=0;
 
 	// このコンストラクタ引数が、Effect::add<RingEffect>() の引数になる
-	explicit DamageEffect(const Vec2& pos_)
+	explicit DamageEffect(const Vec2 pos_)
 		: pos{ pos_ } {}
 
 	bool update(double t) override
@@ -71,7 +71,9 @@ void GameScene::drawMarshmallowUI() const {
 
 	Rect{ 0,0,Scene::Size().x,40 }.draw(ColorF(0.9, 0.3, 0.3));
 
-	TextureAsset(U"UIBack").scaled(6).draw();
+	//UIの背景
+	int n = (int)(Scene::Time() / 0.08) % 65;
+	TextureAsset(U"UIBack")(n*TextureAsset(U"UIBack").size().x/65, 0, TextureAsset(U"UIBack").size().x, TextureAsset(U"UIBack").size().y).scaled(6).draw();
 
 	//HPバー
 	drawBar(objects.player->getHp(), objects.player->getMaxHp(), TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50*3, 6*3);
@@ -122,9 +124,28 @@ void GameScene::update() {
 	//if (KeyE.down())objects.enemies << std::make_unique<GarbageBagNormal>(objects, Vec2{900, 300 });
 	//if (KeyE.down())objects.enemies << std::make_unique<Can>(objects, Vec2{ 900, 300 }, (objects.player->getPos()-Vec2(900,300)).normalized());
 	//if (KeyE.down())objects.enemies << std::make_unique<Fish>(objects, Vec2{ 900, 300 });
-	if (KeyE.down())objects.enemies << std::make_unique<GarbageBagWithCan>(objects, Vec2{ 900, 300 });
+	if (KeyE.down())objects.enemies << std::make_unique<Umbrella>(objects, Vec2{ 700, 0 });
 	if (KeyR.down())objects.player->damage(1);
 	if (KeyT.down())isTimeStopped = !isTimeStopped;
+
+	//DebugSpawn
+	int n = (int)(Scene::Time() / 1.0) % 10;
+	Print << n;
+	if (n == 0) {
+		int n = Random(0, 5);
+		Vec2 vec = RandomVec2();
+		if (vec.x < 0)vec.x *= -1;
+		if (vec.y < 0)vec.y *= -1;
+		Vec2 pos = RandomVec2(RectF(800, 0, Scene::Size().x, Scene::Size().y));
+		switch (n) {
+		case 0: objects.enemies << std::make_unique<GarbageBagNormal>(objects, pos); break;
+		case 1: objects.enemies << std::make_unique<GarbageBagFast>(objects, pos); break;
+		case 2: objects.enemies << std::make_unique<GarbageBagWithCan>(objects, pos); break;
+		case 3: objects.enemies << std::make_unique<Can>(objects, pos, vec); break;
+		case 4: objects.enemies << std::make_unique<Fish>(objects, pos); break;
+		case 5: objects.enemies << std::make_unique<Umbrella>(objects, pos); break;
+		}
+	}
 
 	//
 	if (objects.player->getIsBeamAttacking()) {
@@ -160,11 +181,12 @@ void GameScene::update() {
 	if (objects.player->getIsAttackColOn()) {
 		for (auto& enemy : objects.enemies) {
 			if (objects.player->attackCollision().intersects(enemy->collision())) {
+				Print << U"damage!!!";
 				enemy->damage(objects.player->getDamageAmount());
 			}
 		}
 	}
-	//不要なオブジェクトを破壊
+	//プレイヤーの攻撃で倒された敵を破壊
 	destroyObjects();
 	//プレイヤー本体と敵本体
 	for (auto& enemy : objects.enemies) {
@@ -208,7 +230,19 @@ void GameScene::draw() const {
 		//背景
 		Scene::Rect()
 			.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
-
+		const double mountainPosX = -(int)(  Scene::Time() / 0.0345) % 320*3;
+		const double frontCityPosX = -(int)( Scene::Time() / 0.0115)%320*3;
+		const double middleCityPosX = -(int)(Scene::Time() / 0.0090) % 320 * 3;
+		const double backCityPosX =  -(int)( Scene::Time() / 0.0065)%320*3;
+		TextureAsset(U"BackGroundMountain").scaled(3).draw(mountainPosX, 0);
+		TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + mountainPosX, 0);
+		TextureAsset(U"BackGroundCityBack").scaled(3).draw(frontCityPosX, 0);
+		TextureAsset(U"BackGroundCityBack").scaled(3).draw(Scene::Size().x+frontCityPosX, 0);
+		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(middleCityPosX, 0);
+		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(Scene::Size().x + middleCityPosX, 0);
+		TextureAsset(U"BackGroundCity").scaled(3).draw(backCityPosX, 0);
+		TextureAsset(U"BackGroundCity").scaled(3).draw(Scene::Size().x+backCityPosX, 0);
+		
 		//オブジェクト
 		objects.player->draw();
 
@@ -224,11 +258,18 @@ void GameScene::draw() const {
 		drawMarshmallowUI();
 
 		//エフェクトを再生
+		//プレイヤー攻撃エフェクト
+		objects.player->drawEffect();
+		//gameSceneのエフェクト
 		effect.update();
 
 
 		//Debug
 		//TextureAsset(U"Fish").draw(300,200);
+		//スプライトシートを再生
+		/*int n = (int)(Scene::Time() / 0.035) % 21;
+		TextureAsset(U"UiAttackEffect")(n * TextureAsset(U"UiAttackEffect").size().x / 21.0, 0, TextureAsset(U"UiAttackEffect").size().x / 21.0, TextureAsset(U"UiAttackEffect").size().y).scaled(3).drawAt(objects.player->getPos());*/
+		//TextureAsset(U"Umbrella").scaled(3).draw(300,200);
 	}
 
 	// シーン転送時の拡大縮小方法を最近傍法にする
