@@ -88,3 +88,16 @@ private:
 	double moveInterval=3;
 	double isMoving=false;
 };
+
+class Umbrella : public BaseEnemy {
+public:
+	Umbrella(Objects& objects_, Vec2 pos_);
+	void move()override;
+	Quad collision()const;
+	void draw()override;
+private:
+	double gravity=30;
+	double maxVelX = 200;
+	double currentVelX=0;
+	double angle=0;
+};

@@ -166,7 +166,7 @@ Fish::Fish(Objects& objects_, Vec2 pos_)
 	hp = maxHp;
 	speed = 75 * 3;
 	damageAmount = 1;
-	if (objects.player != nullptr) vec = (objects.player->getPos() - pos).normalized();
+	vec = (objects.player->getPos() - pos).normalized();
 }
 
 void Fish::move() {
@@ -202,4 +202,37 @@ void Fish::draw() {
 	}
 	//Debug
 	//RectF(Arg::center(pos), 30, 10).rotated(vec.getAngle()+90_deg).draw();
+}
+
+
+Umbrella::Umbrella(Objects& objects_, Vec2 pos_)
+	: BaseEnemy{ objects_, pos_ }
+{
+	maxHp = 10;
+	hp = maxHp;
+	damageAmount = 1;
+}
+
+void Umbrella::move() {
+	currentVelX = - maxVelX * Math::Sin(timer);
+
+	Print << abs(currentVelX) / maxVelX;
+
+	angle = 30_deg * (currentVelX / maxVelX);
+
+	pos += Vec2(currentVelX -30, gravity)*Scene::DeltaTime();
+
+	timer += Scene::DeltaTime();
+}
+
+Quad Umbrella::collision()const {
+	return (Quad)RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle);
+}
+
+void Umbrella::draw() {
+	TextureAsset(U"Umbrella").scaled(3).rotated(angle-45_deg).drawAt(pos);
+	//Debug
+	//今回はcol1だけ使用
+	//RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle).draw();
+	//RectF col2 = RectF(Arg::center(pos.movedBy(0, 7)), 10, 95);
 }
