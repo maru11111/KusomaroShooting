@@ -50,6 +50,10 @@ public:
 
 	Vec2 getPos();
 
+	void drawForAttack(double opacity);
+
+	void drawEffect();
+
 	void draw();
 
 private:
@@ -67,12 +71,12 @@ private:
 	double marshmallowAddTimer = 0;
 	const double marshmallowAddInterval = 3;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 0;
+	int normalMaroAppearProbability = 50;
 	//クソマロ判定をされたマロのなかでの確率(％)
-	int upMaroAppearProbability = 0;
-	int downMaroAppearProbability = 0;
-	int sineMaroAppearProbability = 100;
-	int beamMaroAppearProbability = 0;
+	int upMaroAppearProbability = 30;
+	int downMaroAppearProbability = 30;
+	int sineMaroAppearProbability = 30;
+	int beamMaroAppearProbability = 10;
 	Array<MaroType>maroBox;
 	bool isHitBack=false;
 	double hitBackTime=1;
@@ -81,6 +85,7 @@ private:
 	double hitBackSpeed = firstHitBackSpeed;
 	bool isAttack = false;
 	bool isAttackColOn = false;
+	bool isAttackEffectStarted = false;
 	double attackTime = 0.5;
 	double attackTimer = 0;
 	double attackColTime=0.1;
@@ -88,4 +93,5 @@ private:
 	double beamTimer=0;
 	bool startBlink = false;
 	bool keepBlink = false;
+	Effect effect;
 };

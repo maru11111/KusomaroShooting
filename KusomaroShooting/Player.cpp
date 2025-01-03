@@ -2,6 +2,32 @@
 #include "Objects.h"
 #include "Player.h"
 
+struct AttackEffect : IEffect
+{
+	int n = 0;
+	double timer = 0;
+	Vec2 pos;
+
+	// このコンストラクタ引数が、Effect::add<RingEffect>() の引数になる
+	explicit AttackEffect(Vec2 pos_)
+		: pos{ pos_ } {}
+
+	bool update(double t) override
+	{
+		//スプライトシートを再生
+		int n = (int)(timer/(0.035/1.5)) % 21;
+		TextureAsset(U"UiAttackEffect")
+			(n * TextureAsset(U"UiAttackEffect").size().x / 21.0, 0, TextureAsset(U"UiAttackEffect").size().x / 21.0, TextureAsset(U"UiAttackEffect").size().y)
+			.scaled(3)
+			.drawAt(pos);
+
+		timer += Scene::DeltaTime();
+
+		//trueの間継続
+		return (n < 21-1);
+	}
+};
+
 Player::Player(Objects& objects_)
 	:objects{ objects_ }
 {
@@ -30,23 +56,6 @@ void Player::update() {
 	//	}
 	//}
 	//Print << U"aaaa";
-
-	if (KeyT.pressed() && not isAttack) {
-		isAttack = true;
-		isAttackColOn = true;
-	}
-
-	//移動
-	if (isMovable()) {
-		move();
-	}
-
-	//攻撃
-	if (isMovable()) {
-		if (KeyJ.down() || KeySpace.down() || KeyEnter.down()) {
-			attack();
-		}
-	}
 
 	//時間経過でマシュマロ補充
 	if (numMarshmallows < maxNumMarshmallows) {
@@ -101,6 +110,46 @@ void Player::update() {
 			beamTimer = 0;
 		}
 	}
+
+	//近接攻撃
+	if (isMovable() && KeyT.pressed() && not isAttack) {
+		isAttack = true;
+		isAttackColOn = true;
+		isAttackEffectStarted = false;
+	}
+
+	//近接攻撃中なら
+	if (isAttack) {
+		attackTimer += Scene::DeltaTime();
+
+		//エフェクト追加
+		if (not isAttackEffectStarted) {
+			effect.add<AttackEffect>(pos.movedBy(20 * 3+5, -20));
+			isAttackEffectStarted = true;
+		}
+
+		if (attackColTime <= attackTimer) {
+			isAttackColOn = false;
+		}
+
+		if (attackTime <= attackTimer) {
+			isAttack = false;
+			attackTimer = 0;
+		}
+	}
+
+	//移動
+	if (isMovable()) {
+		move();
+	}
+
+	//マシュマロを投げる
+	if (isMovable()) {
+		if (KeyJ.down() || KeySpace.down() || KeyEnter.down()) {
+			attack();
+		}
+	}
+
 }
 
 void Player::move() {
@@ -155,6 +204,11 @@ void Player::damage(int damageAmount) {
 	if (isInvincibility()) {
 		//ダメージを受けない
 		Print << U"MUTEKI";
+		//攻撃をキャンセル
+		isAttackColOn = false;
+		isAttack = false;
+		attackTimer = 0;
+
 	}
 	//無敵時間外
 	else {
@@ -227,7 +281,7 @@ RectF Player::bodyCollision() const {
 	return RectF(Arg::center(pos.movedBy(5*3, -5*3)), 15*3, 15*3);
 }
 RectF Player::attackCollision()const {
-	return RectF(Arg::center(pos.movedBy(16 * 3, 0)), 5 * 3, 15 * 3);
+	return RectF(Arg::center(pos.movedBy(20 * 3, 0)), 12 * 3, 22 * 3);
 }
 
 void Player::startInvincibilityTime() {
@@ -273,6 +327,25 @@ Vec2 Player::getPos() {
 	return pos;
 }
 
+void Player::drawForAttack(double opacity) {
+	int n = (int)(Scene::Time() / 0.0625) % 102;
+
+	//角度のイージング
+	const double eR = EaseOutCubic(attackTimer * 2);
+
+	//前進速度のイージング
+	const double eS = EaseOutExpo(attackTimer * 2);
+
+	TextureAsset(U"UiNormalAndBlink")
+		(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y)
+		.scaled(3).rotated(eR * 2 * (-1) * 360 * attackTime * Math::Pi / 180.0)
+		.drawAt(pos.moveBy(eS * 10 * Scene::DeltaTime() + 5 * Math::Cos(2 * 2 * Math::Pi * attackTimer), -5 * Math::Sin(2 * 2 * Math::Pi * attackTimer)), ColorF(1.0, opacity));
+}
+
+void Player::drawEffect() {
+	effect.update();
+}
+
 void Player::draw() {
 
 	//Debug
@@ -285,51 +358,52 @@ void Player::draw() {
 
 	//無敵時間中
 	if (isInvincibility()) {
-		//点滅させる
-		int isDraw = (int)(Scene::Time() / (0.125 /1.5)) % 2;
-		if (isDraw) {
-			//スプライトシートを再生
-			int n = (int)(Scene::Time() / 0.250) % 3;
-			TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x/3.0, 0, TextureAsset(U"UiDamage").size().x/3.0, TextureAsset(U"UiDamage").size().y).scaled(3).drawAt(pos);
+		//ヒットバック中
+		if (isHitBack) {
+			//点滅させる
+			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
+			if (isDrawClear) {
+				//スプライトシートを再生
+				int n = (int)(Scene::Time() / 0.250) % 3;
+				TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x / 3.0, 0, TextureAsset(U"UiDamage").size().x / 3.0, TextureAsset(U"UiDamage").size().y).scaled(3).drawAt(pos);
+			}
+			else {
+				//スプライトシートを再生
+				int n = (int)(Scene::Time() / 0.250) % 3;
+				TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x / 3.0, 0, TextureAsset(U"UiDamage").size().x / 3.0, TextureAsset(U"UiDamage").size().y).scaled(3).drawAt(pos, ColorF(1.0, 0.8));
+			}
 		}
+		//攻撃中
+		else if(isAttack){
+			//点滅させる
+			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
+			if (isDrawClear) {
+				drawForAttack(1.0);
+			}
+			else {
+				drawForAttack(0.8);
+			}
+		}
+		//それ以外
 		else {
 			//スプライトシートを再生
-			int n = (int)(Scene::Time() / 0.250) % 3;
-			TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x/3.0, 0, TextureAsset(U"UiDamage").size().x/3.0, TextureAsset(U"UiDamage").size().y).scaled(3).drawAt(pos,ColorF(1.0, 0.8));
+			int n = (int)(Scene::Time() / 0.0625) % 102;
+			//点滅させる
+			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
+			if (isDrawClear) {
+				TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos, ColorF(1.0, 1.0));
+			}
+			else {
+				TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos, ColorF(1.0, 0.8));
+			}
 		}
 	}
-	//攻撃中
+	//近接攻撃中
 	else if (isAttack) {
-		attackTimer += Scene::DeltaTime();
-
-		int n = (int)(Scene::Time() / 0.0625) % 102;
-
-		//角度のイージング
-		const double eR = EaseOutCubic(attackTimer*2);
-
-		//前進速度のイージング
-		const double eS = EaseOutExpo(attackTimer * 2);
-
-		TextureAsset(U"UiNormalAndBlink")
-			(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y)
-			.scaled(3).rotated(eR * 2 * (-1) * 360 * attackTime * Math::Pi / 180.0)
-			.drawAt(pos.moveBy(eS*10*Scene::DeltaTime() + 5 * Math::Cos(2 * 2 * Math::Pi * attackTimer), -5 * Math::Sin(2 * 2 * Math::Pi * attackTimer)));
-
-		//Debug
-		//if(isAttackColOn == true) RectF(Arg::center(pos.movedBy(16 * 3, 0)), 5 * 3, 15 * 3).draw();
-
-		if (attackColTime <= attackTimer) {
-			isAttackColOn = false;
-		}
-
-		if (attackTime <= attackTimer) {
-			isAttack = false;
-			attackTimer = 0;
-		}
+		drawForAttack(1.0);
 	}
 	//ビーム中
 	else if (isBeamAttacking) {
-
 		//スプライトシートを再生
 		int n = (int)(beamTimer / 0.0625) % 84;
 		TextureAsset(U"UiBeamUimama")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos);
@@ -347,4 +421,7 @@ void Player::draw() {
 
 	//Debug
 	//RectF(Arg::center(pos.movedBy(5,-5)), 15, 15).draw(ColorF(1, 0, 0));
+
+	//Debug
+	//if(isAttackColOn) RectF(Arg::center(pos.movedBy(20 * 3, 0)), 12 * 3, 22 * 3).draw();
 }
