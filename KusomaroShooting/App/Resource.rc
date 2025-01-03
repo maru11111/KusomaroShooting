@@ -150,6 +150,12 @@ Resource(texture/UiBeamUimama.png)
 Resource(texture/RedCan.png)
 Resource(texture/Fish.png)
 Resource(texture/FishWait.png)
+Resource(texture/UiAttackEffect.png)
+Resource(texture/Umbrella.png)
+Resource(texture/BackGroundCity.png)
+Resource(texture/BackGroundCityBack.png)
+Resource(texture/BackGroundCityMiddle.png)
+Resource(texture/BackGroundMountain.png)
 
 //フォント
 Resource(font/keifont.ttf)
