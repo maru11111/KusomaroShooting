@@ -48,6 +48,8 @@ public:
 
 	bool getIsBeamAttacking();
 
+	Vec2 getPos();
+
 	void draw();
 
 private:
@@ -69,8 +71,8 @@ private:
 	//クソマロ判定をされたマロのなかでの確率(％)
 	int upMaroAppearProbability = 0;
 	int downMaroAppearProbability = 0;
-	int sineMaroAppearProbability = 0;
-	int beamMaroAppearProbability = 100;
+	int sineMaroAppearProbability = 100;
+	int beamMaroAppearProbability = 0;
 	Array<MaroType>maroBox;
 	bool isHitBack=false;
 	double hitBackTime=1;

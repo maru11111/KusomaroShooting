@@ -87,6 +87,15 @@ void Player::update() {
 	//ビーム中なら
 	if (isBeamAttacking) {
 		beamTimer += Scene::DeltaTime();
+
+		//後退する動きのイージング
+		//const double e = EaseOutBack(beamTimer/(75 * 0.05));
+
+		//後ろに下がる
+		if (13 * 0.05 < beamTimer) {
+			pos.x -= 3 * Scene::DeltaTime();
+		}
+
 		if (75 * 0.050 < beamTimer) {
 			isBeamAttacking = false;
 			beamTimer = 0;
@@ -260,6 +269,10 @@ bool Player::getIsBeamAttacking() {
 	return isBeamAttacking;
 }
 
+Vec2 Player::getPos() {
+	return pos;
+}
+
 void Player::draw() {
 
 	//Debug
@@ -316,11 +329,6 @@ void Player::draw() {
 	}
 	//ビーム中
 	else if (isBeamAttacking) {
-		//後退する動きのイージング
-		//const double e = EaseOutBack(beamTimer/(75 * 0.05));
-
-		//後ろに下がる
-		pos.x -= 3 * Scene::DeltaTime();
 
 		//スプライトシートを再生
 		int n = (int)(beamTimer / 0.0625) % 84;
