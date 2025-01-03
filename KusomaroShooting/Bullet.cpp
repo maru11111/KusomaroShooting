@@ -32,7 +32,8 @@ bool BaseBullet::isOffScreen() {
 
 bool BaseBullet::isDestroy() {
 	if (isOffScreen())return true;
-	else  if (isHit) return true;
+	//貫通攻撃に上方修正
+	//else  if (isHit) return true;
 	else return false;
 }
 
