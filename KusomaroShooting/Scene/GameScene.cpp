@@ -119,7 +119,10 @@ void GameScene::update() {
 
 
 	//Debug
-	if (KeyE.down())objects.enemies << std::make_unique<GarbageBagNormal>(objects, Vec2{900, 300 });
+	//if (KeyE.down())objects.enemies << std::make_unique<GarbageBagNormal>(objects, Vec2{900, 300 });
+	//if (KeyE.down())objects.enemies << std::make_unique<Can>(objects, Vec2{ 900, 300 }, (objects.player->getPos()-Vec2(900,300)).normalized());
+	//if (KeyE.down())objects.enemies << std::make_unique<Fish>(objects, Vec2{ 900, 300 });
+	if (KeyE.down())objects.enemies << std::make_unique<GarbageBagWithCan>(objects, Vec2{ 900, 300 });
 	if (KeyR.down())objects.player->damage(1);
 	if (KeyT.down())isTimeStopped = !isTimeStopped;
 
@@ -144,8 +147,10 @@ void GameScene::update() {
 		for (auto& maro : objects.marshmallows) {
 			maro->update();
 		}
-		for (auto& enemy : objects.enemies) {
-			enemy->update();
+		/*enemy内でenemiesに要素を入れる場合があるので普通のforにする。
+		  範囲forの場合だと走査中に要素が入れられたときにnullptrでエラー*/
+		for (int i = 0; i < objects.enemies.size();i++) {
+			objects.enemies[i]->update();
 		}
 	}
 
@@ -220,6 +225,10 @@ void GameScene::draw() const {
 
 		//エフェクトを再生
 		effect.update();
+
+
+		//Debug
+		//TextureAsset(U"Fish").draw(300,200);
 	}
 
 	// シーン転送時の拡大縮小方法を最近傍法にする
