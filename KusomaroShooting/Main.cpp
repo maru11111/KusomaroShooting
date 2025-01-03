@@ -55,6 +55,9 @@ void Main()
 	TextureAsset::Register(U"DamageEffect", Resource(U"texture/DamageEffect.png"));
 	TextureAsset::Register(U"UiBeam", Resource(U"texture/UiBeam.png"));
 	TextureAsset::Register(U"UiBeamUimama", Resource(U"texture/UiBeamUimama.png"));
+	TextureAsset::Register(U"RedCan", Resource(U"texture/RedCan.png"));
+	TextureAsset::Register(U"Fish", Resource(U"texture/Fish.png"));
+	TextureAsset::Register(U"FishWait", Resource(U"texture/FishWait.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
@@ -84,6 +87,9 @@ void Main()
 	TextureAsset::Load(U"DamageEffect");
 	TextureAsset::Load(U"UiBeam");
 	TextureAsset::Load(U"UiBeamUimama");
+	TextureAsset::Load(U"RedCan");
+	TextureAsset::Load(U"Fish");
+	TextureAsset::Load(U"FishWait");
 
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
