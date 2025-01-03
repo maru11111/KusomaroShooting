@@ -13,6 +13,7 @@ void BaseEnemy::attack() {
 
 void BaseEnemy::update() {
 	move();
+	attack();
 }
 
 void BaseEnemy::damage(int damageAmount) {
@@ -34,6 +35,7 @@ Vec2 BaseEnemy::getPos() {
 }
 
 
+
 GarbageBagNormal::GarbageBagNormal(Objects& objects_, Vec2 pos_)
 	: BaseEnemy(objects_, pos_)
 {
@@ -46,10 +48,13 @@ GarbageBagNormal::GarbageBagNormal(Objects& objects_, Vec2 pos_)
 
 void GarbageBagNormal::move() {
 	pos += vec * speed * Scene::DeltaTime();
+	if (pos.x <= Scene::Size().x / 3.5) {
+		speed *= 1.01;
+	}
 }
 
-RectF GarbageBagNormal::collision()const{
-	return RectF(Arg::center(pos), 7*3, 7*3);
+Quad GarbageBagNormal::collision()const{
+	return (Quad)RectF(Arg::center(pos), 7*3, 7*3);
 }
 
 void GarbageBagNormal::draw() {
@@ -76,12 +81,125 @@ GarbageBagFast::GarbageBagFast(Objects& objects_, Vec2 pos_)
 
 void GarbageBagFast::move() {
 	pos += vec * speed * Scene::DeltaTime();
+	if (pos.x <= Scene::Size().x / 4) {
+		speed *= 1.01;
+	}
 }
 
-RectF GarbageBagNormal::collision()const {
-	return RectF(Arg::center(pos), 7 * 3, 7 * 3);
+Quad GarbageBagFast::collision()const {
+	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
 }
 
 void GarbageBagFast::draw(){
 	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, Scene::Time() * 1 * (-360_deg)).drawAt(pos);
+}
+
+
+
+GarbageBagWithCan::GarbageBagWithCan(Objects& objects_, Vec2 pos_)
+	: BaseEnemy(objects_, pos_)
+{
+	maxHp = 10;
+	hp = maxHp;
+	vec = { -1,0 };
+	speed = 75;
+	damageAmount = 1;
+}
+
+void GarbageBagWithCan::move(){
+	pos += vec * speed * Scene::DeltaTime();
+	if (pos.x <= Scene::Size().x / 4) {
+		speed *= 1.01;
+	}
+}
+
+void GarbageBagWithCan::attack() {
+	timer += Scene::DeltaTime();
+
+	Print << objects.enemies.size();
+
+	if (attackInterval <= timer) {
+		timer -= attackInterval;
+		//缶を飛ばす
+		objects.enemies << std::make_unique<Can>(objects, pos, (objects.player->getPos() - pos).normalized());
+	}
+}
+
+Quad GarbageBagWithCan::collision()const {
+	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
+}
+
+void GarbageBagWithCan::draw() {
+	TextureAsset(U"GarbageBag")
+		.scaled(3)
+		.rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, Scene::Time() * 1 * (-360_deg))
+		.drawAt(pos);
+}
+
+
+Can::Can(Objects& objects_, Vec2 pos_, Vec2 vec_)
+	: BaseEnemy(objects_, pos_)
+{
+	maxHp = 10;
+	hp = maxHp;
+	vec = vec_;
+	speed = 75*3*2;
+	damageAmount = 1;
+}
+
+void Can::move() {
+	pos += vec * speed * Scene::DeltaTime();
+}
+
+Quad Can::collision()const {
+	return (Quad)RectF(Arg::center(pos), 15, 15);
+}
+
+void Can::draw() {
+	TextureAsset(U"RedCan").scaled(3).rotated(vec.getAngle()).drawAt(pos);
+}
+
+Fish::Fish(Objects& objects_, Vec2 pos_)
+	:BaseEnemy(objects_, pos_)
+{
+	maxHp = 10;
+	hp = maxHp;
+	speed = 75 * 3;
+	damageAmount = 1;
+	if (objects.player != nullptr) vec = (objects.player->getPos() - pos).normalized();
+}
+
+void Fish::move() {
+	timer += Scene::DeltaTime();
+
+	if (moveInterval <= timer) {
+		isMoving = true;
+		timer = 0;
+	}
+
+	if (isMoving) {
+		if (objects.player != nullptr) vec = (objects.player->getPos() - pos).normalized();
+		pos += vec * speed * Scene::DeltaTime();
+	}
+	else {
+
+	}
+}
+
+Quad Fish::collision()const {
+	return RectF(Arg::center(pos), 30, 10).rotated(vec.getAngle()+90_deg);
+}
+
+void Fish::draw() {
+	if (isMoving) {
+		int n = (int)(timer / 0.100) % 10;
+		TextureAsset(U"Fish")(n * TextureAsset(U"Fish").size().x / 10.0, 0, TextureAsset(U"Fish").size().x / 10.0, TextureAsset(U"Fish").size().y).scaled(4).rotated(vec.getAngle()).drawAt(pos);
+		if (n == 10 - 1) isMoving = false;
+	}
+	else {
+		int n = (int)(timer / 0.150) % 10;
+		TextureAsset(U"FishWait")(n * TextureAsset(U"Fish").size().x / 10.0, 0, TextureAsset(U"Fish").size().x / 10.0, TextureAsset(U"Fish").size().y).scaled(4).rotated(vec.getAngle()).drawAt(pos);
+	}
+	//Debug
+	//RectF(Arg::center(pos), 30, 10).rotated(vec.getAngle()+90_deg).draw();
 }

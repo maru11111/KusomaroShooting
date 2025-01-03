@@ -17,14 +17,14 @@ public:
 
 	bool isDestroy();
 
-	virtual RectF collision()const=0;
+	virtual Quad collision()const=0;
 
 	int getDamageAmount();
 
 	Vec2 getPos();
 
 	virtual void draw()=0;
-	
+
 protected:
 	Objects& objects;
 	int maxHp;
@@ -33,6 +33,7 @@ protected:
 	Vec2 vec;
 	double speed;
 	int damageAmount;
+	double timer = 0;
 };
 
 class GarbageBagNormal : public BaseEnemy {
@@ -42,7 +43,7 @@ public:
 
 	void move()override;
 
-	RectF collision()const override;
+	Quad collision()const override;
 
 	void draw()override;
 };
@@ -52,7 +53,38 @@ public:
 	GarbageBagFast(Objects& objects_, Vec2 pos_);
 	void move()override;
 
-	RectF collision()const override;
+	Quad collision()const override;
 
 	void draw()override;
+};
+
+class GarbageBagWithCan : public BaseEnemy {
+public:
+	GarbageBagWithCan(Objects& objects_, Vec2 pos_);
+	void move()override;
+	void attack()override;
+	Quad collision()const override;
+	void draw()override;
+private:
+	double attackInterval=3;
+};
+
+class Can : public BaseEnemy {
+public:
+	Can(Objects& objects_, Vec2 pos_, Vec2 vec_);
+	void move()override;
+	Quad collision()const;
+	void draw()override;
+private:
+};
+
+class Fish : public BaseEnemy {
+public:
+	Fish(Objects& objects_, Vec2 pos_);
+	void move()override;
+	Quad collision()const;
+	void draw()override;
+private:
+	double moveInterval=3;
+	double isMoving=false;
 };
