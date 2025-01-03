@@ -58,6 +58,12 @@ void Main()
 	TextureAsset::Register(U"RedCan", Resource(U"texture/RedCan.png"));
 	TextureAsset::Register(U"Fish", Resource(U"texture/Fish.png"));
 	TextureAsset::Register(U"FishWait", Resource(U"texture/FishWait.png"));
+	TextureAsset::Register(U"UiAttackEffect", Resource(U"texture/UiAttackEffect.png"));
+	TextureAsset::Register(U"Umbrella", Resource(U"texture/Umbrella.png"));
+	TextureAsset::Register(U"BackGroundCity", Resource(U"texture/BackGroundCity.png"));
+	TextureAsset::Register(U"BackGroundCityBack", Resource(U"texture/BackGroundCityBack.png"));
+	TextureAsset::Register(U"BackGroundCityMiddle", Resource(U"texture/BackGroundCityMiddle.png"));
+	TextureAsset::Register(U"BackGroundMountain", Resource(U"texture/BackGroundMountain.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
@@ -90,6 +96,12 @@ void Main()
 	TextureAsset::Load(U"RedCan");
 	TextureAsset::Load(U"Fish");
 	TextureAsset::Load(U"FishWait");
+	TextureAsset::Load(U"UiAttackEffect");
+	TextureAsset::Load(U"Umbrella");
+	TextureAsset::Load(U"BackGroundCity");
+	TextureAsset::Load(U"BackGroundCityBack");
+	TextureAsset::Load(U"BackGroundCityMiddle");
+	TextureAsset::Load(U"BackGroundMountain");
 
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
