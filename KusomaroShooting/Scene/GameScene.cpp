@@ -136,7 +136,7 @@ void GameScene::update() {
 		Vec2 vec = RandomVec2();
 		if (vec.x < 0)vec.x *= -1;
 		if (vec.y < 0)vec.y *= -1;
-		Vec2 pos = RandomVec2(RectF(800, 0, Scene::Size().x, Scene::Size().y));
+		Vec2 pos = RandomVec2(RectF(800, 0+TextureAsset(U"UIBack").size().y * 6, Scene::Size().x, Scene::Size().y));
 		switch (n) {
 		case 0: objects.enemies << std::make_unique<GarbageBagNormal>(objects, pos); break;
 		case 1: objects.enemies << std::make_unique<GarbageBagFast>(objects, pos); break;
@@ -230,19 +230,34 @@ void GameScene::draw() const {
 		//背景
 		Scene::Rect()
 			.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
-		const double mountainPosX = -(int)(  Scene::Time() / 0.0345) % 320*3;
+		const double farBackMountainPosX = -(int)(  Scene::Time() / 0.0390) % 320*3;
+		const double backMountainPosX = -(int)(     Scene::Time() / 0.0370) % 320 * 3;
+		const double middleMountainPosX= -(int)(Scene::Time() / 0.0350) % 320 * 3;
+		const double frontMountainPosX = -(int)(Scene::Time() / 0.0330) % 320 * 3;
 		const double frontCityPosX = -(int)( Scene::Time() / 0.0115)%320*3;
 		const double middleCityPosX = -(int)(Scene::Time() / 0.0090) % 320 * 3;
 		const double backCityPosX =  -(int)( Scene::Time() / 0.0065)%320*3;
-		TextureAsset(U"BackGroundMountain").scaled(3).draw(mountainPosX, 0);
-		TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + mountainPosX, 0);
+
+		TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
+		TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + farBackMountainPosX, 0);
+		TextureAsset(U"BackGroundMountainBack").scaled(3).draw(backMountainPosX, 0);
+		TextureAsset(U"BackGroundMountainBack").scaled(3).draw(Scene::Size().x + backMountainPosX, 0);
+		TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(middleMountainPosX, 0);
+		TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(Scene::Size().x + middleMountainPosX, 0);
+		TextureAsset(U"BackGroundMountainFront").scaled(3).draw(frontMountainPosX, 0);
+		TextureAsset(U"BackGroundMountainFront").scaled(3).draw(Scene::Size().x + frontMountainPosX, 0);
 		TextureAsset(U"BackGroundCityBack").scaled(3).draw(frontCityPosX, 0);
 		TextureAsset(U"BackGroundCityBack").scaled(3).draw(Scene::Size().x+frontCityPosX, 0);
 		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(middleCityPosX, 0);
 		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(Scene::Size().x + middleCityPosX, 0);
 		TextureAsset(U"BackGroundCity").scaled(3).draw(backCityPosX, 0);
 		TextureAsset(U"BackGroundCity").scaled(3).draw(Scene::Size().x+backCityPosX, 0);
-		
+
+		//背景とオブジェクトの間
+		for (auto& maro : objects.marshmallows) {
+			maro->backGroundDraw();
+		}
+
 		//オブジェクト
 		objects.player->draw();
 
