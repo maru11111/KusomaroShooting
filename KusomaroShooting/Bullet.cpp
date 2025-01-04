@@ -49,6 +49,8 @@ MaroType BaseBullet::getType() {
 	return type;
 }
 
+void BaseBullet::backGroundDraw()const {}
+
 void BaseBullet::draw() {
 	TextureAsset(U"Marshmallow").scaled(3).drawAt(pos);
 	//Debug
@@ -144,7 +146,7 @@ void KusoMarshmallowSine::draw() {
 KusoMarshmallowBeam::KusoMarshmallowBeam(Vec2 pos_)
 	: BaseBullet(pos_)
 {
-	damageAmount = 1;
+	damageAmount = 4;
 	type = MaroType::Beam;
 }
 
@@ -159,6 +161,10 @@ void KusoMarshmallowBeam::update() {
 
 	if (isColliderActive) {
 		isColliderActive = false;
+	}
+
+	if (beamTimer <= beamColTime) {
+		backGroundOpacity += 0.8*Scene::DeltaTime();
 	}
 
 	if (beamColTime <= beamColTimer) {
@@ -179,6 +185,11 @@ void KusoMarshmallowBeam::move() {
 bool KusoMarshmallowBeam::isDestroy() {
 	if (isEndBeam) return true;
 	else false;
+}
+
+void KusoMarshmallowBeam::backGroundDraw()const {
+	Scene::Rect()
+		.draw(ColorF{ 0, 0, 0, Min( ((int)(10*backGroundOpacity))/10.0, 0.5)});
 }
 
 void KusoMarshmallowBeam::draw() {

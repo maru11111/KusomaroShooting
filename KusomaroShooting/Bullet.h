@@ -32,6 +32,8 @@ public:
 
 	MaroType getType();
 
+	virtual void backGroundDraw()const;
+
 	virtual void draw();
 
 protected:
@@ -80,6 +82,7 @@ public:
 	void move()override;
 	bool isDestroy()override;
 	void update()override;
+	void backGroundDraw()const override;
 	void draw()override;
 private:
 	double beamTimer=0;
@@ -87,4 +90,5 @@ private:
 	int beamColTime=26*0.05;
 	bool isColliderActive=false;
 	bool isEndBeam=false;
+	double backGroundOpacity=0.1;
 };
