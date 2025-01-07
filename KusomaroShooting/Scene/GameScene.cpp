@@ -42,6 +42,8 @@ GameScene::GameScene(const InitData& init)
 	: IScene{ init }
 {
 	objects.player = std::make_unique<Player>(objects);
+
+	loadJson(U"stage/test.json");
 }
 
 void GameScene::drawBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY)const {
@@ -155,7 +157,7 @@ void GameScene::update() {
 	//プレイヤー直接攻撃と敵本体
 	if (objects.player->getIsAttackColOn()) {
 		for (auto& enemy : objects.enemies) {
-			if (objects.player->attackCollision().intersects(enemy->collision())) {
+			if (enemy->collision().collision(objects.player->attackCollision())) {
 				Print << U"damage!!!";
 				enemy->damage(objects.player->getDamageAmount());
 			}
@@ -165,7 +167,7 @@ void GameScene::update() {
 	destroyObjects();
 	//プレイヤー本体と敵本体
 	for (auto& enemy : objects.enemies) {
-		if (objects.player->bodyCollision().intersects(enemy->collision())) {
+		if (enemy->collision().collision(objects.player->bodyCollision())) {
 			objects.player->damage(enemy->getDamageAmount());
 		}
 	}
@@ -173,7 +175,7 @@ void GameScene::update() {
 	//マシュマロと敵
 	for (auto& enemy : objects.enemies) {
 		for (auto& maro : objects.marshmallows) {
-			if (enemy->collision().intersects(maro->collision())) {
+			if (enemy->collision().collision(maro->collision())) {
 				//敵にヒットした判定をtrueに
 				maro->setIsHit(true);
 				//敵にダメージ
@@ -194,41 +196,45 @@ void GameScene::update() {
 }
 
 void GameScene::spawnEnemy() {
+	SpawnEnemyData::spawnTimer = Scene::DeltaTime();
+
+
+
 	//Debug
-	if (KeyE.down())objects.enemies << std::make_unique<GarbageBagWithCan>(objects, Vec2{ 900, 300 });
-	//if (KeyE.down())objects.enemies << std::make_unique<Can>(objects, Vec2{ 900, 300 }, (objects.player->getPos()-Vec2(900,300)).normalized());
-	if (KeyE.down())objects.enemies << std::make_unique<Fish>(objects, Vec2{ 900, 300 });
-	if (KeyE.down())objects.enemies << std::make_unique<Umbrella>(objects, Vec2{ 700, 0 });
-	if (KeyR.down())objects.player->damage(1);
-	if (KeyT.down())isTimeStopped = !isTimeStopped;
+	//if (KeyE.down())objects.enemies << std::make_unique<GarbageBagWithCan>(objects, Vec2{ 900, 300 });
+	////if (KeyE.down())objects.enemies << std::make_unique<Can>(objects, Vec2{ 900, 300 }, (objects.player->getPos()-Vec2(900,300)).normalized());
+	//if (KeyE.down())objects.enemies << std::make_unique<Fish>(objects, Vec2{ 900, 300 });
+	//if (KeyE.down())objects.enemies << std::make_unique<Umbrella>(objects, Vec2{ 700, 0 });
+	//if (KeyR.down())objects.player->damage(1);
+	//if (KeyT.down())isTimeStopped = !isTimeStopped;
 
-	/*if (KeyE.down()) {
-		for (int i = 0; i < 7; i++) {
-			const Size SceneSize = { 320 * 3, 214 * 3 };
-			const double GridSize = (SceneSize.y - TextureAsset(U"UIBack").size().y * 3) / 8.0;
-			objects.enemies << std::make_unique<GarbageBagWithCan>(objects, Vec2{ 800, TextureAsset(U"UIBack").size().y*6+i*GridSize+GridSize/2.0});
-		}
-	}*/
+	///*if (KeyE.down()) {
+	//	for (int i = 0; i < 7; i++) {
+	//		const Size SceneSize = { 320 * 3, 214 * 3 };
+	//		const double GridSize = (SceneSize.y - TextureAsset(U"UIBack").size().y * 3) / 8.0;
+	//		objects.enemies << std::make_unique<GarbageBagWithCan>(objects, Vec2{ 800, TextureAsset(U"UIBack").size().y*6+i*GridSize+GridSize/2.0});
+	//	}
+	//}*/
 
 
-	//DebugSpawn
-	int n = (int)(Scene::Time() / 1.0) % 10;
-	Print << n;
-	if (n == 0) {
-		int n = Random(0, 5);
-		Vec2 vec = RandomVec2();
-		if (vec.x < 0)vec.x *= -1;
-		if (vec.y < 0)vec.y *= -1;
-		Vec2 pos = RandomVec2(RectF(800, 0 + TextureAsset(U"UIBack").size().y * 6, Scene::Size().x, Scene::Size().y));
-		switch (n) {
-		case 0: objects.enemies << std::make_unique<GarbageBagNormal>(objects, pos); break;
-		case 1: objects.enemies << std::make_unique<GarbageBagFast>(objects, pos); break;
-		case 2: objects.enemies << std::make_unique<GarbageBagWithCan>(objects, pos); break;
-		case 3: objects.enemies << std::make_unique<Can>(objects, pos, vec); break;
-		case 4: objects.enemies << std::make_unique<Fish>(objects, pos); break;
-		case 5: objects.enemies << std::make_unique<Umbrella>(objects, pos); break;
-		}
-	}
+	////DebugSpawn
+	//int n = (int)(Scene::Time() / 1.0) % 10;
+	//Print << n;
+	//if (n == 0) {
+	//	int n = Random(0, 5);
+	//	Vec2 vec = RandomVec2();
+	//	if (vec.x < 0)vec.x *= -1;
+	//	if (vec.y < 0)vec.y *= -1;
+	//	Vec2 pos = RandomVec2(RectF(800, 0 + TextureAsset(U"UIBack").size().y * 6, Scene::Size().x, Scene::Size().y));
+	//	switch (n) {
+	//	case 0: objects.enemies << std::make_unique<GarbageBagNormal>(objects, pos); break;
+	//	case 1: objects.enemies << std::make_unique<GarbageBagFast>(objects, pos); break;
+	//	case 2: objects.enemies << std::make_unique<GarbageBagWithCan>(objects, pos); break;
+	//	case 3: objects.enemies << std::make_unique<Can>(objects, pos, vec); break;
+	//	case 4: objects.enemies << std::make_unique<Fish>(objects, pos); break;
+	//	case 5: objects.enemies << std::make_unique<Umbrella>(objects, pos); break;
+	//	}
+	//}
 }
 
 void GameScene::destroyObjects() {
