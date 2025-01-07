@@ -3,7 +3,18 @@
 
 enum class State {
 	//Title,
-	Game
+	Game,
+	StageEditor
+};
+
+enum class EnemyType {
+	Empty,
+	Bag,
+	FastBag,
+	BagWithCan,
+	Can,
+	Fish,
+	Umbrella
 };
 
 using App = SceneManager<State>;
