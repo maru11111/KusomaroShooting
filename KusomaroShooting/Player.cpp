@@ -36,6 +36,15 @@ Player::Player(Objects& objects_)
 	}
 }
 
+Player::Player(Objects& objects_, Vec2 pos_)
+	: objects{ objects_ }
+	, pos{pos_}
+{
+	for (int i = 0; i < maxNumMarshmallows; i++) {
+		addMarshmallow();
+	}
+}
+
 Player::~Player() {
 	maroBox.clear();
 }
@@ -204,11 +213,6 @@ void Player::damage(int damageAmount) {
 	if (isInvincibility()) {
 		//ダメージを受けない
 		Print << U"MUTEKI";
-		//攻撃をキャンセル
-		isAttackColOn = false;
-		isAttack = false;
-		attackTimer = 0;
-
 	}
 	//無敵時間外
 	else {
@@ -218,6 +222,10 @@ void Player::damage(int damageAmount) {
 		hp -= damageAmount;
 		//0以下になったら0に戻す
 		if (hp < 0)hp = 0;
+		//攻撃をキャンセル
+		isAttackColOn = false;
+		isAttack = false;
+		attackTimer = 0;
 		//ヒットバック開始
 		isHitBack = true;
 		hitBackTimer = 0;

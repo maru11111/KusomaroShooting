@@ -7,6 +7,8 @@ class Player {
 public:
 	Player(Objects& obj);
 
+	Player(Objects& obj, Vec2 pos);
+
 	~Player();
 
 	void update();
@@ -73,10 +75,10 @@ private:
 	//ふつうのマシュマロが出る確率(％)
 	int normalMaroAppearProbability = 50;
 	//クソマロ判定をされたマロのなかでの確率(％)
-	int upMaroAppearProbability = 30;
-	int downMaroAppearProbability = 30;
-	int sineMaroAppearProbability = 30;
-	int beamMaroAppearProbability = 10;
+	int upMaroAppearProbability = 0;
+	int downMaroAppearProbability = 0;
+	int sineMaroAppearProbability = 0;
+	int beamMaroAppearProbability = 100;
 	Array<MaroType>maroBox;
 	bool isHitBack=false;
 	double hitBackTime=1;
