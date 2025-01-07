@@ -22,7 +22,7 @@ void BaseEnemy::damage(int damageAmount) {
 }
 
 bool BaseEnemy::isDestroy() {
-	if (pos.x < 0 - 50  || Scene::Size().x + 50 < pos.x  || pos.y < 0 - 50 || Scene::Size().y + 50 < pos.y)return true;
+	if (pos.x < 0 - 50  || Scene::Size().x + Scene::Size().x < pos.x  || pos.y < 0 - Scene::Size().y || Scene::Size().y + 50 < pos.y)return true;
 	if (hp <= 0) return true;
 	else return false;
 }
@@ -33,6 +33,7 @@ int BaseEnemy::getDamageAmount() {
 Vec2 BaseEnemy::getPos() {
 	return pos;
 }
+
 
 
 
