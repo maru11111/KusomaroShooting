@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "TowQuads.h"
 
 struct Objects;
 
@@ -17,7 +18,7 @@ public:
 
 	bool isDestroy();
 
-	virtual Quad collision()const=0;
+	virtual TwoQuads collision()const=0;
 
 	int getDamageAmount();
 
@@ -43,7 +44,7 @@ public:
 
 	void move()override;
 
-	Quad collision()const override;
+	TwoQuads collision()const override;
 
 	void draw()override;
 };
@@ -53,7 +54,7 @@ public:
 	GarbageBagFast(Objects& objects_, Vec2 pos_);
 	void move()override;
 
-	Quad collision()const override;
+	TwoQuads collision()const override;
 
 	void draw()override;
 };
@@ -63,7 +64,7 @@ public:
 	GarbageBagWithCan(Objects& objects_, Vec2 pos_);
 	void move()override;
 	void attack()override;
-	Quad collision()const override;
+	TwoQuads collision()const override;
 	void draw()override;
 private:
 	double attackInterval=3;
@@ -73,7 +74,7 @@ class Can : public BaseEnemy {
 public:
 	Can(Objects& objects_, Vec2 pos_, Vec2 vec_);
 	void move()override;
-	Quad collision()const;
+	TwoQuads collision()const;
 	void draw()override;
 private:
 };
@@ -82,7 +83,7 @@ class Fish : public BaseEnemy {
 public:
 	Fish(Objects& objects_, Vec2 pos_);
 	void move()override;
-	Quad collision()const;
+	TwoQuads collision()const;
 	void draw()override;
 private:
 	double moveInterval=3;
@@ -93,7 +94,7 @@ class Umbrella : public BaseEnemy {
 public:
 	Umbrella(Objects& objects_, Vec2 pos_);
 	void move()override;
-	Quad collision()const;
+	TwoQuads collision()const;
 	void draw()override;
 private:
 	double gravity=30;

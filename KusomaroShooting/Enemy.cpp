@@ -54,7 +54,7 @@ void GarbageBagNormal::move() {
 	}
 }
 
-Quad GarbageBagNormal::collision()const{
+TwoQuads GarbageBagNormal::collision()const{
 	return (Quad)RectF(Arg::center(pos), 7*3, 7*3);
 }
 
@@ -87,7 +87,7 @@ void GarbageBagFast::move() {
 	}
 }
 
-Quad GarbageBagFast::collision()const {
+TwoQuads GarbageBagFast::collision()const {
 	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
 }
 
@@ -126,7 +126,7 @@ void GarbageBagWithCan::attack() {
 	}
 }
 
-Quad GarbageBagWithCan::collision()const {
+TwoQuads GarbageBagWithCan::collision()const {
 	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
 }
 
@@ -152,7 +152,7 @@ void Can::move() {
 	pos += vec * speed * Scene::DeltaTime();
 }
 
-Quad Can::collision()const {
+TwoQuads Can::collision()const {
 	return (Quad)RectF(Arg::center(pos), 15, 15);
 }
 
@@ -187,7 +187,7 @@ void Fish::move() {
 	}
 }
 
-Quad Fish::collision()const {
+TwoQuads Fish::collision()const {
 	return RectF(Arg::center(pos), 30, 10).rotated(vec.getAngle()+90_deg);
 }
 
@@ -226,8 +226,8 @@ void Umbrella::move() {
 	timer += Scene::DeltaTime();
 }
 
-Quad Umbrella::collision()const {
-	return (Quad)RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle);
+TwoQuads Umbrella::collision()const {
+	return TwoQuads((Quad)RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle), (Quad)(RectF(Arg::center(pos.movedBy(0, 7)), 10, 95).rotated(angle)) ) ;
 }
 
 void Umbrella::draw() {
@@ -235,5 +235,5 @@ void Umbrella::draw() {
 	//Debug
 	//今回はcol1だけ使用
 	//RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle).draw();
-	//RectF col2 = RectF(Arg::center(pos.movedBy(0, 7)), 10, 95);
+	//RectF(Arg::center(pos.movedBy(0, 7)), 10, 95).rotated(angle).draw();
 }
