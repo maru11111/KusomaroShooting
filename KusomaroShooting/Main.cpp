@@ -1,6 +1,6 @@
 ﻿#include "Common.h"
 #include "GameScene.h"
-
+#include "StageEditor.h"
 
 //class PlayerBullet : public BaseBullet {
 //public:
@@ -43,6 +43,8 @@ void Main()
 	TextureAsset::Register(U"KusomaroDown", Resource(U"texture/kusomaroDown.png"));
 	TextureAsset::Register(U"KusomaroSine", Resource(U"texture/kusomaroSine.png"));
 	TextureAsset::Register(U"GarbageBag", Resource(U"texture/GarbageBag.png"));
+	TextureAsset::Register(U"GarbageBagFastForEditor", Resource(U"texture/GarbageBagFastForEditor.png"));
+	TextureAsset::Register(U"GarbageBagWithCanForEditor", Resource(U"texture/GarbageBagWithCanForEditor.png"));
 	TextureAsset::Register(U"PlayerBarBack", Resource(U"texture/PlayerHpBarBack.png"));
 	TextureAsset::Register(U"BossBarBack", Resource(U"texture/BossHpBarBack.png"));
 	TextureAsset::Register(U"PlayerHpFront", Resource(U"texture/PlayerHpBarFront.png"));
@@ -57,6 +59,7 @@ void Main()
 	TextureAsset::Register(U"UiBeamUimama", Resource(U"texture/UiBeamUimama.png"));
 	TextureAsset::Register(U"RedCan", Resource(U"texture/RedCan.png"));
 	TextureAsset::Register(U"Fish", Resource(U"texture/Fish.png"));
+	TextureAsset::Register(U"FishForEditor", Resource(U"texture/FishForEditor.png"));
 	TextureAsset::Register(U"FishWait", Resource(U"texture/FishWait.png"));
 	TextureAsset::Register(U"UiAttackEffect", Resource(U"texture/UiAttackEffect.png"));
 	TextureAsset::Register(U"Umbrella", Resource(U"texture/Umbrella.png"));
@@ -64,6 +67,10 @@ void Main()
 	TextureAsset::Register(U"BackGroundCityBack", Resource(U"texture/BackGroundCityBack.png"));
 	TextureAsset::Register(U"BackGroundCityMiddle", Resource(U"texture/BackGroundCityMiddle.png"));
 	TextureAsset::Register(U"BackGroundMountain", Resource(U"texture/BackGroundMountain.png"));
+	TextureAsset::Register(U"BackGroundMountainBack", Resource(U"texture/BackGroundMountainBack.png"));
+	TextureAsset::Register(U"BackGroundMountainMiddle", Resource(U"texture/BackGroundMountainMiddle.png"));
+	TextureAsset::Register(U"BackGroundMountainFront", Resource(U"texture/BackGroundMountainFront.png"));
+	TextureAsset::Register(U"Empty", Resource(U"texture/Empty.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
@@ -77,6 +84,8 @@ void Main()
 	TextureAsset::Load(U"UiNormal");
 	TextureAsset::Load(U"Marshmallow");
 	TextureAsset::Load(U"GarbageBag");
+	TextureAsset::Load(U"GarbageBagFastForEditor");
+	TextureAsset::Load(U"GarbageBagWithCanForEditor");
 	TextureAsset::Load(U"KusomaroUp");
 	TextureAsset::Load(U"KusomaroDown");
 	TextureAsset::Load(U"KusomaroSine");
@@ -95,6 +104,7 @@ void Main()
 	TextureAsset::Load(U"UiBeamUimama");
 	TextureAsset::Load(U"RedCan");
 	TextureAsset::Load(U"Fish");
+	TextureAsset::Load(U"FishForEditor");
 	TextureAsset::Load(U"FishWait");
 	TextureAsset::Load(U"UiAttackEffect");
 	TextureAsset::Load(U"Umbrella");
@@ -102,7 +112,10 @@ void Main()
 	TextureAsset::Load(U"BackGroundCityBack");
 	TextureAsset::Load(U"BackGroundCityMiddle");
 	TextureAsset::Load(U"BackGroundMountain");
-
+	TextureAsset::Load(U"BackGroundMountainBack");
+	TextureAsset::Load(U"BackGroundMountainMiddle");
+	TextureAsset::Load(U"BackGroundMountainFront");
+	TextureAsset::Load(U"Empty");
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
 	FontAsset::Load(U"GameUI_BestTen");
@@ -114,21 +127,21 @@ void Main()
 	App manager;
 	//manager.add<Title>(State::Title);
 	manager.add<GameScene>(State::Game);
+	manager.add<StageEditor>(State::StageEditor);
 
 	//ゲームシーンから開始
-	manager.init(State::Game, 0);
+	//manager.init(State::Game, 0);
+	manager.init(State::StageEditor, 0);
 
 	while (System::Update())
 	{
 		ClearPrint();
 		{
-
 			if (not manager.update())
 			{
 				break;
 			}
 		}
-
 	}
 }
 
