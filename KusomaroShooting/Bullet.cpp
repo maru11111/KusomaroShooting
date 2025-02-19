@@ -64,7 +64,7 @@ NormalMarshmallow::NormalMarshmallow(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 400*2;
+	speed = 600;
 	type = MaroType::Normal;
 }
 
@@ -79,7 +79,7 @@ KusoMarshmallowUp::KusoMarshmallowUp(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 400*2;
+	speed = 600;
 	type = MaroType::Up;
 }
 
@@ -101,7 +101,7 @@ KusoMarshmallowDown::KusoMarshmallowDown(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 400*2;
+	speed = 600;
 	type = MaroType::Down;
 }
 
@@ -123,13 +123,13 @@ KusoMarshmallowSine::KusoMarshmallowSine(Vec2 pos_)
 	: BaseBullet(pos_)
 {
 	vec = { 1,0 };
-	speed = 300*2;
+	speed =500;
 	type = MaroType::Sine;
 }
 
 void KusoMarshmallowSine::move()
 {
-	vec.y = Math::Sin(timer*10 - 90_deg);
+	vec.y = 1.5 * Math::Sin(timer*10 - 90_deg);
 	pos += vec * speed * Scene::DeltaTime();
 
 	timer += Scene::DeltaTime();
@@ -195,12 +195,12 @@ void KusoMarshmallowBeam::backGroundDraw()const {
 void KusoMarshmallowBeam::draw() {
 	//スプライトシートを再生
 	if (not isEndBeam) {
-		int n = (int)(beamTimer / 0.05) % (5 * 15);
+		int n = (int)(beamTimer / 0.05) % (5 * 16);
 		Print << n;
 		//最後のシートに到達したか
-		if (n == 5 * 15 - 1) isEndBeam = true;
+		if (n == 5 * 16 - 1) isEndBeam = true;
 
-		TextureAsset(U"UiBeam")((n % 5) * TextureAsset(U"UiBeam").size().x / 5, (int)(n / 5) * TextureAsset(U"UiBeam").size().y / 15, TextureAsset(U"UiBeam").size().x / 5, TextureAsset(U"UiBeam").size().y / 15).scaled(3).draw(pos.movedBy(40, -TextureAsset(U"UiBeam").size().y / 15.0 - 32));
+		TextureAsset(U"UiBeam")((n % 5) * TextureAsset(U"UiBeam").size().x / 5, (int)(n / 5) * TextureAsset(U"UiBeam").size().y / 16, TextureAsset(U"UiBeam").size().x / 5, TextureAsset(U"UiBeam").size().y / 16).scaled(3).draw(pos.movedBy(40, -TextureAsset(U"UiBeam").size().y / 15.0 - 32));
 	}
 
 	//if(isColliderActive)RectF(pos.movedBy(60, -TextureAsset(U"UiBeam").size().y / 15.0 - 32), Min(TextureAsset(U"UiBeam").size().x / 5 * 3, Scene::Size().x), TextureAsset(U"UiBeam").size().y / 15 * 3).draw();
