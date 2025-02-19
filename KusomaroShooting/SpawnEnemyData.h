@@ -8,9 +8,14 @@ public:
 	static double spawnTimer;
 	static double spawnStartTime;
 
-	bool isSpawnable()const {
+	bool isSpawnableForEditor()const {
 		//出現時間が試運転開始時間より後 かつ 出現時間のとき
 		if (spawnStartTime <= time && time <= spawnTimer) return true;
+		else return false;
+	}
+
+	bool isSpawnable()const {
+		if(time <= spawnTimer) return true;
 		else return false;
 	}
 };

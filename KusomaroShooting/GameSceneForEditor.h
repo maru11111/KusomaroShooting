@@ -21,7 +21,7 @@ public:
 		SpawnEnemyData::spawnTimer += Scene::DeltaTime();
 
 		for (int i = 0; i < spawnEnemyData.size(); i++) {
-			if (spawnEnemyData[i].isSpawnable()) {
+			if (spawnEnemyData[i].isSpawnableForEditor()) {
 				switch (spawnEnemyData[i].type) {
 					case EnemyType::Empty: /*何もしない*/; break;
 					case EnemyType::Bag: objects.enemies << std::make_unique<GarbageBagNormal>(objects, spawnEnemyData[i].pos); break;
@@ -31,11 +31,11 @@ public:
 					case EnemyType::Fish: objects.enemies << std::make_unique<Fish>(objects, spawnEnemyData[i].pos); break;
 					case EnemyType::Umbrella: objects.enemies << std::make_unique<Umbrella>(objects, spawnEnemyData[i].pos); break;
 				}
-				
 			}
 		}
 
 		//一度出現した敵のデータは削除
-		spawnEnemyData.remove_if([](const SpawnEnemyData& spawnEnemyData) {return spawnEnemyData.isSpawnable(); });
+		spawnEnemyData.remove_if([](const SpawnEnemyData& spawnEnemyData) {return spawnEnemyData.isSpawnableForEditor(); });
 	}
+
 };
