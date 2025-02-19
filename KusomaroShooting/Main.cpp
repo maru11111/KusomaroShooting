@@ -34,6 +34,9 @@ void Main()
 	// ウィンドウリサイズ
 	Window::Resize(Size(320, 214) * scaling);
 
+	//オーディオマネージャー
+	AudioManager::Init();
+
 	//登録
 	//画像
 	TextureAsset::Register(U"UiNormal", Resource(U"texture/UiNormal_33_28_3sheet.png"));
@@ -43,6 +46,7 @@ void Main()
 	TextureAsset::Register(U"KusomaroDown", Resource(U"texture/kusomaroDown.png"));
 	TextureAsset::Register(U"KusomaroSine", Resource(U"texture/kusomaroSine.png"));
 	TextureAsset::Register(U"GarbageBag", Resource(U"texture/GarbageBag.png"));
+	TextureAsset::Register(U"GarbageBagWithCan", Resource(U"texture/GarbageBagWithCan.png"));
 	TextureAsset::Register(U"GarbageBagFastForEditor", Resource(U"texture/GarbageBagFastForEditor.png"));
 	TextureAsset::Register(U"GarbageBagWithCanForEditor", Resource(U"texture/GarbageBagWithCanForEditor.png"));
 	TextureAsset::Register(U"PlayerBarBack", Resource(U"texture/PlayerHpBarBack.png"));
@@ -58,6 +62,9 @@ void Main()
 	TextureAsset::Register(U"UiBeam", Resource(U"texture/UiBeam.png"));
 	TextureAsset::Register(U"UiBeamUimama", Resource(U"texture/UiBeamUimama.png"));
 	TextureAsset::Register(U"RedCan", Resource(U"texture/RedCan.png"));
+	TextureAsset::Register(U"GrapeCan", Resource(U"texture/GrapeCan.png"));
+	TextureAsset::Register(U"OrangeCan", Resource(U"texture/OrangeCan.png"));
+	TextureAsset::Register(U"WhiteCan", Resource(U"texture/WhiteCan.png"));
 	TextureAsset::Register(U"Fish", Resource(U"texture/Fish.png"));
 	TextureAsset::Register(U"FishForEditor", Resource(U"texture/FishForEditor.png"));
 	TextureAsset::Register(U"FishWait", Resource(U"texture/FishWait.png"));
@@ -79,11 +86,21 @@ void Main()
 	FontAsset::Register(U"GameUI_Pixel", 25, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_Pixel6", 30, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 
+	AudioManager::Instance()->setAudio(U"MidBoss", Resource(U"audio/MidBoss.wav"), AudioType::BGM);
+	AudioManager::Instance()->setAudio(U"KaraKara", Resource(U"audio/KaraKara.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"ReceiveDamage", Resource(U"audio/ReceiveDamage.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Throw", Resource(U"audio/Throw.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"HitHigh", Resource(U"audio/HitHigh.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"HitLow", Resource(U"audio/HitLow.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"CloseRangeAttack", Resource(U"audio/CloseRangeAttack.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Can", Resource(U"audio/Can.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Beam", Resource(U"audio/Beam.wav"), AudioType::SE);
 	//ロード
 	//画像
 	TextureAsset::Load(U"UiNormal");
 	TextureAsset::Load(U"Marshmallow");
 	TextureAsset::Load(U"GarbageBag");
+	TextureAsset::Load(U"GarbageBagWithCan");
 	TextureAsset::Load(U"GarbageBagFastForEditor");
 	TextureAsset::Load(U"GarbageBagWithCanForEditor");
 	TextureAsset::Load(U"KusomaroUp");
@@ -103,6 +120,9 @@ void Main()
 	TextureAsset::Load(U"UiBeam");
 	TextureAsset::Load(U"UiBeamUimama");
 	TextureAsset::Load(U"RedCan");
+	TextureAsset::Load(U"GrapeCan");
+	TextureAsset::Load(U"OrangeCan");
+	TextureAsset::Load(U"WhiteCan");
 	TextureAsset::Load(U"Fish");
 	TextureAsset::Load(U"FishForEditor");
 	TextureAsset::Load(U"FishWait");
