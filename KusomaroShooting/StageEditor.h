@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Objects.h"
 #include "GameSceneForEditor.h"
+#include "SpawnEnemyData.h"
 
 enum class Mode {
 	EditMode,
@@ -26,6 +27,8 @@ class StageEditor : public App::Scene
 {
 public:
 	StageEditor(const InitData& init);
+	~StageEditor();
+	void addGrids(int addGridNum);
 	void update()override;
 	void updateEditMode();
 	void updatePlayMode();
@@ -48,7 +51,7 @@ private:
 	int col = (int)(SceneSize.y / GridSize)+4;
 	Vec2 gridStartOffset = { (SceneSize.x - GridSize * row) / 2.0, - GridSize * 2 +(SceneSize.y - GridSize * col) / 2.0 };
 
-	int maxGridNum=maxTime+1;
+	uint32 maxGridNum=maxTime+1;
 
 	Array<Grid<CellData>>grids{ maxGridNum, Grid<CellData>((int)col, (int)row, CellData(EnemyType::Empty))};
 	
@@ -66,4 +69,10 @@ private:
 	mutable Mode currentMode=Mode::EditMode;
 
 	GameSceneForEditor gameScene;
+
+	void loadEditJson(String path);
+
+	mutable Array<SpawnEnemyData> spawnEnemyData;
+
+	mutable bool isAfterChange=false;
 };
