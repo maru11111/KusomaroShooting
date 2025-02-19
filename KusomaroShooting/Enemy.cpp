@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Enemy.h"
 #include "Objects.h"
+#include "Common.h"
 
 BaseEnemy::BaseEnemy(Objects& objects_, Vec2 pos_)
 	: objects{ objects_ }
@@ -19,6 +20,9 @@ void BaseEnemy::update() {
 void BaseEnemy::damage(int damageAmount) {
 	hp -= damageAmount;
 	if (hp < 0)hp = 0;
+	//ダメージSE
+	if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
+	else AudioManager::Instance()->play(U"HitLow");
 }
 
 bool BaseEnemy::isDestroy() {
@@ -123,6 +127,8 @@ void GarbageBagWithCan::attack() {
 		timer -= attackInterval;
 		//缶を飛ばす
 		objects.enemies << std::make_unique<Can>(objects, pos, (objects.player->getPos() - pos).normalized());
+		//缶を飛ばす音
+		AudioManager::Instance()->play(U"Can");
 	}
 }
 
@@ -131,9 +137,9 @@ TwoQuads GarbageBagWithCan::collision()const {
 }
 
 void GarbageBagWithCan::draw() {
-	TextureAsset(U"GarbageBag")
+	TextureAsset(U"GarbageBagWithCan")
 		.scaled(3)
-		.rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, Scene::Time() * 1 * (-360_deg))
+		.rotatedAt({ TextureAsset(U"GarbageBagWithCan").size().x * 3 / 2.0, TextureAsset(U"GarbageBagWithCan").size().y * 3 / 2.0 + 5 }, Scene::Time() * 0.5 * (-360_deg))
 		.drawAt(pos);
 }
 
@@ -146,6 +152,17 @@ Can::Can(Objects& objects_, Vec2 pos_, Vec2 vec_)
 	vec = vec_;
 	speed = 75*3*2;
 	damageAmount = 1;
+
+	//缶の種類を抽選
+	canType = (CanType)Random(0, (int)CanType::Size-1);
+
+	//テクスチャ決定
+	switch (canType) {
+	case CanType::Red: texture = TextureAsset(U"RedCan"); break;
+	case CanType::Grape: texture = TextureAsset(U"GrapeCan"); break;
+	case CanType::Orange: texture = TextureAsset(U"OrangeCan"); break;
+	case CanType::White: texture = TextureAsset(U"WhiteCan"); break;
+	}
 }
 
 void Can::move() {
@@ -157,7 +174,7 @@ TwoQuads Can::collision()const {
 }
 
 void Can::draw() {
-	TextureAsset(U"RedCan").scaled(3).rotated(vec.getAngle()).drawAt(pos);
+	texture.scaled(3).rotated(vec.getAngle()).drawAt(pos);
 }
 
 Fish::Fish(Objects& objects_, Vec2 pos_)
@@ -176,6 +193,7 @@ void Fish::move() {
 	if (moveInterval <= timer) {
 		isMoving = true;
 		timer = 0;
+		AudioManager::Instance()->play(U"KaraKara");
 	}
 
 	if (isMoving) {

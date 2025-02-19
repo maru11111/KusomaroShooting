@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "TowQuads.h"
+#include "TwoQuads.h"
 
 struct Objects;
 
@@ -72,6 +72,15 @@ private:
 
 class Can : public BaseEnemy {
 public:
+	enum class CanType {
+		Red,
+		Grape,
+		Orange,
+		White,
+		Size
+	};
+	CanType canType;
+	Texture texture;
 	Can(Objects& objects_, Vec2 pos_, Vec2 vec_);
 	void move()override;
 	TwoQuads collision()const;
