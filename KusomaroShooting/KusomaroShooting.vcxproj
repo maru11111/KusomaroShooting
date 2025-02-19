@@ -115,6 +115,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="SpawnEnemyData.cpp" />
@@ -314,7 +315,6 @@
     <None Include="App\example\toml\config.toml" />
     <None Include="App\example\toml\test.toml" />
     <None Include="App\example\zip\zip_test.zip" />
-    <None Include="App\stageTest.json" />
     <None Include="App\stage\editorStage.json" />
   </ItemGroup>
   <ItemGroup>
@@ -335,6 +335,7 @@
     <Xml Include="App\example\xml\test.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Enemy.h" />
@@ -342,7 +343,7 @@
     <ClInclude Include="GameSceneForEditor.h" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Quads.h" />
+    <ClInclude Include="TwoQuads.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="StageEditor.h" />
     <ClInclude Include="stdafx.h" />
