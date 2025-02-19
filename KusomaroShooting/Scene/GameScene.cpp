@@ -120,7 +120,8 @@ void GameScene::drawMarshmallowUI() const {
 }
 
 void GameScene::update() {
-
+	
+	AudioManager::Instance()->play(U"MidBoss");
 
 	//敵を追加
 	spawnEnemy();
@@ -157,9 +158,11 @@ void GameScene::update() {
 	//プレイヤー直接攻撃と敵本体
 	if (objects.player->getIsAttackColOn()) {
 		for (auto& enemy : objects.enemies) {
-			if (enemy->collision().collision(objects.player->attackCollision())) {
+			if (enemy->collision().intersects(objects.player->attackCollision())) {
 				Print << U"damage!!!";
 				enemy->damage(objects.player->getDamageAmount());
+				//ダメージエフェクト
+				effect.add<DamageEffect>(enemy->getPos());
 			}
 		}
 	}
@@ -167,7 +170,7 @@ void GameScene::update() {
 	destroyObjects();
 	//プレイヤー本体と敵本体
 	for (auto& enemy : objects.enemies) {
-		if (enemy->collision().collision(objects.player->bodyCollision())) {
+		if (enemy->collision().intersects(objects.player->bodyCollision())) {
 			objects.player->damage(enemy->getDamageAmount());
 		}
 	}
@@ -175,7 +178,7 @@ void GameScene::update() {
 	//マシュマロと敵
 	for (auto& enemy : objects.enemies) {
 		for (auto& maro : objects.marshmallows) {
-			if (enemy->collision().collision(maro->collision())) {
+			if (enemy->collision().intersects(maro->collision())) {
 				//敵にヒットした判定をtrueに
 				maro->setIsHit(true);
 				//敵にダメージ
@@ -196,8 +199,24 @@ void GameScene::update() {
 }
 
 void GameScene::spawnEnemy() {
-	SpawnEnemyData::spawnTimer = Scene::DeltaTime();
+	SpawnEnemyData::spawnTimer += Scene::DeltaTime();
 
+	for (int i = 0; i < spawnEnemyData.size(); i++) {
+		if (spawnEnemyData[i].isSpawnable()) {
+			switch (spawnEnemyData[i].type) {
+			case EnemyType::Empty: /*何もしない*/; break;
+			case EnemyType::Bag: objects.enemies << std::make_unique<GarbageBagNormal>(objects, spawnEnemyData[i].pos); break;
+			case EnemyType::FastBag: objects.enemies << std::make_unique<GarbageBagFast>(objects, spawnEnemyData[i].pos); break;
+			case EnemyType::BagWithCan: objects.enemies << std::make_unique<GarbageBagWithCan>(objects, spawnEnemyData[i].pos); break;
+			case EnemyType::Can: objects.enemies << std::make_unique<Can>(objects, spawnEnemyData[i].pos, Vec2{-1,0}); break;
+			case EnemyType::Fish: objects.enemies << std::make_unique<Fish>(objects, spawnEnemyData[i].pos); break;
+			case EnemyType::Umbrella: objects.enemies << std::make_unique<Umbrella>(objects, spawnEnemyData[i].pos); break;
+			}
+		}
+	}
+
+	//一度出現した敵のデータは削除
+	spawnEnemyData.remove_if([](const SpawnEnemyData& spawnEnemyData) {return spawnEnemyData.isSpawnable(); });
 
 
 	//Debug
@@ -248,6 +267,7 @@ Objects& GameScene::getObj() {
 
 void GameScene::loadJson(String path)const {
 	JSON json = JSON::Load(path);
+	if (not json) throw Error{ path + U"がありません" };
 	{
 		for (const auto& object : json[U"Enemies"].arrayView())
 		{
