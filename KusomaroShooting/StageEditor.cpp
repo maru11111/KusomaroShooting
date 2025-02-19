@@ -13,7 +13,7 @@ StageEditor::StageEditor(const InitData& init)
 		for (int j = 0; j < row; j++) {
 			for (int k = 0; k < col; k++) {
 				if (k <= 1) {
-					grids[i][j][k].rect = RectF{ gridStartOffset.x*2.0 + j * GridSize, GridSize*2 + gridStartOffset.y + k * GridSize, GridSize, GridSize };
+					grids[i][j][k].rect = RectF{ gridStartOffset.x * 2.0 + j * GridSize, GridSize * 2 + gridStartOffset.y + k * GridSize, GridSize, GridSize };
 					grids[i][j][k].centerPos = { (grids[i][j][k].rect.x + grids[i][j][k].rect.w / 2.0), (grids[i][j][k].rect.y + grids[i][j][k].rect.h / 2.0) };
 					grids[i][j][k].time = i;
 				}
@@ -25,6 +25,52 @@ StageEditor::StageEditor(const InitData& init)
 			}
 		}
 	}
+}
+
+StageEditor::~StageEditor() {
+	//編集後に保存していなければ
+	if (isAfterChange) {
+		Optional<FilePath> path = Dialog::SaveFile({ FileFilter::JSON() });;
+		if (path.has_value()) toJson(*path);
+	}
+}
+
+void StageEditor::addGrids(int addGridNum) {
+	int prevMaxGridNum = maxGridNum;
+	maxGridNum += addGridNum;
+	maxTime += addGridNum;
+	Array<Grid<CellData>> tmp{ (uint64)maxGridNum, Grid<CellData>((int)col, (int)row, CellData(EnemyType::Empty)) };
+
+	//tmpの位置を初期化
+	for (int i = 0; i < maxGridNum; i++) {
+		for (int j = 0; j < row; j++) {
+			for (int k = 0; k < col; k++) {
+				if (k <= 1) {
+					tmp[i][j][k].rect = RectF{ gridStartOffset.x * 2.0 + j * GridSize, GridSize * 2 + gridStartOffset.y + k * GridSize, GridSize, GridSize };
+					tmp[i][j][k].centerPos = { (tmp[i][j][k].rect.x + tmp[i][j][k].rect.w / 2.0), (tmp[i][j][k].rect.y + tmp[i][j][k].rect.h / 2.0) };
+					tmp[i][j][k].time = i;
+				}
+				else {
+					tmp[i][j][k].rect = RectF{ Scene::Size().x + j * GridSize, gridStartOffset.y + k * GridSize, GridSize, GridSize };
+					tmp[i][j][k].centerPos = { (tmp[i][j][k].rect.x + tmp[i][j][k].rect.w / 2.0), (tmp[i][j][k].rect.y + tmp[i][j][k].rect.h / 2.0) };
+					tmp[i][j][k].time = i;
+				}
+			}
+		}
+	}
+
+	//元のグリッドの内容をコピー
+	for (int i = 0; i < prevMaxGridNum; i++) {
+		for (int j = 0; j < row; j++) {
+			for (int k = 0; k < col; k++) {
+				tmp[i][j][k].type = grids[i][j][k].type;
+				tmp[i][j][k].textureName = grids[i][j][k].textureName;
+			}
+		}
+	}
+
+	//グリッドを新しいものに変える
+	grids = tmp;
 }
 
 void StageEditor::update() {
@@ -50,9 +96,23 @@ void StageEditor::updateEditMode() {
 	Print << U"static_cast<int>(Parse<double>(Format(timer))):" << static_cast<int>(Parse<double>(Format(timer)));
 	Print << U"static_cast<int>(timer):" << static_cast<int>(timer);
 
-	//json出力
+	//編集するステージをロード
+	if (KeyL.down()) {
+		Optional<FilePath> path = Dialog::OpenFile({ FileFilter::JSON() }, { FileSystem::CurrentDirectory() + U"stage" });
+		if (path.has_value()) loadEditJson(*path);
+	}
+
+	//現在のステージをjsonに出力
 	if (KeyJ.down()) {
-		toJson(U"stage/test.json");
+		Optional<FilePath> path = Dialog::SaveFile({ FileFilter::JSON() });;
+		if (path.has_value()) {
+			toJson(*path);
+		}
+	}
+
+	//時間を増やす
+	if (KeyT.down()) {
+		addGrids(1);
 	}
 
 	//敵を選択
@@ -130,6 +190,9 @@ void StageEditor::updateEditMode() {
 					grids[getCurrentIntTime()][i][j].textureName = U"Umbrella";
 					break;
 				}
+
+				//save機能のための編集後フラグ
+				if(currentSelectedType != EnemyType::Empty) isAfterChange = true;
 			}
 		}
 	}
@@ -235,6 +298,8 @@ void StageEditor::toJson(String name)const {
 	json[U"Enemies"] = enemies;
 
 	json.save(name);
+
+	isAfterChange = false;
 }
 
 //doubleをそのままintにキャストすると誤差が出るのでString→double→intに変換して使う
@@ -368,6 +433,94 @@ void StageEditor::drawEditMode()const {
 	if (timer < 0) timer = 0;
 	if (maxTime < timer) timer = maxTime;
 	//if ((Math::Fmod(timer, 1)) != 0) timer = getCurrentIntTime();
+}
+
+void StageEditor::loadEditJson(String path) {
+	JSON json = JSON::Load(path);
+	if (not json) throw Error{ path + U"がありません" };
+	//jsonのデータを SpawnEnemyDataに移す
+	{
+		for (const auto& object : json[U"Enemies"].arrayView())
+		{
+			SpawnEnemyData data;
+			data.time = object[U"Time"].get<int>();
+			data.pos = object[U"Pos"].get<Vec2>();
+			String str = object[U"Type"].get<String>();
+			int n;
+			if (str == U"Bag") {
+				n = (int)EnemyType::Bag;
+			}
+			else if (str == U"FastBag") {
+				n = (int)EnemyType::FastBag;
+			}
+			else if (str == U"BagWithCan") {
+				n = (int)EnemyType::BagWithCan;
+			}
+			else if (str == U"Can") {
+				n = (int)EnemyType::Can;
+			}
+			else if (str == U"Fish") {
+				n = (int)EnemyType::Fish;
+			}
+			else if (str == U"Umbrella") {
+				n = (int)EnemyType::Umbrella;
+			}
+			else {
+				throw Error(U"GameSceneForEditor:未定義の敵です");
+			}
+			data.type = (EnemyType)n;
+			spawnEnemyData << data;
+		}
+	}
+
+	//グリッドを初期化
+	for (int i = 0; i < grids.size(); i++) {
+		for (int j = 0; j < row; j++) {
+			for (int k = 0; k < col; k++) {
+				grids[i][j][k].type = EnemyType::Empty;
+				grids[i][j][k].textureName = U"Empty";
+			}
+		}
+	}
+
+	//グリッドにデータを格納
+	for (int i = 0; i < spawnEnemyData.size(); i++) {
+		int enemyRow = 0;
+		int enemyCol = 0;
+		for (int j = 0; j < row; j++){
+			for (int k = 0; k < col; k++) {
+				//敵の位置に対応するグリッドのインデックスを求める
+				if (grids[0][j][k].centerPos == spawnEnemyData[i].pos) {
+					enemyRow = j;
+					enemyCol = k;
+				}
+			}
+		}
+		grids[spawnEnemyData[i].time][enemyRow][enemyCol].type= spawnEnemyData[i].type;
+		switch (spawnEnemyData[i].type) {
+		case EnemyType::Empty:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"Empty";
+			break;
+		case EnemyType::Bag:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBag";
+			break;
+		case EnemyType::FastBag:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagFastForEditor";
+			break;
+		case EnemyType::BagWithCan:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagWithCanForEditor";
+			break;
+		case EnemyType::Can:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"RedCan";
+			break;
+		case EnemyType::Fish:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"FishForEditor";
+			break;
+		case EnemyType::Umbrella:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"Umbrella";
+			break;
+		}
+	}
 }
 
 void StageEditor::drawPlayMode()const {
