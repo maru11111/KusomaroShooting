@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Objects.h"
 #include "Player.h"
+#include "Common.h"
 
 struct AttackEffect : IEffect
 {
@@ -15,7 +16,7 @@ struct AttackEffect : IEffect
 	bool update(double t) override
 	{
 		//スプライトシートを再生
-		int n = (int)(timer/(0.035/1.5)) % 21;
+		int n = (int)(timer / (0.035 / 1.5)) % 21;
 		TextureAsset(U"UiAttackEffect")
 			(n * TextureAsset(U"UiAttackEffect").size().x / 21.0, 0, TextureAsset(U"UiAttackEffect").size().x / 21.0, TextureAsset(U"UiAttackEffect").size().y)
 			.scaled(3)
@@ -24,7 +25,7 @@ struct AttackEffect : IEffect
 		timer += Scene::DeltaTime();
 
 		//trueの間継続
-		return (n < 21-1);
+		return (n < 21 - 1);
 	}
 };
 
@@ -38,7 +39,7 @@ Player::Player(Objects& objects_)
 
 Player::Player(Objects& objects_, Vec2 pos_)
 	: objects{ objects_ }
-	, pos{pos_}
+	, pos{ pos_ }
 {
 	for (int i = 0; i < maxNumMarshmallows; i++) {
 		addMarshmallow();
@@ -125,6 +126,8 @@ void Player::update() {
 		isAttack = true;
 		isAttackColOn = true;
 		isAttackEffectStarted = false;
+		//近接攻撃効果音
+		AudioManager::Instance()->play(U"CloseRangeAttack");
 	}
 
 	//近接攻撃中なら
@@ -133,7 +136,7 @@ void Player::update() {
 
 		//エフェクト追加
 		if (not isAttackEffectStarted) {
-			effect.add<AttackEffect>(pos.movedBy(20 * 3+5, -20));
+			effect.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20));
 			isAttackEffectStarted = true;
 		}
 
@@ -146,7 +149,7 @@ void Player::update() {
 			attackTimer = 0;
 		}
 	}
-
+	
 	//移動
 	if (isMovable()) {
 		move();
@@ -203,8 +206,14 @@ void Player::attack() {
 			isBeamAttacking = true;
 			break;
 		}
+
+		//マシュマロ(or beam)を投げる音
+		if (maroBox[0] != MaroType::Beam) AudioManager::Instance()->play(U"Throw");
+		else AudioManager::Instance()->play(U"Beam");
+
 		maroBox.pop_front();
 		numMarshmallows--;
+
 	}
 }
 
@@ -229,6 +238,8 @@ void Player::damage(int damageAmount) {
 		//ヒットバック開始
 		isHitBack = true;
 		hitBackTimer = 0;
+		//効果音
+		AudioManager::Instance()->play(U"ReceiveDamage");
 	}
 }
 
@@ -286,7 +297,7 @@ void Player::setKusomaro(MaroType type) {
 }
 
 RectF Player::bodyCollision() const {
-	return RectF(Arg::center(pos.movedBy(5*3, -5*3)), 15*3, 15*3);
+	return RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3)), 15 * 3, 15 * 3);
 }
 RectF Player::attackCollision()const {
 	return RectF(Arg::center(pos.movedBy(20 * 3, 0)), 12 * 3, 22 * 3);
@@ -358,7 +369,7 @@ void Player::draw() {
 
 	//Debug
 	//RectF(pos.movedBy(60, -TextureAsset(U"UiBeam").size().y / 15.0 - 32), Min(TextureAsset(U"UiBeam").size().x/5 * 3, Scene::Size().x) , TextureAsset(U"UiBeam").size().y/15 * 3).draw();
-	
+
 	//スプライトシートを再生
 	//int n = (int)(Scene::Time() / 0.05) % (5*15);
 
@@ -382,7 +393,7 @@ void Player::draw() {
 			}
 		}
 		//攻撃中
-		else if(isAttack){
+		else if (isAttack) {
 			//点滅させる
 			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
 			if (isDrawClear) {
@@ -420,7 +431,7 @@ void Player::draw() {
 	else {
 		//スプライトシートを再生
 		int n = (int)(Scene::Time() / 0.0625) % 102;
-		TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x/102, 0, TextureAsset(U"UiNormalAndBlink").size().x/102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos);
+		TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos);
 	}
 
 	//Debug
