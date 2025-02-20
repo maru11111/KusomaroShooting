@@ -306,26 +306,225 @@ GarbageBox::GarbageBox(Objects& objects_, Vec2 pos_)
 void GarbageBox::move() {
 	Print << U"State:" << (int)state;
 	Print << U"NextState:" << (int)nextState;
-	Print << U"isOpen:" << isLidOpen;
+
 	switch (state) {
-	case State::Idle:
+	case State::Idle:		
 		timers[(int)state].timer += Scene::DeltaTime();
 		if (timers[(int)state].time <= timers[(int)state].timer) {
 			//次の攻撃に移る
-			state = nextState;
 			timers[(int)state].timer = 0;
+			state = nextState;
 		}
 		break;
 	case State::ThrowCan:
-		updateAttackStateTimer();
-		if (currentFrame(52, 0.07, timers[(int)state].timer) == 52) isLidOpen = true;
+		//タイマー更新
+		timers[(int)state].timer += Scene::DeltaTime();
+		
+		//ふたが開いたか判定
+		if (currentFrame(56, 0.08, timers[(int)state].timer) == 51 && not isLidOpen && not isLidClosing) {
+			lidOpenedTime = timers[(int)state].timer;
+			isLidOpen = true;
+		}
 
+		//もし蓋が開いていたら
+		if (isLidOpen) {
+			throwCanIntervalTimer.timer += Scene::DeltaTime();
+			if (throwCanIntervalTimer.time <= throwCanIntervalTimer.timer) {
+				//缶を飛ばす
+				objects.enemies << std::make_unique<Can>(objects, pos.movedBy(0, -100), (objects.player->getPos() - pos.movedBy(0,-100)).normalized());
+				//缶を飛ばす音
+				AudioManager::Instance()->play(U"Can");
+				//リセット
+				throwCanIntervalTimer.timer -= throwCanIntervalTimer.time;
+				//飛ばした缶の数をカウント
+				throwCanNum++;
+			}
+		}
+		//指定の数だけ缶を出し切ったら
+		if (throwCanNum == throwCanMaxNum) {
+			//蓋を閉じ始める
+			isLidOpen = false;
+			isLidClosing = true;
+			throwCanNum = 0;
+			timers[(int)state].timer = lidOpenedTime;
+		}
+
+		//蓋を閉じている最中なら
+		if (isLidClosing) {
+			//閉じ終えたらidleに戻る
+			if (currentFrame(56, 0.08, timers[(int)state].timer) == 56) {
+				//時間リセット
+				timers[(int)state].timer = 0;
+				//蓋を閉じ終える
+				isLidClosing = false;
+				//攻撃を終了する
+				isEndAttack = true;
+			}
+		}
 		break;
+
 	case State::RollingAttack:
 		updateAttackStateTimer();
+		Print << timers[(int)state].timer;
+
+		switch (rollingState) {
+		case RollingState::PreAction:
+			if (timers[(int)state].timer <= 2.25) {
+				easeTimer += Scene::DeltaTime();
+				currentAngle = ease * firstAngle;
+				ease = EaseOutCirc( Min(easeTimer/2.25, 1.0) );
+				pos.x += ease * 1.1 *Periodic::Square1_1(0.1s);
+			}
+			else {
+				rollingState = RollingState::Rolling;
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+			}
+			break;
+		case RollingState::Rolling:
+			if (timers[(int)state].timer <= 1.0) {
+				easeTimer += Scene::DeltaTime();
+				currentAngle = -ease * rollingAngle;
+				ease = EaseOutCubic(easeTimer / 1.0);
+				pos.x -= 20 * Math::Cos(timers[(int)state].timer*Math::Pi);
+				pos.y -= 16 * Math::Cos(timers[(int)state].timer * Math::Pi*2.0);
+			}
+			else {
+				//PreActionに戻す
+				rollingState = RollingState::PreAction;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+				//25％の確率でローリングロングに移行
+				if (Random(0, 3) == 0) {
+					state = State::RollingAttackLong;
+				}
+				else {
+					//攻撃終了
+					isEndAttack = true;
+				}
+			}
+			break;
+		default:
+			throw Error(U"不明な状態");
+			break;
+		}
 		break;
+
+	case State::RollingAttackLong:
+		updateAttackStateTimer();
+		
+		switch (rollingState) {
+		case RollingState::PreAction:
+			if (timers[(int)state].timer <= 3.25) {
+				easeTimer += Scene::DeltaTime();
+				currentAngle = ease * firstAngle;
+				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
+				pos.x += ease * 3.0 * Periodic::Square1_1(0.1s);
+			}
+			else {
+				rollingState = RollingState::Rolling;
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+			}
+			break;
+		case RollingState::Rolling:
+			if (timers[(int)state].timer <= 1.0) {
+				easeTimer += Scene::DeltaTime();
+				currentAngle = -ease * rollingAngle;
+				ease = EaseOutCubic(easeTimer / 1.0);
+				pos.x -= 30 * Math::Cos(timers[(int)state].timer * Math::Pi/1.0);
+				pos.y -= 13 * Math::Cos(timers[(int)state].timer * Math::Pi * 2.0/1.0);
+			}
+			else {
+				//PreActionに戻す
+				rollingState = RollingState::PreAction;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+				//攻撃終了
+				isEndAttack = true;
+			}
+			break;
+		default:
+			throw Error(U"不明な状態");
+			break;
+		}
+		break;
+
 	case State::DashAttack:
 		updateAttackStateTimer();
+
+		//ダッシュパターンを決定
+		if (not isSelectPattern) {
+			dashPattern = (DashPattern)Random(0, 1);
+			isSelectPattern = true;
+		}
+
+		switch (dashState) {
+		case DashState::PreAction:
+			if (timers[(int)state].timer <= 2.25) {
+				easeTimer += Scene::DeltaTime();
+				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
+				currentAngle = ease * firstAngle;
+				pos.x += ease * 1.1 * Periodic::Square1_1(0.1s);
+				if(dashPattern==DashPattern::Top) pos = basePos.lerp(dashPosTopRightStart, ease);
+				else pos = basePos.lerp(dashPosBottomRightStart, ease);
+			}
+			else {
+				dashState = DashState::Dash1;
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+			}
+			break;
+
+		case DashState::Dash1:
+			if (timers[(int)state].timer <= 1.75) {
+				easeTimer += Scene::DeltaTime();
+				ease = EaseInQuad(Min(easeTimer / 1.75, 1.0));
+				currentAngle -= 20 * Scene::DeltaTime();
+				if (dashPattern == DashPattern::Top) pos = dashPosTopRightStart.lerp(dashPosTopLeft, ease);
+				else pos = dashPosBottomRightStart.lerp(dashPosBottomLeft, ease);
+			}
+			else {
+				dashState = DashState::Dash2;
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+			}
+			break;
+
+		case DashState::Dash2:
+			if (timers[(int)state].timer <= 1.75) {
+				easeTimer += Scene::DeltaTime();
+				ease = EaseInQuad(Min(easeTimer / 1.75, 1.0));
+				currentAngle += 20 * Scene::DeltaTime();
+				if (dashPattern == DashPattern::Top) pos = dashPosBottomLeft.lerp(dashPosBottomRightEnd, ease);
+				else pos = dashPosTopLeft.lerp(dashPosTopRightEnd, ease);
+			}
+			else {
+				dashState = DashState::EndAction;
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+				isSelectPattern = false;
+				currentAngle = 0;
+			}
+			break;
+			
+		case DashState::EndAction:
+			if (timers[(int)state].timer <= 1.00) {
+				easeTimer += Scene::DeltaTime();
+				ease = EaseOutQuad(Min(easeTimer, 1.0));
+				if (dashPattern==DashPattern::Top) pos = dashPosBottomRightEnd.lerp(basePos, ease);
+				else pos = dashPosTopRightEnd.lerp(basePos, ease);
+			}
+			else {
+				dashState = DashState::PreAction;
+				timers[(int)state].timer = 0;
+				easeTimer = 0;
+				isEndAttack = true;
+			}
+			break;
+		}
 		break;
 	default:
 		throw Error(U"不明な行動");
@@ -342,11 +541,13 @@ void GarbageBox::move() {
 		isLidOpen = false;
 		//ランダムな行動を選ぶ
 		nextState = (State)(Random((int)State::ThrowCan, (int)State::DashAttack));
+		//角度をリセット
+		currentAngle = 0;
 	}
 }
 
 TwoQuads GarbageBox::collision()const {
-	return TwoQuads((Quad)RectF(Arg::center(pos.movedBy(0, -5)), 140, 190) );
+	return TwoQuads((Quad)RectF(Arg::center(pos.movedBy(0, -5)), 140, 190).rotated(currentAngle) );
 }
 
 void GarbageBox::updateAttackStateTimer() {
@@ -360,29 +561,55 @@ void GarbageBox::updateAttackStateTimer() {
 	}
 }
 
+bool GarbageBox::isDestroy() {
+	if (hp <= 0) return true;
+	else return false;
+}
+
 void GarbageBox::draw() {
 
 	switch (state) {
 	case State::Idle:
 		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
 		break;
+
 	case State::ThrowCan:
-		if (not isLidOpen) drawSpriteAnim(U"GarbageBoxOpen", 52, 0.07, pos, timers[(int)state].timer);
-		else drawSprite(U"GarbageBoxOpen", 52, 52, pos);
+		if (not isLidOpen) drawSpriteAnim(U"GarbageBoxOpen", 56, 0.08, pos, timers[(int)state].timer);
+		else drawSprite(U"GarbageBoxOpen", 56, 51, pos);
 		break;
+
 	case State::RollingAttack:
-		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
+		switch (rollingState) {
+		case RollingState::PreAction:
+			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			break;
+		case RollingState::Rolling:
+			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			break;
+		}
 		break;
+
+	case State::RollingAttackLong:
+		switch (rollingState) {
+		case RollingState::PreAction:
+			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			break;
+		case RollingState::Rolling:
+			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			break;
+		}
+		break;
+
 	case State::DashAttack:
-		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
+		drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
 		break;
 	}
 
 	//当たり判定
 	//RectF(Arg::center(pos.movedBy(0,-5)), 140, 190).draw(ColorF(1, 0, 0, 0.25));
-	
 	//n = (int)(Scene::Time() / 0.07) % 52;
 	//TextureAsset(U"GarbageBoxOpen")(n * TextureAsset(U"GarbageBoxOpen").size().x / 52.0, 0, TextureAsset(U"GarbageBoxOpen").size().x / 52.0, TextureAsset(U"GarbageBoxOpen").size().y).scaled(3).draw(600, 300 + 15 * Math::Sin(Scene::Time()));
+	RectF(Arg::center(pos.movedBy(0, -5)), 140, 190).rotated(currentAngle).draw(ColorF(1, 0, 0, 0.3));
 }
 
 int BaseEnemy::prevId = 0;

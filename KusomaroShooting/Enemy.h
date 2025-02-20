@@ -17,7 +17,7 @@ public:
 	//ダメージを受ける関数。無敵時間ならfalse, そうでなければtrueを返す
 	bool damage(int damageAmount, bool isExistInv);
 
-	bool isDestroy();
+	virtual bool isDestroy();
 
 	bool isInvincibility();
 
@@ -127,39 +127,84 @@ public:
 		Idle,
 		ThrowCan,
 		RollingAttack,
+		RollingAttackLong,
 		DashAttack,
 		StateNum
 	};
 	struct TimerVar {
 		double timer;
-		double time;
-		TimerVar(double time_) {
+		const double time;
+		TimerVar(double time_)
+			:time(time_)
+		{
 			timer = 0;
-			time = time_;
 		}
 	};
 	GarbageBox(Objects& objects_, Vec2 pos_);
 	void move()override;
 	TwoQuads collision()const;
 	void updateAttackStateTimer();
+	bool isDestroy()override;
 	void draw()override;
 
 private:
 	State state = State::Idle;
-	State nextState = State::ThrowCan;
+	State nextState = State::RollingAttack;
+	double currentAngle = 0;
+	Vec2 basePos = Vec2(Scene::Size().x - 150, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6);
 
 	TimerVar timers[(int)State::StateNum] =
 	{
 		//待機
-		TimerVar(2.0),
+		TimerVar(5.0),
 		//缶投げ
 		TimerVar(100.0),
 		//ローリング体当たり
-		TimerVar(3.0),
+		TimerVar(100.0),
+		//ローリング体当たりロング
+		TimerVar(100.0),
 		//ダッシュアタック
-		TimerVar(3.0)
+		TimerVar(100.0)
 	};
+	//缶投げ
 	bool isLidOpen=false;
-
 	bool isEndAttack=false;
+	int throwCanNum=0;
+	int throwCanMaxNum=25;
+	bool isLidClosing = false;
+	double lidOpenedTime=0;
+
+	//ローリングアタック
+	const double firstAngle = 45 * Math::Pi / 180.0;
+	double ease=0;
+	enum class RollingState {
+		PreAction,
+		Rolling,
+	};
+	RollingState rollingState=RollingState::PreAction;
+	double easeTimer=0;
+	double rollingAngle=360 * Math::Pi / 180.0;
+
+	TimerVar throwCanIntervalTimer = TimerVar(0.3);
+
+	//ダッシュアタック
+	enum class DashState {
+		PreAction,
+		Dash1,
+		Dash2,
+		EndAction
+	};
+	enum class DashPattern {
+		Top,
+		Bottom
+	};
+	DashState dashState = DashState::PreAction;
+	DashPattern dashPattern = DashPattern::Bottom;
+	bool isSelectPattern=false;
+	Vec2 dashPosTopRightStart = Vec2(Scene::Size().x - 100, basePos.y-120);
+	Vec2 dashPosTopRightEnd = Vec2(Scene::Size().x + 150, basePos.y-120);
+	Vec2 dashPosTopLeft = Vec2(-150, dashPosTopRightStart.y);
+	Vec2 dashPosBottomRightStart = Vec2(Scene::Size().x - 100, Scene::Size().y - 120);
+	Vec2 dashPosBottomRightEnd = Vec2(Scene::Size().x + 150, Scene::Size().y - 120);
+	Vec2 dashPosBottomLeft = Vec2(-150, dashPosBottomRightStart.y);
 };
