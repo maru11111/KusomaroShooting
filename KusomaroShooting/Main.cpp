@@ -78,6 +78,8 @@ void Main()
 	TextureAsset::Register(U"BackGroundMountainMiddle", Resource(U"texture/BackGroundMountainMiddle.png"));
 	TextureAsset::Register(U"BackGroundMountainFront", Resource(U"texture/BackGroundMountainFront.png"));
 	TextureAsset::Register(U"Empty", Resource(U"texture/Empty.png"));
+	TextureAsset::Register(U"GarbageBox", Resource(U"texture/GarbageBox.png"));
+	TextureAsset::Register(U"GarbageBoxOpen", Resource(U"texture/GarbageBoxOpen.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
@@ -95,6 +97,7 @@ void Main()
 	AudioManager::Instance()->setAudio(U"CloseRangeAttack", Resource(U"audio/CloseRangeAttack.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"Can", Resource(U"audio/Can.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"Beam", Resource(U"audio/Beam.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"BeamStart", Resource(U"audio/BeamStart.wav"), AudioType::SE);
 	//ロード
 	//画像
 	TextureAsset::Load(U"UiNormal");
