@@ -243,6 +243,8 @@ void Player::damage(int damageAmount) {
 		hitBackTimer = 0;
 		//効果音
 		AudioManager::Instance()->play(U"ReceiveDamage");
+		//簡易慣性をリセット
+		vec = Vec2(0,0);
 	}
 }
 
