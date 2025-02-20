@@ -209,7 +209,10 @@ void Player::attack() {
 
 		//マシュマロ(or beam)を投げる音
 		if (maroBox[0] != MaroType::Beam) AudioManager::Instance()->play(U"Throw");
-		else AudioManager::Instance()->play(U"Beam");
+		else {
+			AudioManager::Instance()->play(U"BeamStart");
+			AudioManager::Instance()->play(U"Beam");
+		}
 
 		maroBox.pop_front();
 		numMarshmallows--;
