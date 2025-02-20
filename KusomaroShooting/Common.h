@@ -24,6 +24,11 @@ inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime
 	int n = (int)(Scene::Time() / oneFrameTime) % numFrame;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).drawAt(pos);
 }
+//rotateバージョン
+inline void drawRotateSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double angle) {
+	int n = (int)(Scene::Time() / oneFrameTime) % numFrame;
+	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).rotated(angle).drawAt(pos);
+}
 //外部のタイマーを使って再生(1フレーム目から再生できるように)
 inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer) {
 	int n = (int)(timer / oneFrameTime) % numFrame;
