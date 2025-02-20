@@ -44,6 +44,9 @@ GameScene::GameScene(const InitData& init)
 	objects.player = std::make_unique<Player>(objects);
 
 	loadJson(U"stage/test.json");
+
+	//Debug
+	objects.enemies << std::make_unique<GarbageBox>(objects, Vec2(600,400));
 }
 
 void GameScene::drawBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY)const {
@@ -113,7 +116,7 @@ void GameScene::drawMarshmallowUI() const {
 
 		FontAsset(U"GameUI_Pixel")(U"Next").draw(423, 11);
 
-		FontAsset(U"GameUI_BestTenDot30")(U"Boss:***********").draw(540, 25);
+		FontAsset(U"GameUI_BestTenDot30")(U"Boss:巨大ゴミ箱").draw(540, 25);
 		//FontAsset(U"GameUI_Pixel")(U"HP").draw(872, 84);
 	}
 
@@ -159,10 +162,10 @@ void GameScene::update() {
 	if (objects.player->getIsAttackColOn()) {
 		for (auto& enemy : objects.enemies) {
 			if (enemy->collision().intersects(objects.player->attackCollision())) {
-				Print << U"damage!!!";
-				enemy->damage(objects.player->getDamageAmount());
+				//Print << U"damage!!!";
+				bool isDamaged = enemy->damage(objects.player->getDamageAmount(), true);
 				//ダメージエフェクト
-				effect.add<DamageEffect>(enemy->getPos());
+				if(isDamaged) effect.add<DamageEffect>(enemy->getPos());
 			}
 		}
 	}
@@ -180,11 +183,25 @@ void GameScene::update() {
 		for (auto& maro : objects.marshmallows) {
 			if (enemy->collision().intersects(maro->collision())) {
 				//敵にヒットした判定をtrueに
-				maro->setIsHit(true);
-				//敵にダメージ
-				enemy->damage(maro->getDamageAmount());
-				//エフェクトを追加
-				effect.add<DamageEffect>(enemy->getPos());
+				//maro->setIsHit(true);
+				//敵にダメージを与えられるか判定
+				if (maro->isNotHit(enemy->getId())) {
+					//IDを受け取る
+					maro->addId(enemy->getId());
+					//敵にダメージを与える
+					enemy->damage(maro->getDamageAmount(), false);
+					//エフェクトを追加
+					effect.add<DamageEffect>(enemy->getPos());
+				}
+				else {
+					//ビームは多段ヒットあり
+					if (maro->getType() == MaroType::Beam) {
+						//敵にダメージを与える
+						enemy->damage(maro->getDamageAmount(), false);
+						//エフェクトを追加
+						effect.add<DamageEffect>(enemy->getPos());
+					}
+				}
 			}
 		}
 	}
@@ -365,6 +382,7 @@ void GameScene::draw() const {
 		/*int n = (int)(Scene::Time() / 0.035) % 21;
 		TextureAsset(U"UiAttackEffect")(n * TextureAsset(U"UiAttackEffect").size().x / 21.0, 0, TextureAsset(U"UiAttackEffect").size().x / 21.0, TextureAsset(U"UiAttackEffect").size().y).scaled(3).drawAt(objects.player->getPos());*/
 		//TextureAsset(U"Umbrella").scaled(3).draw(300,200);
+
 	}
 
 	// シーン転送時の拡大縮小方法を最近傍法にする
