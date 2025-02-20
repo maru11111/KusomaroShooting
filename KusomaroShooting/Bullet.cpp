@@ -49,6 +49,17 @@ MaroType BaseBullet::getType() {
 	return type;
 }
 
+bool BaseBullet::isNotHit(int id) {
+	for (int i = 0; i < idOfEnemyHitOnce.size(); i++) {
+		if (idOfEnemyHitOnce[i] == id) return false;
+	}
+	return true;
+}
+
+void BaseBullet::addId(int id) {
+	idOfEnemyHitOnce << id;
+}
+
 void BaseBullet::backGroundDraw()const {}
 
 void BaseBullet::draw() {

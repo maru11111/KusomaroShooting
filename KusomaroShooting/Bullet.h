@@ -32,7 +32,12 @@ public:
 
 	MaroType getType();
 
+	//インスタンスにとって当たったことの無い敵かどうか
+	bool isNotHit(int id);
+
 	virtual void backGroundDraw()const;
+
+	void addId(int id);
 
 	virtual void draw();
 
@@ -43,7 +48,9 @@ protected:
 	int damageAmount;
 	static int numInstances;
 	MaroType type;
+	//何かしらの敵に当たったことがあるか
 	bool isHit=false;
+	Array<int>idOfEnemyHitOnce;
 };
 
 class NormalMarshmallow : public BaseBullet {
