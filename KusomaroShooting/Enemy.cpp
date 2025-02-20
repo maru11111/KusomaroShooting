@@ -6,7 +6,11 @@
 BaseEnemy::BaseEnemy(Objects& objects_, Vec2 pos_)
 	: objects{ objects_ }
 	, pos{ pos_ }
-{}
+{
+	// 固有のidを付与
+	id = prevId;
+	prevId++;
+}
 
 void BaseEnemy::attack() {
 
@@ -15,19 +19,52 @@ void BaseEnemy::attack() {
 void BaseEnemy::update() {
 	move();
 	attack();
+	//無敵時間があったら更新
+	if (isInvincibility()) {
+		remainingInvincibilityTime -= Scene::DeltaTime();
+		if (remainingInvincibilityTime < 0)remainingInvincibilityTime = 0;
+	}
 }
 
-void BaseEnemy::damage(int damageAmount) {
-	hp -= damageAmount;
-	if (hp < 0)hp = 0;
-	//ダメージSE
-	if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
-	else AudioManager::Instance()->play(U"HitLow");
+bool BaseEnemy::damage(int damageAmount, bool isExistInv) {
+	//無敵時間を考慮
+	if (isExistInv) {
+		//無敵時間中
+		if (isInvincibility()) {
+			//ダメージを受けない
+			return false;
+		}
+		else {
+			//ダメージを受ける
+			remainingInvincibilityTime = invincibilityTime;
+			hp -= damageAmount;
+			if (hp < 0)hp = 0;
+			//ダメージSE
+			if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
+			else AudioManager::Instance()->play(U"HitLow");
+			return true;
+		}
+	}
+	//無敵時間を考慮しない
+	else {
+		//ダメージを受ける
+		hp -= damageAmount;
+		if (hp < 0)hp = 0;
+		//ダメージSE
+		if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
+		else AudioManager::Instance()->play(U"HitLow");
+		return true;
+	}
 }
 
 bool BaseEnemy::isDestroy() {
 	if (pos.x < 0 - 50  || Scene::Size().x + Scene::Size().x < pos.x  || pos.y < 0 - Scene::Size().y || Scene::Size().y + 50 < pos.y)return true;
 	if (hp <= 0) return true;
+	else return false;
+}
+
+bool BaseEnemy::isInvincibility() {
+	if (0 < remainingInvincibilityTime) return true;
 	else return false;
 }
 
@@ -37,7 +74,9 @@ int BaseEnemy::getDamageAmount() {
 Vec2 BaseEnemy::getPos() {
 	return pos;
 }
-
+int BaseEnemy::getId() {
+	return id;
+}
 
 
 
@@ -255,3 +294,95 @@ void Umbrella::draw() {
 	//RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle).draw();
 	//RectF(Arg::center(pos.movedBy(0, 7)), 10, 95).rotated(angle).draw();
 }
+
+GarbageBox::GarbageBox(Objects& objects_, Vec2 pos_)
+	: BaseEnemy(objects_, pos_)
+{
+	maxHp = 1000;
+	hp = maxHp;
+	damageAmount = 1;
+}
+
+void GarbageBox::move() {
+	Print << U"State:" << (int)state;
+	Print << U"NextState:" << (int)nextState;
+	Print << U"isOpen:" << isLidOpen;
+	switch (state) {
+	case State::Idle:
+		timers[(int)state].timer += Scene::DeltaTime();
+		if (timers[(int)state].time <= timers[(int)state].timer) {
+			//次の攻撃に移る
+			state = nextState;
+			timers[(int)state].timer = 0;
+		}
+		break;
+	case State::ThrowCan:
+		updateAttackStateTimer();
+		if (currentFrame(52, 0.07, timers[(int)state].timer) == 52) isLidOpen = true;
+
+		break;
+	case State::RollingAttack:
+		updateAttackStateTimer();
+		break;
+	case State::DashAttack:
+		updateAttackStateTimer();
+		break;
+	default:
+		throw Error(U"不明な行動");
+		break;
+	}
+
+	//次の状態を選ぶ
+	//攻撃が終了していれば
+	if (isEndAttack) {
+		//一度待機状態に戻る
+		state = State::Idle;
+		//フラグを元に戻す
+		isEndAttack = false;
+		isLidOpen = false;
+		//ランダムな行動を選ぶ
+		nextState = (State)(Random((int)State::ThrowCan, (int)State::DashAttack));
+	}
+}
+
+TwoQuads GarbageBox::collision()const {
+	return TwoQuads((Quad)RectF(Arg::center(pos.movedBy(0, -5)), 140, 190) );
+}
+
+void GarbageBox::updateAttackStateTimer() {
+	timers[(int)state].timer += Scene::DeltaTime();
+	if (timers[(int)state].time <= timers[(int)state].timer) {
+		//待機モーションに戻る
+		state = State::Idle;
+		timers[(int)state].timer = 0;
+		//攻撃を終了する
+		isEndAttack = true;
+	}
+}
+
+void GarbageBox::draw() {
+
+	switch (state) {
+	case State::Idle:
+		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
+		break;
+	case State::ThrowCan:
+		if (not isLidOpen) drawSpriteAnim(U"GarbageBoxOpen", 52, 0.07, pos, timers[(int)state].timer);
+		else drawSprite(U"GarbageBoxOpen", 52, 52, pos);
+		break;
+	case State::RollingAttack:
+		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
+		break;
+	case State::DashAttack:
+		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
+		break;
+	}
+
+	//当たり判定
+	//RectF(Arg::center(pos.movedBy(0,-5)), 140, 190).draw(ColorF(1, 0, 0, 0.25));
+	
+	//n = (int)(Scene::Time() / 0.07) % 52;
+	//TextureAsset(U"GarbageBoxOpen")(n * TextureAsset(U"GarbageBoxOpen").size().x / 52.0, 0, TextureAsset(U"GarbageBoxOpen").size().x / 52.0, TextureAsset(U"GarbageBoxOpen").size().y).scaled(3).draw(600, 300 + 15 * Math::Sin(Scene::Time()));
+}
+
+int BaseEnemy::prevId = 0;

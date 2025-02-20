@@ -14,9 +14,12 @@ public:
 
 	virtual void move()=0;
 
-	void damage(int damageAmount);
+	//ダメージを受ける関数。無敵時間ならfalse, そうでなければtrueを返す
+	bool damage(int damageAmount, bool isExistInv);
 
 	bool isDestroy();
+
+	bool isInvincibility();
 
 	virtual TwoQuads collision()const=0;
 
@@ -24,10 +27,14 @@ public:
 
 	Vec2 getPos();
 
+	int getId();
+
 	virtual void draw()=0;
 
 protected:
 	Objects& objects;
+	int id;
+	static int prevId;
 	int maxHp;
 	int hp;
 	Vec2 pos;
@@ -35,6 +42,8 @@ protected:
 	double speed;
 	int damageAmount;
 	double timer = 0;
+	double remainingInvincibilityTime = 0;
+	double invincibilityTime = 0.5;
 };
 
 class GarbageBagNormal : public BaseEnemy {
@@ -110,4 +119,47 @@ private:
 	double maxVelX = 200;
 	double currentVelX=0;
 	double angle=0;
+};
+
+class GarbageBox : public BaseEnemy {
+public:
+	enum class State {
+		Idle,
+		ThrowCan,
+		RollingAttack,
+		DashAttack,
+		StateNum
+	};
+	struct TimerVar {
+		double timer;
+		double time;
+		TimerVar(double time_) {
+			timer = 0;
+			time = time_;
+		}
+	};
+	GarbageBox(Objects& objects_, Vec2 pos_);
+	void move()override;
+	TwoQuads collision()const;
+	void updateAttackStateTimer();
+	void draw()override;
+
+private:
+	State state = State::Idle;
+	State nextState = State::ThrowCan;
+
+	TimerVar timers[(int)State::StateNum] =
+	{
+		//待機
+		TimerVar(2.0),
+		//缶投げ
+		TimerVar(100.0),
+		//ローリング体当たり
+		TimerVar(3.0),
+		//ダッシュアタック
+		TimerVar(3.0)
+	};
+	bool isLidOpen=false;
+
+	bool isEndAttack=false;
 };
