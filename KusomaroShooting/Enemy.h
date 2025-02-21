@@ -145,13 +145,16 @@ public:
 	TwoQuads collision()const;
 	void updateAttackStateTimer();
 	bool isDestroy()override;
+	int getMaxHp();
+	int getCurrentHp();
 	void draw()override;
 
 private:
 	State state = State::Idle;
-	State nextState = State::RollingAttack;
+	State nextState = State::ThrowCan;
 	double currentAngle = 0;
 	Vec2 basePos = Vec2(Scene::Size().x - 150, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6);
+	Vec2 preReadyToAttackPos;
 
 	TimerVar timers[(int)State::StateNum] =
 	{
@@ -173,6 +176,8 @@ private:
 	int throwCanMaxNum=25;
 	bool isLidClosing = false;
 	double lidOpenedTime=0;
+	bool isPlayOpenSE=false;
+	bool isPlayCloseSE=false;
 
 	//ローリングアタック
 	const double firstAngle = 45 * Math::Pi / 180.0;

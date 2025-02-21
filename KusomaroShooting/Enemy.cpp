@@ -308,19 +308,47 @@ void GarbageBox::move() {
 	Print << U"NextState:" << (int)nextState;
 
 	switch (state) {
-	case State::Idle:		
+	case State::Idle:
+		//タイマー
 		timers[(int)state].timer += Scene::DeltaTime();
+
+		//攻撃準備中
+		if (timers[(int)state].time-1.0 <= timers[(int)state].timer) {
+			easeTimer += Scene::DeltaTime();
+			ease = EaseOutSine(easeTimer);
+			pos = preReadyToAttackPos.lerp(basePos, ease);
+		}
+		//攻撃準備前
+		else {
+			Print << U"ふわふわ";
+			//ふわふわする
+			pos.y += 0.5 * Math::Cos(Scene::Time() * Math::Pi / 4.0);
+			preReadyToAttackPos = pos;
+		}
+
 		if (timers[(int)state].time <= timers[(int)state].timer) {
 			//次の攻撃に移る
 			timers[(int)state].timer = 0;
+			easeTimer = 0;
 			state = nextState;
 		}
 		break;
+
 	case State::ThrowCan:
+
+		//効果音
+		if(timers[(int)state].timer==0) AudioManager::Instance()->play(U"ReadyToThrowCan");
+
 		//タイマー更新
 		timers[(int)state].timer += Scene::DeltaTime();
-		
-		//ふたが開いたか判定
+
+		//ふたが開くときの効果音
+		if (currentFrame(56, 0.08, timers[(int)state].timer) == 47 && not isPlayOpenSE) {
+			AudioManager::Instance()->play(U"Open");
+			isPlayOpenSE = true;
+		}
+
+		//ふたが開ききったか判定
 		if (currentFrame(56, 0.08, timers[(int)state].timer) == 51 && not isLidOpen && not isLidClosing) {
 			lidOpenedTime = timers[(int)state].timer;
 			isLidOpen = true;
@@ -348,6 +376,11 @@ void GarbageBox::move() {
 			throwCanNum = 0;
 			timers[(int)state].timer = lidOpenedTime;
 		}
+		//ふたを閉じるときの効果音
+		if (currentFrame(56, 0.08, timers[(int)state].timer) == 55 && not isPlayCloseSE && isLidClosing) {
+			AudioManager::Instance()->play(U"Close");
+			isPlayCloseSE = true;
+		}
 
 		//蓋を閉じている最中なら
 		if (isLidClosing) {
@@ -357,6 +390,9 @@ void GarbageBox::move() {
 				timers[(int)state].timer = 0;
 				//蓋を閉じ終える
 				isLidClosing = false;
+				//フラグをリセット
+				isPlayOpenSE = false;
+				isPlayCloseSE = false;
 				//攻撃を終了する
 				isEndAttack = true;
 			}
@@ -369,10 +405,12 @@ void GarbageBox::move() {
 
 		switch (rollingState) {
 		case RollingState::PreAction:
+			//効果音
+			if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToDashAttack");
 			if (timers[(int)state].timer <= 2.25) {
 				easeTimer += Scene::DeltaTime();
+				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
-				ease = EaseOutCirc( Min(easeTimer/2.25, 1.0) );
 				pos.x += ease * 1.1 *Periodic::Square1_1(0.1s);
 			}
 			else {
@@ -382,10 +420,11 @@ void GarbageBox::move() {
 			}
 			break;
 		case RollingState::Rolling:
+			if(easeTimer==0) AudioManager::Instance()->play(U"RollingAttack");
 			if (timers[(int)state].timer <= 1.0) {
 				easeTimer += Scene::DeltaTime();
-				currentAngle = -ease * rollingAngle;
 				ease = EaseOutCubic(easeTimer / 1.0);
+				currentAngle = -ease * rollingAngle;
 				pos.x -= 20 * Math::Cos(timers[(int)state].timer*Math::Pi);
 				pos.y -= 16 * Math::Cos(timers[(int)state].timer * Math::Pi*2.0);
 			}
@@ -416,10 +455,11 @@ void GarbageBox::move() {
 		
 		switch (rollingState) {
 		case RollingState::PreAction:
+			if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToRollingAttackLong");
 			if (timers[(int)state].timer <= 3.25) {
 				easeTimer += Scene::DeltaTime();
-				currentAngle = ease * firstAngle;
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
+				currentAngle = ease * firstAngle;
 				pos.x += ease * 3.0 * Periodic::Square1_1(0.1s);
 			}
 			else {
@@ -429,10 +469,11 @@ void GarbageBox::move() {
 			}
 			break;
 		case RollingState::Rolling:
+			if (easeTimer == 0) AudioManager::Instance()->play(U"RollingAttackLong");
 			if (timers[(int)state].timer <= 1.0) {
 				easeTimer += Scene::DeltaTime();
-				currentAngle = -ease * rollingAngle;
 				ease = EaseOutCubic(easeTimer / 1.0);
+				currentAngle = -ease * rollingAngle;
 				pos.x -= 30 * Math::Cos(timers[(int)state].timer * Math::Pi/1.0);
 				pos.y -= 13 * Math::Cos(timers[(int)state].timer * Math::Pi * 2.0/1.0);
 			}
@@ -464,6 +505,7 @@ void GarbageBox::move() {
 		switch (dashState) {
 		case DashState::PreAction:
 			if (timers[(int)state].timer <= 2.25) {
+				if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToDashAttack");
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
@@ -479,7 +521,8 @@ void GarbageBox::move() {
 			break;
 
 		case DashState::Dash1:
-			if (timers[(int)state].timer <= 1.75) {
+			if (timers[(int)state].timer <= 2.75) {
+				if(easeTimer==0) AudioManager::Instance()->play(U"DashAttack");
 				easeTimer += Scene::DeltaTime();
 				ease = EaseInQuad(Min(easeTimer / 1.75, 1.0));
 				currentAngle -= 20 * Scene::DeltaTime();
@@ -564,6 +607,12 @@ void GarbageBox::updateAttackStateTimer() {
 bool GarbageBox::isDestroy() {
 	if (hp <= 0) return true;
 	else return false;
+}
+int GarbageBox::getMaxHp() {
+	return maxHp;
+}
+int GarbageBox::getCurrentHp() {
+	return hp;
 }
 
 void GarbageBox::draw() {
