@@ -1,20 +1,23 @@
 ﻿#include "stdafx.h"
 #include "Bullet.h"
+#include "Common.h"
+#include "Objects.h"
 
 int BaseBullet::numInstances = 0;
 
 
-BaseBullet::BaseBullet(Vec2 pos_)
-	: pos{ pos_ }
+BaseBullet::BaseBullet(Objects& objects_, Vec2 pos_)
+	: objects{objects_}
+	, pos{ pos_ }
 {
 	numInstances++;
 	damageAmount = 10;
-	Print << numInstances;
+	//Print << numInstances;
 }
 
 BaseBullet::~BaseBullet() {
 	numInstances--;
-	Print << numInstances;
+	//Print << numInstances;
 }
 
 void BaseBullet::update() {
@@ -71,8 +74,8 @@ void BaseBullet::draw() {
 
 
 
-NormalMarshmallow::NormalMarshmallow(Vec2 pos_)
-	: BaseBullet(pos_)
+NormalMarshmallow::NormalMarshmallow(Objects& objects_, Vec2 pos_)
+	: BaseBullet(objects_, pos_)
 {
 	vec = { 1,0 };
 	speed = 600;
@@ -86,8 +89,8 @@ void NormalMarshmallow::move() {
 
 
 
-KusoMarshmallowUp::KusoMarshmallowUp(Vec2 pos_)
-	: BaseBullet(pos_)
+KusoMarshmallowUp::KusoMarshmallowUp(Objects& objects_, Vec2 pos_)
+	: BaseBullet(objects_, pos_)
 {
 	vec = { 1,0 };
 	speed = 600;
@@ -108,8 +111,8 @@ void KusoMarshmallowUp::draw() {
 
 
 
-KusoMarshmallowDown::KusoMarshmallowDown(Vec2 pos_)
-	: BaseBullet(pos_)
+KusoMarshmallowDown::KusoMarshmallowDown(Objects& objects_, Vec2 pos_)
+	: BaseBullet(objects_, pos_)
 {
 	vec = { 1,0 };
 	speed = 600;
@@ -130,8 +133,8 @@ void KusoMarshmallowDown::draw() {
 
 
 
-KusoMarshmallowSine::KusoMarshmallowSine(Vec2 pos_)
-	: BaseBullet(pos_)
+KusoMarshmallowSine::KusoMarshmallowSine(Objects& objects_, Vec2 pos_)
+	: BaseBullet(objects_, pos_)
 {
 	vec = { 1,0 };
 	speed =500;
@@ -154,15 +157,56 @@ void KusoMarshmallowSine::draw() {
 
 
 
-KusoMarshmallowBeam::KusoMarshmallowBeam(Vec2 pos_)
-	: BaseBullet(pos_)
+KusoMarshmallowBeam::KusoMarshmallowBeam(Objects& objects_, Vec2 pos_)
+	: BaseBullet(objects_, pos_)
 {
-	damageAmount = 4;
+	vec = { 1,0 };
+	speed = 600;
 	type = MaroType::Beam;
 }
 
-void KusoMarshmallowBeam::update() {
-	
+void KusoMarshmallowBeam::move()
+{
+	pos += vec * speed * Scene::DeltaTime();
+
+	timer += Scene::DeltaTime();
+
+	if (isHit) {
+		AudioManager::Instance()->play(U"BeamStart");
+		AudioManager::Instance()->play(U"Beam");
+		objects.marshmallows << std::make_unique<Beam>(objects, objects.player->getPos());
+		isShotBeam = true;
+		isHit = false;
+		objects.player->setIsBeamAttacking();
+	}
+}
+
+
+bool KusoMarshmallowBeam::isDestroy() {
+	if (isOffScreen())return true;
+	//ビームを撃ったら消える
+	else  if (isShotBeam) return true;
+	else return false;
+}
+
+void KusoMarshmallowBeam::draw() {
+	TextureAsset(U"KusomaroBeam").scaled(3).drawAt(pos);
+	//Debug
+	//RectF(Arg::center(pos), 7, 7).draw(ColorF(1, 0, 0));
+}
+
+
+Beam::Beam(Objects& objects_, Vec2 pos_)
+	: BaseBullet(objects, pos_)
+{
+	damageAmount = 4;
+	type = MaroType::Empty;
+}
+
+void Beam::update() {
+
+	Print << U"ColliderOn" << isColliderActive;
+
 	beamTimer += Scene::DeltaTime();
 	beamColTimer += Scene::DeltaTime();
 
@@ -184,30 +228,30 @@ void KusoMarshmallowBeam::update() {
 	}
 }
 
-RectF KusoMarshmallowBeam::collision() {
+RectF Beam::collision() {
 	if (isColliderActive) return RectF(pos.movedBy(60, -TextureAsset(U"UiBeam").size().y / 15.0 - 32), Min(TextureAsset(U"UiBeam").size().x / 5 * 3, Scene::Size().x), TextureAsset(U"UiBeam").size().y / 15 * 3);
 	else RectF(0, 0, 0, 0);
 }
 
-void KusoMarshmallowBeam::move() {
+void Beam::move() {
 	//動かない
 }
 
-bool KusoMarshmallowBeam::isDestroy() {
+bool Beam::isDestroy() {
 	if (isEndBeam) return true;
 	else false;
 }
 
-void KusoMarshmallowBeam::backGroundDraw()const {
+void Beam::backGroundDraw()const {
 	Scene::Rect()
 		.draw(ColorF{ 0, 0, 0, Min( ((int)(10*backGroundOpacity))/10.0, 0.5)});
 }
 
-void KusoMarshmallowBeam::draw() {
+void Beam::draw() {
 	//スプライトシートを再生
 	if (not isEndBeam) {
 		int n = (int)(beamTimer / 0.05) % (5 * 16);
-		Print << n;
+		//Print << n;
 		//最後のシートに到達したか
 		if (n == 5 * 16 - 1) isEndBeam = true;
 

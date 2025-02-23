@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+struct Objects;
+
 enum class MaroType {
 	Normal,
 	Up,
@@ -12,7 +14,7 @@ enum class MaroType {
 class BaseBullet {
 public:
 
-	BaseBullet(Vec2 pos_);
+	BaseBullet(Objects& objects_, Vec2 pos_);
 
 	virtual ~BaseBullet();
 
@@ -42,6 +44,7 @@ public:
 	virtual void draw();
 
 protected:
+	Objects& objects;
 	Vec2 vec;
 	Vec2 pos;
 	double speed;
@@ -55,27 +58,27 @@ protected:
 
 class NormalMarshmallow : public BaseBullet {
 public:
-	NormalMarshmallow(Vec2 pos_);
+	NormalMarshmallow(Objects& objects_, Vec2 pos_);
 	void move()override;
 };
 
 class KusoMarshmallowUp : public BaseBullet {
 public:
-	KusoMarshmallowUp(Vec2 pos_);
+	KusoMarshmallowUp(Objects& objects_, Vec2 pos_);
 	void move()override;
 	void draw()override;
 };
 
 class KusoMarshmallowDown : public BaseBullet {
 public:
-	KusoMarshmallowDown(Vec2 pos_);
+	KusoMarshmallowDown(Objects& objects_, Vec2 pos_);
 	void move()override;
 	void draw()override;
 };
 
 class KusoMarshmallowSine : public BaseBullet {
 public:
-	KusoMarshmallowSine(Vec2 pos_);
+	KusoMarshmallowSine(Objects& objects_, Vec2 pos_);
 	void move()override;
 	void draw()override;
 private:
@@ -84,7 +87,18 @@ private:
 
 class KusoMarshmallowBeam : public BaseBullet {
 public:
-	KusoMarshmallowBeam(Vec2 pos_);
+	KusoMarshmallowBeam(Objects& objects_, Vec2 pos_);
+	void move()override;
+	bool isDestroy()override;
+	void draw()override;
+private:
+	double timer = 0;
+	bool isShotBeam=false;
+};
+
+class Beam : public BaseBullet {
+public:
+	Beam(Objects& objects_, Vec2 pos_);
 	RectF collision()override;
 	void move()override;
 	bool isDestroy()override;
@@ -92,10 +106,10 @@ public:
 	void backGroundDraw()const override;
 	void draw()override;
 private:
-	double beamTimer=0;
+	double beamTimer = 0;
 	double beamColTimer = 0;
-	int beamColTime=26*0.05;
-	bool isColliderActive=false;
-	bool isEndBeam=false;
-	double backGroundOpacity=0.1;
+	int beamColTime = 26 * 0.05;
+	bool isColliderActive = false;
+	bool isEndBeam = false;
+	double backGroundOpacity = 0.1;
 };
