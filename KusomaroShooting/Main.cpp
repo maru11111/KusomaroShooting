@@ -80,6 +80,7 @@ void Main()
 	TextureAsset::Register(U"Empty", Resource(U"texture/Empty.png"));
 	TextureAsset::Register(U"GarbageBox", Resource(U"texture/GarbageBox.png"));
 	TextureAsset::Register(U"GarbageBoxOpen", Resource(U"texture/GarbageBoxOpen.png"));
+	TextureAsset::Register(U"UIBackWithBox", Resource(U"texture/UIBackWithBox.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
@@ -98,6 +99,23 @@ void Main()
 	AudioManager::Instance()->setAudio(U"Can", Resource(U"audio/Can.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"Beam", Resource(U"audio/Beam.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"BeamStart", Resource(U"audio/BeamStart.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"DashAttack", Resource(U"audio/DashAttack.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"ReadyToDashAttack", Resource(U"audio/ReadyToDashAttack.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"ReadyToRollingAttackLong", Resource(U"audio/ReadyToRollingAttackLong.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"RollingAttack", Resource(U"audio/RollingAttack.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"RollingAttackLong", Resource(U"audio/RollingAttackLong.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"ReadyToThrowCan", Resource(U"audio/ReadyToThrowCan.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Open", Resource(U"audio/Open.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Close", Resource(U"audio/Close.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"BossHpAnimation", Resource(U"audio/BossHpAnimation.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"BossAppearPull", Resource(U"audio/BossAppearPull.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Kusomaro", Resource(U"audio/Kusomaro.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Can1", Resource(U"audio/Can1.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Can2", Resource(U"audio/Can2.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Can3", Resource(U"audio/Can3.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"AppearBoss", Resource(U"audio/swing20.wav"), AudioType::SE);
+	
+
 	//ロード
 	//画像
 	TextureAsset::Load(U"UiNormal");
@@ -139,6 +157,7 @@ void Main()
 	TextureAsset::Load(U"BackGroundMountainMiddle");
 	TextureAsset::Load(U"BackGroundMountainFront");
 	TextureAsset::Load(U"Empty");
+	TextureAsset::Load(U"UIBackWithBox");
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
 	FontAsset::Load(U"GameUI_BestTen");
