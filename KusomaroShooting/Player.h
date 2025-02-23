@@ -13,6 +13,8 @@ public:
 
 	void update();
 
+	void bossAppearStateUpdate(double timer);
+
 	void move();
 
 	void attack();
@@ -49,8 +51,11 @@ public:
 	bool getIsAttackColOn()const;
 
 	bool getIsBeamAttacking();
+	void setIsBeamAttacking();
 
 	Vec2 getPos();
+
+	bool getIsHitStopStart();
 
 	void drawForAttack(double opacity);
 
@@ -71,7 +76,7 @@ private:
 	int numMarshmallows = 0;
 	int maxNumMarshmallows = 30;
 	double marshmallowAddTimer = 0;
-	const double marshmallowAddInterval = 3;
+	const double marshmallowAddInterval = 5;
 	//ふつうのマシュマロが出る確率(％)
 	int normalMaroAppearProbability = 50;
 	//クソマロ判定をされたマロのなかでの確率(％)
@@ -80,6 +85,7 @@ private:
 	int sineMaroAppearProbability = 0;
 	int beamMaroAppearProbability = 100;
 	Array<MaroType>maroBox;
+	bool isHitStopStart = false;
 	bool isHitBack=false;
 	double hitBackTime=1;
 	double hitBackTimer=0;
@@ -96,4 +102,8 @@ private:
 	bool startBlink = false;
 	bool keepBlink = false;
 	Effect effect;
+
+	//基準位置
+	Vec2 basePos = Vec2(100, TextureAsset(U"UIBack").size().y * 6 + (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6)/2.0);
+	Vec2 prevPos=pos;
 };

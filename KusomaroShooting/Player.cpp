@@ -44,6 +44,7 @@ Player::Player(Objects& objects_, Vec2 pos_)
 	for (int i = 0; i < maxNumMarshmallows; i++) {
 		addMarshmallow();
 	}
+	prevPos = pos_;
 }
 
 Player::~Player() {
@@ -122,7 +123,7 @@ void Player::update() {
 	}
 
 	//近接攻撃
-	if (isMovable() && KeyT.pressed() && not isAttack) {
+	if (isMovable() && (KeyT.pressed() || KeyX.pressed()) && not isAttack ) {
 		isAttack = true;
 		isAttackColOn = true;
 		isAttackEffectStarted = false;
@@ -157,11 +158,18 @@ void Player::update() {
 
 	//マシュマロを投げる
 	if (isMovable()) {
-		if (KeyJ.down() || KeySpace.down() || KeyEnter.down()) {
+		if (KeyJ.down() || KeySpace.down() || KeyEnter.down() || KeyZ.down()) {
 			attack();
 		}
 	}
 
+	//最後の位置を記憶
+	prevPos = pos;
+}
+
+void Player::bossAppearStateUpdate(double timer) {
+	double ease = EaseOutQuad(Min(timer/3.5, 1.0));
+	pos = prevPos.lerp(basePos, ease);
 }
 
 void Player::move() {
@@ -170,9 +178,9 @@ void Player::move() {
 	//下
 	if (KeyS.pressed() || KeyDown.pressed())vec.y = 1;
 	//左
-	if (KeyA.pressed() || KeyUp.pressed())vec.x = -1;
+	if (KeyA.pressed() || KeyLeft.pressed())vec.x = -1;
 	//右
-	if (KeyD.pressed() || KeyUp.pressed())vec.x = 1;
+	if (KeyD.pressed() || KeyRight.pressed())vec.x = 1;
 
 	//攻撃中は右に進めない
 	if (isAttack)if (vec.x == 1)vec.x = 0;
@@ -197,26 +205,19 @@ void Player::attack() {
 
 	if (0 < numMarshmallows) {
 		switch (maroBox[0]) {
-		case MaroType::Normal: objects.marshmallows << std::make_unique<NormalMarshmallow>(pos); break;
-		case MaroType::Up: objects.marshmallows << std::make_unique<KusoMarshmallowUp>(pos); break;
-		case MaroType::Down: objects.marshmallows << std::make_unique<KusoMarshmallowDown>(pos); break;
-		case MaroType::Sine: objects.marshmallows << std::make_unique<KusoMarshmallowSine>(pos); break;
-		case MaroType::Beam:
-			objects.marshmallows << std::make_unique<KusoMarshmallowBeam>(pos);
-			isBeamAttacking = true;
-			break;
+		case MaroType::Normal: objects.marshmallows << std::make_unique<NormalMarshmallow>(objects, pos); break;
+		case MaroType::Up: objects.marshmallows << std::make_unique<KusoMarshmallowUp>(objects, pos); break;
+		case MaroType::Down: objects.marshmallows << std::make_unique<KusoMarshmallowDown>(objects, pos); break;
+		case MaroType::Sine: objects.marshmallows << std::make_unique<KusoMarshmallowSine>(objects, pos); break;
+		case MaroType::Beam: objects.marshmallows << std::make_unique<KusoMarshmallowBeam>(objects, pos);break;
 		}
 
-		//マシュマロ(or beam)を投げる音
-		if (maroBox[0] != MaroType::Beam) AudioManager::Instance()->play(U"Throw");
-		else {
-			AudioManager::Instance()->play(U"BeamStart");
-			AudioManager::Instance()->play(U"Beam");
-		}
+		//マシュマロ(or beam or クソマロ)を投げる音
+		if (maroBox[0] == MaroType::Normal) AudioManager::Instance()->play(U"Throw");
+		else AudioManager::Instance()->play(U"Kusomaro");
 
 		maroBox.pop_front();
 		numMarshmallows--;
-
 	}
 }
 
@@ -224,7 +225,7 @@ void Player::damage(int damageAmount) {
 	//無敵時間中
 	if (isInvincibility()) {
 		//ダメージを受けない
-		Print << U"MUTEKI";
+		//Print << U"MUTEKI";
 	}
 	//無敵時間外
 	else {
@@ -245,6 +246,8 @@ void Player::damage(int damageAmount) {
 		AudioManager::Instance()->play(U"ReceiveDamage");
 		//簡易慣性をリセット
 		vec = Vec2(0,0);
+		//ヒットストップを始める
+		isHitStopStart = true;
 	}
 }
 
@@ -346,9 +349,19 @@ bool Player::getIsAttackColOn()const {
 bool Player::getIsBeamAttacking() {
 	return isBeamAttacking;
 }
+void Player::setIsBeamAttacking() {
+	isBeamAttacking = true;
+}
 
 Vec2 Player::getPos() {
 	return pos;
+}
+bool Player::getIsHitStopStart(){
+	if (isHitStopStart) {
+		isHitStopStart = false;
+		return true;
+	}
+	else return false;
 }
 
 void Player::drawForAttack(double opacity) {
