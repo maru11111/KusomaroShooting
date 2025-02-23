@@ -160,14 +160,20 @@ void GarbageBagWithCan::move(){
 void GarbageBagWithCan::attack() {
 	timer += Scene::DeltaTime();
 
-	Print << objects.enemies.size();
+	//Print << objects.enemies.size();
 
 	if (attackInterval <= timer) {
 		timer -= attackInterval;
 		//缶を飛ばす
 		objects.enemies << std::make_unique<Can>(objects, pos, (objects.player->getPos() - pos).normalized());
 		//缶を飛ばす音
-		AudioManager::Instance()->play(U"Can");
+		//int type = Random(0, 2);
+		//switch (type) {
+		//case 0:AudioManager::Instance()->play(U"Can1"); break;
+		//case 1:AudioManager::Instance()->play(U"Can2"); break;
+		//case 2:AudioManager::Instance()->play(U"Can3"); break;
+		//}
+		AudioManager::Instance()->play(U"Can2");
 	}
 }
 
@@ -213,7 +219,7 @@ TwoQuads Can::collision()const {
 }
 
 void Can::draw() {
-	texture.scaled(3).rotated(vec.getAngle()).drawAt(pos);
+	texture.scaled(4).rotated(vec.getAngle()).drawAt(pos);
 }
 
 Fish::Fish(Objects& objects_, Vec2 pos_)
@@ -274,7 +280,7 @@ Umbrella::Umbrella(Objects& objects_, Vec2 pos_)
 void Umbrella::move() {
 	currentVelX = - maxVelX * Math::Sin(timer);
 
-	Print << abs(currentVelX) / maxVelX;
+	//Print << abs(currentVelX) / maxVelX;
 
 	angle = 30_deg * (currentVelX / maxVelX);
 
@@ -295,19 +301,142 @@ void Umbrella::draw() {
 	//RectF(Arg::center(pos.movedBy(0, 7)), 10, 95).rotated(angle).draw();
 }
 
-GarbageBox::GarbageBox(Objects& objects_, Vec2 pos_)
-	: BaseEnemy(objects_, pos_)
+
+BaseBoss::BaseBoss(Objects& objects_, Vec2 pos)
+	: BaseEnemy(objects_, pos)
 {
-	maxHp = 1000;
+	id = -1;
+}
+int BaseBoss::getMaxHp()const {
+	return maxHp;
+}
+int BaseBoss::getCurrentHp()const {
+	return hp;
+}
+String BaseBoss::getName()const {
+	return name;
+}
+
+
+
+GarbageBox::GarbageBox(Objects& objects_, Vec2 pos_)
+	: BaseBoss(objects_, pos_)
+{
+	maxHp = 800;
 	hp = maxHp;
 	damageAmount = 1;
+	name = U"巨大ゴミ箱";
+	initPos = pos_;
 }
 
 void GarbageBox::move() {
-	Print << U"State:" << (int)state;
-	Print << U"NextState:" << (int)nextState;
+	//Print << U"State:" << (int)state;
+	//Print << U"NextState:" << (int)nextState;
+	//Print << U"id:" << id;
 
 	switch (state) {
+		//登場
+	case State::Appear:
+		//タイマー
+		//Print << U"timer:" << timers[(int)state].timer;
+		//Print << U"appearState:" << (int)appearState;
+		timers[(int)state].timer += Scene::DeltaTime();
+
+		switch (appearState) {
+		case AppearState::ToAppearBasePos:
+			if (ease == 0) AudioManager::Instance()->play(U"AppearBoss");
+			//登場基準位置に移動
+			ease = EaseOutCirc(timers[(int)state].timer / 2.0);
+			pos = initPos.lerp(appearBasePos, ease);
+
+			//次の動きに移る
+			if (2.0 <= timers[(int)state].timer) {
+				appearState = AppearState::PullBody;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+			}
+			break;
+
+		case AppearState::PullBody:
+			//体を引く
+			ease = EaseOutExpo(timers[(int)state].timer/1.0);
+			currentAngle = ease * appearPullAngle;
+			//ガタガタする
+			pos.x += ease * 1.0 * Periodic::Square1_1(0.1s);
+			//ガタガタ効果音
+			if (not isPlayPullAudio) {
+				AudioManager::Instance()->play(U"BossAppearPull");
+				isPlayPullAudio = true;
+			}
+
+			//次の動きに移る
+			if (1.5 <= timers[(int)state].timer) {
+				appearState = AppearState::PushBody;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+				//イージングリセット
+				ease = 0;
+			}
+			break;
+
+		case AppearState::PushBody:
+			//体を乗り出す
+			ease = EaseOutExpo(timers[(int)state].timer / 0.5);
+			currentAngle = Math::Lerp(appearPullAngle, appearPushAngle, ease);
+			//ガタガタする
+			pos.x += ease * 2.5 * Periodic::Square1_1(0.1s);
+			//体を乗り出すときの効果音
+			if (not isPlayPushAudio) {
+				AudioManager::Instance()->play(U"RollingAttack");
+				isPlayPushAudio = true;
+			}
+
+			//次の動きに移る
+			if (0.5 <= timers[(int)state].timer) {
+				appearState = AppearState::GataGata;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+				//イージングリセット
+				ease = 0;
+			}
+			break;
+
+		case AppearState::GataGata:
+			//ガタガタする
+			pos.x += 2.5 * Periodic::Square1_1(0.1s);
+			//体を乗り出す角度を維持
+			currentAngle = appearPushAngle;
+
+			//次の動きに移る
+			if (0.5 <= timers[(int)state].timer) {
+				appearState = AppearState::ToBasePos;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+				//イージングリセット
+				ease = 0;
+			}
+			break;
+
+		case AppearState::ToBasePos:
+			ease = EaseOutCirc(timers[(int)state].timer / 0.5);
+			//基準位置に移動
+			pos = appearBasePos.lerp(basePos, ease);
+			//角度を戻す
+			currentAngle = Math::Lerp(appearPushAngle+360*Math::Pi/180.0, 0, ease);
+
+			//待機に移る
+			if (0.5 <= timers[(int)state].timer) {
+				state = State::Idle;
+				//タイマーリセット
+				timers[(int)state].timer = 0;
+				//イージングリセット
+				ease = 0;
+			}
+			break;
+		}
+		break;
+
+		//待機
 	case State::Idle:
 		//タイマー
 		timers[(int)state].timer += Scene::DeltaTime();
@@ -320,7 +449,7 @@ void GarbageBox::move() {
 		}
 		//攻撃準備前
 		else {
-			Print << U"ふわふわ";
+			//Print << U"ふわふわ";
 			//ふわふわする
 			pos.y += 0.5 * Math::Cos(Scene::Time() * Math::Pi / 4.0);
 			preReadyToAttackPos = pos;
@@ -334,8 +463,8 @@ void GarbageBox::move() {
 		}
 		break;
 
+		//缶を飛ばす
 	case State::ThrowCan:
-
 		//効果音
 		if(timers[(int)state].timer==0) AudioManager::Instance()->play(U"ReadyToThrowCan");
 
@@ -361,7 +490,13 @@ void GarbageBox::move() {
 				//缶を飛ばす
 				objects.enemies << std::make_unique<Can>(objects, pos.movedBy(0, -100), (objects.player->getPos() - pos.movedBy(0,-100)).normalized());
 				//缶を飛ばす音
-				AudioManager::Instance()->play(U"Can");
+				//int type = Random(0, 2);
+				//switch (type) {
+				//case 0:AudioManager::Instance()->play(U"Can1"); break;
+				//case 1:AudioManager::Instance()->play(U"Can2"); break;
+				//case 2:AudioManager::Instance()->play(U"Can3"); break;
+				//}
+				AudioManager::Instance()->play(U"Can2");
 				//リセット
 				throwCanIntervalTimer.timer -= throwCanIntervalTimer.time;
 				//飛ばした缶の数をカウント
@@ -401,7 +536,7 @@ void GarbageBox::move() {
 
 	case State::RollingAttack:
 		updateAttackStateTimer();
-		Print << timers[(int)state].timer;
+		//Print << timers[(int)state].timer;
 
 		switch (rollingState) {
 		case RollingState::PreAction:
@@ -509,9 +644,9 @@ void GarbageBox::move() {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
-				pos.x += ease * 1.1 * Periodic::Square1_1(0.1s);
 				if(dashPattern==DashPattern::Top) pos = basePos.lerp(dashPosTopRightStart, ease);
 				else pos = basePos.lerp(dashPosBottomRightStart, ease);
+				pos.x += ease * 1.3 * Periodic::Square1_1(0.1s);
 			}
 			else {
 				dashState = DashState::Dash1;
@@ -608,16 +743,14 @@ bool GarbageBox::isDestroy() {
 	if (hp <= 0) return true;
 	else return false;
 }
-int GarbageBox::getMaxHp() {
-	return maxHp;
-}
-int GarbageBox::getCurrentHp() {
-	return hp;
-}
 
 void GarbageBox::draw() {
 
 	switch (state) {
+	case State::Appear:
+		drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+		break;
+
 	case State::Idle:
 		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
 		break;
@@ -658,7 +791,8 @@ void GarbageBox::draw() {
 	//RectF(Arg::center(pos.movedBy(0,-5)), 140, 190).draw(ColorF(1, 0, 0, 0.25));
 	//n = (int)(Scene::Time() / 0.07) % 52;
 	//TextureAsset(U"GarbageBoxOpen")(n * TextureAsset(U"GarbageBoxOpen").size().x / 52.0, 0, TextureAsset(U"GarbageBoxOpen").size().x / 52.0, TextureAsset(U"GarbageBoxOpen").size().y).scaled(3).draw(600, 300 + 15 * Math::Sin(Scene::Time()));
-	RectF(Arg::center(pos.movedBy(0, -5)), 140, 190).rotated(currentAngle).draw(ColorF(1, 0, 0, 0.3));
+	//あた
+	//RectF(Arg::center(pos.movedBy(0, -5)), 140, 190).rotated(currentAngle).draw(ColorF(1, 0, 0, 0.3));
 }
 
 int BaseEnemy::prevId = 0;

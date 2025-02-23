@@ -44,6 +44,7 @@ protected:
 	double timer = 0;
 	double remainingInvincibilityTime = 0;
 	double invincibilityTime = 0.5;
+	String name;
 };
 
 class GarbageBagNormal : public BaseEnemy {
@@ -121,9 +122,28 @@ private:
 	double angle=0;
 };
 
-class GarbageBox : public BaseEnemy {
+class BaseBoss : public BaseEnemy {
+public:
+	BaseBoss(Objects& objects_, Vec2 pos_);
+
+	void move()override=0;
+	TwoQuads collision()const =0;
+	void draw()override=0;
+
+	int getMaxHp()const;
+
+	int getCurrentHp()const;
+
+	String getName()const;
+
+protected:
+	String name;
+};
+
+class GarbageBox : public BaseBoss {
 public:
 	enum class State {
+		Appear,
 		Idle,
 		ThrowCan,
 		RollingAttack,
@@ -145,12 +165,10 @@ public:
 	TwoQuads collision()const;
 	void updateAttackStateTimer();
 	bool isDestroy()override;
-	int getMaxHp();
-	int getCurrentHp();
 	void draw()override;
 
 private:
-	State state = State::Idle;
+	State state = State::Appear;
 	State nextState = State::ThrowCan;
 	double currentAngle = 0;
 	Vec2 basePos = Vec2(Scene::Size().x - 150, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6);
@@ -158,6 +176,8 @@ private:
 
 	TimerVar timers[(int)State::StateNum] =
 	{
+		//登場
+		TimerVar(100.0),
 		//待機
 		TimerVar(5.0),
 		//缶投げ
@@ -169,6 +189,22 @@ private:
 		//ダッシュアタック
 		TimerVar(100.0)
 	};
+	//登場
+	enum class AppearState {
+		ToAppearBasePos,
+		PullBody,
+		PushBody,
+		GataGata,
+		ToBasePos
+	};
+	AppearState appearState = AppearState::ToAppearBasePos;
+	Vec2 appearBasePos = Vec2(Scene::Size().x - 350, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6);
+	Vec2 initPos;
+	double appearPullAngle = 45 * Math::Pi / 180.0;
+	double appearPushAngle = - 410 * Math::Pi / 180.0;
+	bool isPlayPullAudio = false;
+	bool isPlayPushAudio = false;
+
 	//缶投げ
 	bool isLidOpen=false;
 	bool isEndAttack=false;
