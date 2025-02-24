@@ -33,7 +33,17 @@ Player::Player(Objects& objects_)
 	:objects{ objects_ }
 {
 	for (int i = 0; i < maxNumMarshmallows; i++) {
-		addMarshmallow();
+		numMarshmallows++;
+
+		MaroType addType = chooseMaro();
+
+		switch (addType) {
+		case MaroType::Normal:maroBox << MaroType::Normal; break;
+		case MaroType::Up:maroBox << MaroType::Up; break;
+		case MaroType::Down:maroBox << MaroType::Down; break;
+		case MaroType::Sine:maroBox << MaroType::Sine; break;
+		case MaroType::Beam:maroBox << MaroType::Beam; break;
+		}
 	}
 }
 
@@ -42,7 +52,17 @@ Player::Player(Objects& objects_, Vec2 pos_)
 	, pos{ pos_ }
 {
 	for (int i = 0; i < maxNumMarshmallows; i++) {
-		addMarshmallow();
+		numMarshmallows++;
+
+		MaroType addType = chooseMaro();
+
+		switch (addType) {
+		case MaroType::Normal:maroBox << MaroType::Normal; break;
+		case MaroType::Up:maroBox << MaroType::Up; break;
+		case MaroType::Down:maroBox << MaroType::Down; break;
+		case MaroType::Sine:maroBox << MaroType::Sine; break;
+		case MaroType::Beam:maroBox << MaroType::Beam; break;
+		}
 	}
 	prevPos = pos_;
 }
@@ -78,6 +98,16 @@ void Player::update() {
 		}
 	}
 	else marshmallowAddTimer = 0;
+
+	if (isMaroAdding) {
+		maroAddBackAnimTimer += Scene::DeltaTime();
+		if (0.5 <= maroAddBackAnimTimer)maroAddSumForAnim += maroAddAmountForAnim * Scene::DeltaTime();
+		if (numMarshmallows <= prevMaroNum + maroAddSumForAnim) {
+			isMaroAdding = false;
+			maroAddSumForAnim = 0;
+		}
+	}
+
 
 	//無敵時間があったら更新
 	if (isInvincibility()) {
@@ -163,6 +193,32 @@ void Player::update() {
 		}
 	}
 
+	//回復
+	if (KeyH.down()) {
+		heal(1);
+	}
+	if (isHealing) {
+		healBackAnimTimer += Scene::DeltaTime();
+		if(0.5<=healBackAnimTimer)healSumForAnim += healAmountForAnim * Scene::DeltaTime();
+		if (hp<=prevHpHeal+healSumForAnim) {
+			isHealing = false;
+			healSumForAnim = 0;
+		}
+	}
+
+	//ダメージ時のhp減少アニメーション
+	if (isDamageHpAnimation) {
+		damageHpAnimTimer += Scene::DeltaTime();
+
+		if (1.0 <= damageHpAnimTimer) {
+			damageHpAnimEaseTimer += Scene::DeltaTime();
+
+			if (1.0 <= damageHpAnimEaseTimer) {
+				isDamageHpAnimation = false;
+			}
+		}
+	}
+
 	//最後の位置を記憶
 	prevPos = pos;
 }
@@ -231,6 +287,8 @@ void Player::damage(int damageAmount) {
 	else {
 		//無敵時間スタート
 		startInvincibilityTime();
+		//ダメージを受ける前のhpを保存
+		prevHpDamage = hp;
 		//ダメージを受ける
 		hp -= damageAmount;
 		//0以下になったら0に戻す
@@ -248,6 +306,11 @@ void Player::damage(int damageAmount) {
 		vec = Vec2(0,0);
 		//ヒットストップを始める
 		isHitStopStart = true;
+		//ダメージ時のhp減少アニメーションのためのタイマー
+		damageHpAnimTimer = 0;
+		damageHpAnimEaseTimer = 0;
+		// 〃 のためのフラグ
+		isDamageHpAnimation = true;
 	}
 }
 
@@ -270,26 +333,6 @@ MaroType Player::chooseMaro() {
 	else if (num < upMaroAppearProbability + downMaroAppearProbability + sineMaroAppearProbability) return MaroType::Sine;
 	else if (num < upMaroAppearProbability + downMaroAppearProbability + sineMaroAppearProbability + beamMaroAppearProbability)return MaroType::Beam;
 
-}
-
-void Player::addMarshmallow() {
-	if (numMarshmallows < maxNumMarshmallows) {
-
-		numMarshmallows++;
-
-		MaroType addType = chooseMaro();
-
-		switch (addType) {
-		case MaroType::Normal:maroBox << MaroType::Normal; break;
-		case MaroType::Up:maroBox << MaroType::Up; break;
-		case MaroType::Down:maroBox << MaroType::Down; break;
-		case MaroType::Sine:maroBox << MaroType::Sine; break;
-		case MaroType::Beam:maroBox << MaroType::Beam; break;
-		}
-	}
-	else if (maxNumMarshmallows < numMarshmallows) {
-		numMarshmallows = maxNumMarshmallows;
-	}
 }
 
 void Player::stayOnScreen() {
@@ -363,6 +406,74 @@ bool Player::getIsHitStopStart(){
 	}
 	else return false;
 }
+
+void Player::heal(int healAmount) {
+	if (hp == maxHp) return;
+	if (not isHealing) {
+		prevHpHeal = hp;
+		prevBackAnimHp = prevHpHeal;
+		healBackAnimTimer = 0;
+	}
+	else {
+		prevBackAnimHp = EaseOutExpo(healBackAnimTimer*2.0) * ((double)hp - prevBackAnimHp) + prevBackAnimHp;
+		healBackAnimTimer = 0;
+	}
+	isHealing = true;
+	hp += healAmount;
+	if (maxHp < hp) hp = maxHp;
+}
+double Player::getHpEase() {
+	if (isHealing) return Min(((double)prevHpHeal + healSumForAnim)/(double)maxHp, (double)hp / (double)maxHp);
+	else return (double)hp / (double)maxHp;
+}
+double Player::getHpHealEase(){
+	if (isHealing) return (Min(EaseOutExpo(healBackAnimTimer*2.0), 1.0)*((double)hp-prevBackAnimHp)+prevBackAnimHp)/(double)maxHp;
+	else return 0.0;
+}
+double Player::getDamageEase() {
+	if (isDamageHpAnimation) return ((1.0 - Min(EaseInQuart(damageHpAnimEaseTimer), 1.0))) * prevHpDamage / (double)maxHp;
+	else return 0.0;
+}
+
+void Player::addMarshmallow() {
+	if (numMarshmallows < maxNumMarshmallows) {
+
+		if (not isMaroAdding) {
+			prevMaroNum = numMarshmallows;
+			prevBackAnimMaro = prevMaroNum;
+			maroAddBackAnimTimer = 0;
+		}
+		else {
+			prevBackAnimMaro = EaseOutExpo(maroAddBackAnimTimer * 1.5) * ((double)numMarshmallows - prevBackAnimMaro) + prevBackAnimMaro;
+			maroAddBackAnimTimer = 0;
+		}
+		isMaroAdding = true;
+
+		numMarshmallows++;
+
+		MaroType addType = chooseMaro();
+
+		switch (addType) {
+		case MaroType::Normal:maroBox << MaroType::Normal; break;
+		case MaroType::Up:maroBox << MaroType::Up; break;
+		case MaroType::Down:maroBox << MaroType::Down; break;
+		case MaroType::Sine:maroBox << MaroType::Sine; break;
+		case MaroType::Beam:maroBox << MaroType::Beam; break;
+		}
+	}
+	else if (maxNumMarshmallows < numMarshmallows) {
+		numMarshmallows = maxNumMarshmallows;
+	}
+}
+double Player::getMaroEase() {
+	if (isMaroAdding) return Min(((double)prevMaroNum + maroAddSumForAnim) / (double)maxNumMarshmallows, (double)numMarshmallows / (double)maxNumMarshmallows);
+	else return (double)numMarshmallows / (double)maxNumMarshmallows;
+}
+double Player::getMaroAddEase() {
+	if (isMaroAdding) return (Min(EaseOutExpo(maroAddBackAnimTimer * 1.5), 1.0) * ((double)numMarshmallows - prevBackAnimMaro) + prevBackAnimMaro) / (double)maxNumMarshmallows;
+	else return 0.0;
+}
+
 
 void Player::drawForAttack(double opacity) {
 	int n = (int)(Scene::Time() / 0.0625) % 102;

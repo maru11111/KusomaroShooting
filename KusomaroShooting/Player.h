@@ -57,6 +57,13 @@ public:
 
 	bool getIsHitStopStart();
 
+	void heal(int healAmount);
+	double getHpEase();
+	double getHpHealEase();
+	double getMaroEase();
+	double getMaroAddEase();
+	double getDamageEase();
+
 	void drawForAttack(double opacity);
 
 	void drawEffect();
@@ -78,12 +85,12 @@ private:
 	double marshmallowAddTimer = 0;
 	const double marshmallowAddInterval = 5;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 50;
+	int normalMaroAppearProbability = 20;
 	//クソマロ判定をされたマロのなかでの確率(％)
-	int upMaroAppearProbability = 0;
-	int downMaroAppearProbability = 0;
-	int sineMaroAppearProbability = 0;
-	int beamMaroAppearProbability = 100;
+	int upMaroAppearProbability = 30;
+	int downMaroAppearProbability = 30;
+	int sineMaroAppearProbability = 30;
+	int beamMaroAppearProbability = 10;
 	Array<MaroType>maroBox;
 	bool isHitStopStart = false;
 	bool isHitBack=false;
@@ -102,6 +109,27 @@ private:
 	bool startBlink = false;
 	bool keepBlink = false;
 	Effect effect;
+
+	//hpHealAnim
+	bool isHealing = false;
+	int prevHpHeal;
+	const double healAmountForAnim=4.0;
+	double healSumForAnim = 0;
+	double healBackAnimTimer=0;
+	double prevBackAnimHp = 0;
+	//hpDamageAnim
+	bool isDamageHpAnimation = false;
+	double damageHpAnimTimer = 0;
+	double damageHpAnimEaseTimer = 0;
+	int prevHpDamage;
+
+	//maroAnim
+	bool isMaroAdding = false;
+	int prevMaroNum;
+	const double maroAddAmountForAnim = 3.0;
+	double maroAddSumForAnim = 0;
+	double maroAddBackAnimTimer = 0;
+	double prevBackAnimMaro = 0;
 
 	//基準位置
 	Vec2 basePos = Vec2(100, TextureAsset(U"UIBack").size().y * 6 + (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6)/2.0);
