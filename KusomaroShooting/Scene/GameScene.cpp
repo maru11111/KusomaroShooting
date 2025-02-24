@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameScene.h"
+#include "Common.h"
 
 /// @brief 最大のアルファ値を書き込むブレンドステートを返します。
 BlendState MaxAlphaBlend()
@@ -38,79 +39,6 @@ struct DamageEffect : IEffect
 	}
 };
 
-struct KusomaroTextEffect : IEffect {
-
-	double timer=0;
-	double time = 3.0;
-	Vec2 pos;
-	String str;
-	double opacity = 1.0;
-	double posYOffset=-20;
-
-	explicit KusomaroTextEffect(const Vec2 pos_, String str_)
-		: pos{ pos_ }
-		, str{str_}
-
-	{}
-
-	bool update(double t)override {
-		//Print << U"timer" << timer;
-		timer += Scene::DeltaTime();
-		double ease = Min(EaseOutQuart(timer/time), 1.0);
-		FontAsset(U"GameUI_Kei")(str).drawAt(pos.movedBy(0, ease * posYOffset), ColorF(1.0, 1.0-ease));
-		return (timer < time);
-	}
-};
-
-struct BeamTextEffect : IEffect {
-
-	double timer = 0;
-	double time = 5.0;
-	Vec2 pos;
-	double initPosY;
-	String str;
-	String drawedStr=U"";
-	double opacity = 1.0;
-	double posYOffset = -20;
-	bool isRedNext = false;
-
-	explicit BeamTextEffect(const Vec2 pos_, String str_)
-		: pos{ pos_ }
-		, str{ str_ }
-		, initPosY{ pos_.y }
-	{
-	}
-
-	bool update(double t)override {
-		timer += Scene::DeltaTime();
-		double ease = Min(EaseOutQuart(timer / time), 1.0);
-
-		drawedStr = U"";
-		pos.y = initPosY;
-
-		for (int i = 0; i < str.size(); i++) {
-			if (str[i] == U'R') {
-				isRedNext = true;
-			}
-			else if (str[i] == U'\n') {
-				pos.y += FontAsset(U"GameUI_Kei").height();
-				drawedStr = U"";
-			}
-			else if (isRedNext) {
-				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(0.9, 0.0, 0.0, 1.0 - ease));
-				drawedStr += str[i];
-				isRedNext = false;
-
-			}
-			else {
-				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(1.0, 1.0 - ease));
-				drawedStr += str[i];
-			}
-		}
-		return (timer < time);
-	}
-};
-
 
 GameScene::GameScene(const InitData& init)
 	: IScene{ init }
@@ -123,9 +51,20 @@ GameScene::GameScene(const InitData& init)
 	objects.enemies << std::make_unique<GarbageBox>(objects, Vec2( Scene::Size().x+100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
 }
 
-void GameScene::drawBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY)const {
+void GameScene::drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY, double healEase, double damageEase)const {
 	//HPバーの後ろ部分を描画
 	backBar.scaled(6).draw(backBarPosX, barPosY);
+
+	//ヒールアニメーションバーのカットpxを計算
+	const double healBarDrawStartPosX = frontBar.size().x - frontBar.size().x * healEase;
+	//ヒールアニメーションを描画
+	TextureAsset(U"PlayerHpHeal")(healBarDrawStartPosX, 0, frontBar.size().x - healBarDrawStartPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12, barPosY);
+
+	//ダメージアニメーションのカットpxを計算
+	const double damageBarDrawStartPosX = frontBar.size().x - frontBar.size().x * damageEase;
+	//ダメージ時の減少アニメーションを描画
+	TextureAsset(U"HpBarDamage")(damageBarDrawStartPosX, 0, frontBar.size().x - damageBarDrawStartPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12, barPosY);
+
 	//残りHP割合を計算
 	const double remainingParcentage = (double)currentNum / (double)maxNum;
 	//残りHP割合からHPバーのカットpxを計算
@@ -134,20 +73,33 @@ void GameScene::drawBar(int currentNum, int maxNum, TextureAsset backBar, Textur
 	frontBar(barDrawStartPosX, 0, frontBar.size().x - barDrawStartPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12, barPosY);
 }
 
-void GameScene::drawBossBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY)const {
+void GameScene::drawMaroBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY, double healEase)const {
 	//HPバーの後ろ部分を描画
 	backBar.scaled(6).draw(backBarPosX, barPosY);
+
+	//ヒールアニメーションバーのカットpxを計算
+	const double healBarDrawStartPosX = frontBar.size().x - frontBar.size().x * healEase;
+	//ヒールアニメーションを描画
+	TextureAsset(U"PlayerHpHeal")(healBarDrawStartPosX, 0, frontBar.size().x - healBarDrawStartPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12, barPosY);
+
 	//残りHP割合を計算
 	const double remainingParcentage = (double)currentNum / (double)maxNum;
 	//残りHP割合からHPバーのカットpxを計算
-	const double barDrawEndPosX = frontBar.size().x * remainingParcentage;
+	const double barDrawStartPosX = frontBar.size().x - frontBar.size().x * remainingParcentage;
 	//HPバーの前部分を描画
-	frontBar(0, 0, barDrawEndPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12 + (frontBar.size().x - barDrawEndPosX) * 6, barPosY);
-	//Print << remainingParcentage;
+	frontBar(barDrawStartPosX, 0, frontBar.size().x - barDrawStartPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12, barPosY);
 }
-void GameScene::drawBossBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY)const {
+
+void GameScene::drawBossBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY, BaseBoss *boss)const {
 	//HPバーの後ろ部分を描画
 	backBar.scaled(6).draw(backBarPosX, barPosY);
+
+	//ダメージアニメーションのカット後pxを計算
+	const double damageBarDrawEndPosX = frontBar.size().x * ((double)boss->getPrevHpDamage()/(double)boss->getMaxHp()) * ((double)boss->getPrevHpDamage() - (double)boss->getCurrentHp())/(double)boss->getPrevHpDamage() * boss->getDamageEase();
+	Print << U"bossBar:" << damageBarDrawEndPosX;
+	//ダメージ時の減少アニメーションを描画
+	TextureAsset(U"HpBarDamage")(0, 0, damageBarDrawEndPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12 + (frontBar.size().x - damageBarDrawEndPosX - frontBar.size().x * ((double)boss->getCurrentHp() / (double)boss->getMaxHp())) * 6, barPosY);
+
 	//残りHP割合を計算
 	const double remainingParcentage = (double)currentNum / (double)maxNum;
 	//残りHP割合からHPバーのカットpxを計算
@@ -181,12 +133,11 @@ void GameScene::drawMarshmallowUI() const {
 		TextureAsset(U"UIBack")(n * TextureAsset(U"UIBack").size().x / 65, 0, TextureAsset(U"UIBack").size().x / 65.0, TextureAsset(U"UIBack").size().y).scaled(6).draw(-6 + damageUIEffectOffsetX, -easeBossAppear * marshmallowUIOffset);
 	}
 
-	
 	//HPバー
-	drawBar(objects.player->getHp(), objects.player->getMaxHp(), TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50*3 + damageUIEffectOffsetX, 6*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+	drawHpBar(objects.player->getHpEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50 * 3 + damageUIEffectOffsetX, 6 * 3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getHpHealEase(), objects.player->getDamageEase());
 
 	//マシュマロバー
-	drawBar(objects.player->getNumMarshmallows(), objects.player->getMaxNumMarshmallows(), TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50*3 + damageUIEffectOffsetX, 26*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+	drawMaroBar(objects.player->getMaroEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50 * 3 + damageUIEffectOffsetX, 26 * 3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getMaroAddEase());
 
 	//ボスのHPバー
 	for (int i = 0; i < objects.enemies.size(); i++) {
@@ -197,9 +148,9 @@ void GameScene::drawMarshmallowUI() const {
 					AudioManager::Instance()->play(U"BossHpAnimation");
 					isPlayHpAnimation = true;
 				}
-				easeHpAnimationTimer += Scene::DeltaTime();
-				const double easeHpAnimation = Min(EaseInLinear(easeHpAnimationTimer/3.0), (double)bossPtr->getCurrentHp() / (double)bossPtr->getMaxHp());
-				drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - easeBossAppear * marshmallowUIOffset);
+				easeBossHpAnimationTimer += Scene::DeltaTime();
+				const double easeHpAnimation = Min(EaseInLinear(easeBossHpAnimationTimer/3.0), (double)bossPtr->getCurrentHp() / (double)bossPtr->getMaxHp());
+				drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - easeBossAppear * marshmallowUIOffset, bossPtr);
 			}
 		}
 	}
@@ -247,10 +198,10 @@ void GameScene::update() {
 	//Print << U"GameState" << (int)gameState;
 	Print << kusomaroTexts.size();
 	//Debug
-	if (MouseL.down()) {
+	//if (MouseL.down()) {
 		//effect.add<KusomaroTextEffect>(Cursor::Pos(), kusomaroTexts[Random(0, (int)kusomaroTexts.size()-1)]);
-		effect.add<BeamTextEffect>(Cursor::Pos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
-	}
+		//effect.add<BeamTextEffect>(Cursor::Pos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
+	//}
 	
 	AudioManager::Instance()->play(U"MidBoss");
 
@@ -302,9 +253,9 @@ void GameScene::update() {
 		switch (bossAppearState) {
 		case BossAppearState::HideUI:
 			
-			if (gameStateTimer <= 0.5) {
+			if (gameStateTimer <= 1.0/1.5) {
 				//UIを隠す
-				easeBossAppear = EaseOutQuart(easeTimer1/1.0);
+				easeBossAppear = EaseOutQuart(easeTimer1*1.0);
 				//プレイヤーの位置を基準位置に
 				objects.player->bossAppearStateUpdate(easeTimer2);
 			}
@@ -319,16 +270,11 @@ void GameScene::update() {
 
 		case BossAppearState::DrawRect:
 			//
-			if (gameStateTimer <= 0.5) {
-				//UIを隠す
-				easeBossAppear = EaseOutQuint(easeTimer2);
-			}
-			//
 			if (gameStateTimer <= 2.0) {
 				//プレイヤーの位置を基準位置に
 				objects.player->bossAppearStateUpdate(easeTimer2);
 				//枠を出す
-				ease = EaseOutQuint(gameStateTimer / 3.0);
+				ease = EaseOutQuint(gameStateTimer / 2.0);
 			}
 			else {
 				//タイマーリセット
@@ -342,13 +288,13 @@ void GameScene::update() {
 		case BossAppearState::AppearBoss:
 			easeTimer4 += Scene::DeltaTime();
 			
-			//
-			if (gameStateTimer <= 1.0) {
-				//プレイヤーの位置を基準位置に
-				objects.player->bossAppearStateUpdate(easeTimer2);
-				//枠を出す
-				ease = EaseOutQuint(gameStateTimer / 3.0);
-			}
+			////
+			//if (gameStateTimer <= 1.0) {
+			//	//プレイヤーの位置を基準位置に
+			//	objects.player->bossAppearStateUpdate(easeTimer2);
+			//	//枠を出す
+			//	//ease = EaseOutQuint(gameStateTimer / 3.0);
+			//}
 			//敵だけ更新
 			for (int i = 0; i < objects.enemies.size(); i++) {
 				objects.enemies[i]->update();
@@ -390,12 +336,12 @@ void GameScene::update() {
 			if (4.8 <= easeTimer4) {
 				isHpAnimationStart = true;
 				easeTimer7 += Scene::DeltaTime();
-				easeBossAppear = 1 - EaseOutExpo(Min(easeTimer7 / 1.2, 1.0));
+				easeBossAppear = 1.0 - EaseOutExpo(Min(easeTimer7 / 1.2, 1.0));
 			}
 
 			if (5.8 <= easeTimer4) {
 				//ゲームステートを変更
-				nextState = GameState::Stage;
+				nextState = GameState::BossBattle;
 				isChangeGameState = true;
 			}
 
@@ -407,6 +353,31 @@ void GameScene::update() {
 		break;
 
 	case GameState::BossBattle:
+		//ヒットストップをするか判定
+		if (objects.player->getIsHitStopStart()) {
+			hitStopTimer = 0;
+			isHitStopping = true;
+			isDamageUIEffectPlaying = true;
+			counterForSlowUpdate = 0;
+		}
+
+		//ヒットストップ時
+		if (isHitStopping) {
+			//タイマー
+			hitStopTimer += Scene::DeltaTime();
+			counterForSlowUpdate++;
+			//3フレームに一回だけ更新(スローにする)
+			if (counterForSlowUpdate % /*(int)(Max(*/3/* * (1.0 - Min(EaseOutQuart(hitStopTimer) / hitStopTime, 1.0)), 1.0))*/ == 0) {
+				stageUpdate();
+			}
+			if (hitStopTime <= hitStopTimer) {
+				isHitStopping = false;
+			}
+		}
+		//ヒットストップなし
+		else {
+			stageUpdate();
+		}
 		break;
 	}
 
@@ -459,17 +430,26 @@ void GameScene::collisionAndRemoveUpdate() {
 				//敵にヒットした判定をtrueに
 				maro->setIsHit(true);
 				//敵にダメージを与えられるか判定
-				if (maro->isNotHit(enemy->getId())) {
+				if (maro->isNotEnemyHit(enemy->getId())) {
 					//IDを受け取る
 					maro->addId(enemy->getId());
 					//敵にダメージを与える
 					enemy->damage(maro->getDamageAmount(), false);
 					//エフェクトを追加
-					effect.add<DamageEffect>(enemy->getPos());
+					if (maro->getType() == MaroType::Normal || maro->getType() == MaroType::Empty) {
+						effect.add<DamageEffect>(enemy->getPos());
+					}
+					else if(maro->getType() == MaroType::Beam) {
+						effect.add<BeamTextEffect>(maro->getPos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
+					}
+					else {
+						effect.add<KusomaroTextEffect>(maro->getPos(), kusomaroTexts[Random(0, (int)kusomaroTexts.size() - 1)]);
+					}
 				}
 				else {
 					//ビームは多段ヒットあり
 					if (maro->getType() == MaroType::Empty) {
+						Print << U"aaaaaaaaaaaaaaaaaaaaaaaaaa";
 						//敵にダメージを与える
 						enemy->damage(maro->getDamageAmount(), false);
 						//エフェクトを追加
@@ -480,9 +460,26 @@ void GameScene::collisionAndRemoveUpdate() {
 		}
 	}
 
-	//画面外に行ったクソマロはもう一度boxに
 	for (auto& maro : objects.marshmallows) {
-		if (maro->isOffScreen() && (maro->getType() != MaroType::Normal || maro->getType() != MaroType::Beam)) objects.player->setKusomaro(maro->getType());
+		//画面外に行ったクソマロはもう一度boxに
+		//boxに戻さないよう変更
+		//if (maro->isOffScreen() && (maro->getType() != MaroType::Normal || maro->getType() != MaroType::Empty)) objects.player->setKusomaro(maro->getType());
+		//敵に当たらず画面外に行った時にもクソマロ文章開示
+		if (not maro->getIsHit() && maro->isOffScreen()) {
+			//エフェクトを追加
+			if (maro->getType() == MaroType::Normal) {
+				//エフェクトなし
+			}
+			else if (maro->getType() == MaroType::Beam) {
+				effect.add<BeamTextEffect>(maro->getPos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
+			}
+			else if (maro->getType() != MaroType::Empty) {
+				effect.add<KusomaroTextEffect>(maro->getPos(), kusomaroTexts[Random(0, (int)kusomaroTexts.size() - 1)]);
+			}
+
+
+		}
+		Print << U"isOffScreen" << maro->isOffScreen();
 	}
 
 	//不要なオブジェクトを破壊

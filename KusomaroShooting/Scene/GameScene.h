@@ -35,9 +35,9 @@ public:
 
 	void loadJson(String path)const;
 
-	void drawBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY)const;
-	void drawBossBar(int currentNum, int maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY)const;
-	void drawBossBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY)const;
+	void drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, double healEase, double damageEase)const;
+	void drawMaroBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, double healEase)const;
+	void drawBossBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, BaseBoss *boss)const;
 	void drawMarshmallowUI()const;
 
 private:
@@ -62,7 +62,7 @@ private:
 
 	bool isHpAnimationStart = false;
 	bool isHpAnimationEnd = false;
-	mutable double easeHpAnimationTimer = 0;
+	mutable double easeBossHpAnimationTimer = 0;
 	mutable bool isPlayHpAnimation = false;
 
 	double ease=0;
