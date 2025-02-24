@@ -34,8 +34,12 @@ public:
 
 	MaroType getType();
 
+	Vec2 getPos();
+
 	//インスタンスにとって当たったことの無い敵かどうか
-	bool isNotHit(int id);
+	bool isNotEnemyHit(int id);
+
+	bool getIsHit();
 
 	virtual void backGroundDraw()const;
 
@@ -54,6 +58,7 @@ protected:
 	//何かしらの敵に当たったことがあるか
 	bool isHit=false;
 	Array<int>idOfEnemyHitOnce;
+	bool isDestroyNextFrame=false;
 };
 
 class NormalMarshmallow : public BaseBullet {

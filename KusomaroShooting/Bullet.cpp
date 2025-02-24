@@ -21,6 +21,10 @@ BaseBullet::~BaseBullet() {
 }
 
 void BaseBullet::update() {
+	//前のフレームで判定
+	if (isOffScreen()) {
+		isDestroyNextFrame = true;
+	}
 	move();
 }
 
@@ -34,7 +38,7 @@ bool BaseBullet::isOffScreen() {
 }
 
 bool BaseBullet::isDestroy() {
-	if (isOffScreen())return true;
+	if (isDestroyNextFrame)return true;
 	//貫通攻撃に上方修正
 	//else  if (isHit) return true;
 	else return false;
@@ -52,11 +56,19 @@ MaroType BaseBullet::getType() {
 	return type;
 }
 
-bool BaseBullet::isNotHit(int id) {
+Vec2 BaseBullet::getPos() {
+	return pos;
+}
+
+bool BaseBullet::isNotEnemyHit(int id) {
 	for (int i = 0; i < idOfEnemyHitOnce.size(); i++) {
 		if (idOfEnemyHitOnce[i] == id) return false;
 	}
 	return true;
+}
+
+bool BaseBullet::getIsHit() {
+	return isHit;
 }
 
 void BaseBullet::addId(int id) {
@@ -183,7 +195,11 @@ void KusoMarshmallowBeam::move()
 
 
 bool KusoMarshmallowBeam::isDestroy() {
-	if (isOffScreen())return true;
+	//画面外に出たら
+	if (isOffScreen()) {
+
+		return true;
+	}
 	//ビームを撃ったら消える
 	else  if (isShotBeam) return true;
 	else return false;
