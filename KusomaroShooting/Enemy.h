@@ -8,14 +8,14 @@ public:
 
 	BaseEnemy(Objects& objects_, Vec2 pos_);
 
-	void update();
+	virtual void update();
 
 	virtual void attack();
 
 	virtual void move()=0;
 
 	//ダメージを受ける関数。無敵時間ならfalse, そうでなければtrueを返す
-	bool damage(int damageAmount, bool isExistInv);
+	virtual bool damage(int damageAmount, bool isExistInv);
 
 	virtual bool isDestroy();
 
@@ -126,6 +126,8 @@ class BaseBoss : public BaseEnemy {
 public:
 	BaseBoss(Objects& objects_, Vec2 pos_);
 
+	void update()override;
+
 	void move()override=0;
 	TwoQuads collision()const =0;
 	void draw()override=0;
@@ -136,8 +138,19 @@ public:
 
 	String getName()const;
 
+	double getDamageEase();
+
+	double getPrevHpDamage();
+
+	bool damage(int damageAmount, bool isExistInv)override;
+
 protected:
 	String name;
+	//hpDamageAnim
+	bool isDamageHpAnimation = false;
+	double damageHpAnimTimer = 0;
+	double damageHpAnimEaseTimer = 0;
+	int prevHpDamage=0;
 };
 
 class GarbageBox : public BaseBoss {

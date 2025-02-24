@@ -307,6 +307,30 @@ BaseBoss::BaseBoss(Objects& objects_, Vec2 pos)
 {
 	id = -1;
 }
+void BaseBoss::update() {
+	Print << getDamageEase();
+
+	move();
+	attack();
+	//無敵時間があったら更新
+	if (isInvincibility()) {
+		remainingInvincibilityTime -= Scene::DeltaTime();
+		if (remainingInvincibilityTime < 0)remainingInvincibilityTime = 0;
+	}
+	
+	//ダメージ時のhp減少アニメーション
+	if (isDamageHpAnimation) {
+		damageHpAnimTimer += Scene::DeltaTime();
+
+		if (2.0 <= damageHpAnimTimer) {
+			damageHpAnimEaseTimer += Scene::DeltaTime();
+
+			if (1.0 <= damageHpAnimEaseTimer) {
+				isDamageHpAnimation = false;
+			}
+		}
+	}
+}
 int BaseBoss::getMaxHp()const {
 	return maxHp;
 }
@@ -315,6 +339,13 @@ int BaseBoss::getCurrentHp()const {
 }
 String BaseBoss::getName()const {
 	return name;
+}
+double BaseBoss::getDamageEase() {
+	if (isDamageHpAnimation) return ((1.0 - Min(EaseInQuart(damageHpAnimEaseTimer), 1.0)) * ((double)prevHpDamage - (double)hp)) / ((double)prevHpDamage - (double)hp);
+	else return 0.0;
+}
+double BaseBoss::getPrevHpDamage() {
+	return prevHpDamage;
 }
 
 
@@ -359,7 +390,7 @@ void GarbageBox::move() {
 
 		case AppearState::PullBody:
 			//体を引く
-			ease = EaseOutExpo(timers[(int)state].timer/1.0);
+			ease = Min(EaseInLinear(timers[(int)state].timer/1.0), 1.0);
 			currentAngle = ease * appearPullAngle;
 			//ガタガタする
 			pos.x += ease * 1.0 * Periodic::Square1_1(0.1s);
@@ -381,10 +412,10 @@ void GarbageBox::move() {
 
 		case AppearState::PushBody:
 			//体を乗り出す
-			ease = EaseOutExpo(timers[(int)state].timer / 0.5);
+			ease = EaseOutExpo(timers[(int)state].timer * 2);
 			currentAngle = Math::Lerp(appearPullAngle, appearPushAngle, ease);
 			//ガタガタする
-			pos.x += ease * 2.5 * Periodic::Square1_1(0.1s);
+			//pos.x += ease * 2.5 * Periodic::Square1_1(0.1s);
 			//体を乗り出すときの効果音
 			if (not isPlayPushAudio) {
 				AudioManager::Instance()->play(U"RollingAttack");
@@ -402,8 +433,9 @@ void GarbageBox::move() {
 			break;
 
 		case AppearState::GataGata:
+			ease = EaseOutExpo(timers[(int)state].timer * 2);
 			//ガタガタする
-			pos.x += 2.5 * Periodic::Square1_1(0.1s);
+			pos.x += ease * 2.5 * Periodic::Square1_1(0.1s);
 			//体を乗り出す角度を維持
 			currentAngle = appearPushAngle;
 
@@ -736,6 +768,57 @@ void GarbageBox::updateAttackStateTimer() {
 		timers[(int)state].timer = 0;
 		//攻撃を終了する
 		isEndAttack = true;
+	}
+}
+
+bool BaseBoss::damage(int damageAmount, bool isExistInv) {
+	//無敵時間を考慮
+	if (isExistInv) {
+		//無敵時間中
+		if (isInvincibility()) {
+			//ダメージを受けない
+			return false;
+		}
+		else {
+			//ダメージを受ける前のhpを保存
+			if (not isDamageHpAnimation)prevHpDamage = hp;
+			else prevHpDamage = (1.0 - Min(EaseInQuart(damageHpAnimEaseTimer), 1.0)) * ((double)prevHpDamage - (double)hp)+(double)hp;
+			//ダメージを受ける
+			remainingInvincibilityTime = invincibilityTime;
+			hp -= damageAmount;
+			if (hp < 0)hp = 0;
+			//ダメージSE
+			if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
+			else AudioManager::Instance()->play(U"HitLow");
+			//ダメージ減少アニメーション
+			//ダメージ時のhp減少アニメーションのためのタイマー
+			damageHpAnimTimer = 0;
+			damageHpAnimEaseTimer = 0;
+			// 〃 のためのフラグ
+			isDamageHpAnimation = true;
+
+			return true;
+		}
+
+	}
+	//無敵時間を考慮しない
+	else {
+		//ダメージを受ける前のhpを保存
+		if (not isDamageHpAnimation) prevHpDamage = hp;
+		else prevHpDamage = (1.0 - Min(EaseInQuart(damageHpAnimEaseTimer), 1.0)) * ((double)prevHpDamage-(double)hp)+(double)hp;
+		//ダメージを受ける
+		hp -= damageAmount;
+		if (hp < 0)hp = 0;
+		//ダメージSE
+		if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
+		else AudioManager::Instance()->play(U"HitLow");
+		//ダメージ減少アニメーション
+		//ダメージ時のhp減少アニメーションのためのタイマー
+		damageHpAnimTimer = 0;
+		damageHpAnimEaseTimer = 0;
+		// 〃 のためのフラグ
+		isDamageHpAnimation = true;
+		return true;
 	}
 }
 
