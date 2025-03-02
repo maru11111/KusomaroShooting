@@ -418,6 +418,8 @@ gmon.out
 *.ico
 font/
 texture/
+audio/
+stage/
 /KusomaroShooting/App/texture/mashumaro_27_30.png
 /KusomaroShooting/App/texture/UiNormal_33_28_3sheet.png
 /KusomaroShooting/App/RCa13540
