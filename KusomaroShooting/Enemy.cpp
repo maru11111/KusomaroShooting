@@ -17,6 +17,7 @@ void BaseEnemy::attack() {
 }
 
 void BaseEnemy::update() {
+	animTimer += Scene::DeltaTime();
 	move();
 	attack();
 	//無敵時間があったら更新
@@ -103,7 +104,7 @@ TwoQuads GarbageBagNormal::collision()const{
 
 void GarbageBagNormal::draw() {
 	
-	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5}, Scene::Time() * 1 * (-360_deg)).drawAt(pos);
+	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5}, firstAngle + animTimer * 1 * (-360_deg)).drawAt(pos);
 
 	//int n = (int)(Scene::Time() / 0.125*3.0/2.0) % 8;
 	
@@ -308,7 +309,7 @@ BaseBoss::BaseBoss(Objects& objects_, Vec2 pos)
 	id = -1;
 }
 void BaseBoss::update() {
-	Print << getDamageEase();
+	//Print << getDamageEase();
 
 	move();
 	attack();

@@ -42,6 +42,7 @@ protected:
 	double speed;
 	int damageAmount;
 	double timer = 0;
+	double animTimer = 0;
 	double remainingInvincibilityTime = 0;
 	double invincibilityTime = 0.5;
 	String name;
@@ -57,6 +58,8 @@ public:
 	TwoQuads collision()const override;
 
 	void draw()override;
+private:
+	double firstAngle = Random(0,360);
 };
 
 class GarbageBagFast : public BaseEnemy {
