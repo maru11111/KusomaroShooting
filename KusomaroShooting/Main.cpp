@@ -52,6 +52,8 @@ void Main()
 	TextureAsset::Register(U"PlayerBarBack", Resource(U"texture/PlayerHpBarBack.png"));
 	TextureAsset::Register(U"BossBarBack", Resource(U"texture/BossHpBarBack.png"));
 	TextureAsset::Register(U"PlayerHpFront", Resource(U"texture/PlayerHpBarFront.png"));
+	TextureAsset::Register(U"PlayerHpHeal", Resource(U"texture/PlayerHpBarHeal.png"));
+	TextureAsset::Register(U"HpBarDamage", Resource(U"texture/HPBarDamage.png"));
 	TextureAsset::Register(U"MarshmallowBarFront", Resource(U"texture/MarshmallowBarFront.png"));
 	TextureAsset::Register(U"BossBarFront", Resource(U"texture/BossHpBarFront.png"));
 	TextureAsset::Register(U"MarshmallowBox", Resource(U"texture/MarshmallowBox.png"));
@@ -81,11 +83,25 @@ void Main()
 	TextureAsset::Register(U"GarbageBox", Resource(U"texture/GarbageBox.png"));
 	TextureAsset::Register(U"GarbageBoxOpen", Resource(U"texture/GarbageBoxOpen.png"));
 	TextureAsset::Register(U"UIBackWithBox", Resource(U"texture/UIBackWithBox.png"));
+	TextureAsset::Register(U"Cloud", Resource(U"texture/Cloud.png"));
+	TextureAsset::Register(U"CloudBig", Resource(U"texture/CloudBig.png"));
+	TextureAsset::Register(U"CloudNormal", Resource(U"texture/CloudNormal.png"));
+	TextureAsset::Register(U"CloudSmall", Resource(U"texture/CloudSmall.png"));
+	TextureAsset::Register(U"StageNameIn", Resource(U"texture/StageNameIn.png"));
+	TextureAsset::Register(U"StageNameOut", Resource(U"texture/StageNameOut.png"));
+	TextureAsset::Register(U"Rain", Resource(U"texture/Rain.png"));
+	TextureAsset::Register(U"SkyMorning", Resource(U"texture/SkyMorning.png"));
+	TextureAsset::Register(U"SkyNoon", Resource(U"texture/SkyNoon.png"));
+	TextureAsset::Register(U"SkyAfterNoon", Resource(U"texture/SkyAfterNoon.png"));
+	TextureAsset::Register(U"SkyEvening", Resource(U"texture/SkyEvening.png"));
+	TextureAsset::Register(U"SkyNight", Resource(U"texture/SkyNight.png"));
+	TextureAsset::Register(U"SkyMidNight", Resource(U"texture/SkyMidNight.png"));
+
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
-	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
-	FontAsset::Register(U"GameUI_BestTenDot", 25, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
-	FontAsset::Register(U"GameUI_BestTenDot30", 30, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
+	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf")/*, FontStyle::Bitmap*/);
+	FontAsset::Register(U"GameUI_BestTenDot", 25, Resource(U"font/BestTen-DOT.otf")/*, FontStyle::Bitmap*/);
+	FontAsset::Register(U"GameUI_BestTenDot30", 30, Resource(U"font/BestTen-DOT.otf")/*, FontStyle::Bitmap*/);
 	FontAsset::Register(U"GameUI_Pixel", 25, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_Pixel6", 30, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 
@@ -114,7 +130,11 @@ void Main()
 	AudioManager::Instance()->setAudio(U"Can2", Resource(U"audio/Can2.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"Can3", Resource(U"audio/Can3.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"AppearBoss", Resource(U"audio/swing20.wav"), AudioType::SE);
-	
+	AudioManager::Instance()->setAudio(U"PopMaroText", Resource(U"audio/PopMaroText.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Eat", Resource(U"audio/Eat.mp3"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Heal", Resource(U"audio/Heal.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"AddMaro", Resource(U"audio/AddMaro.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Beep", Resource(U"audio/Beep.wav"), AudioType::SE);
 
 	//ロード
 	//画像
@@ -156,8 +176,19 @@ void Main()
 	TextureAsset::Load(U"BackGroundMountainBack");
 	TextureAsset::Load(U"BackGroundMountainMiddle");
 	TextureAsset::Load(U"BackGroundMountainFront");
+	TextureAsset::Load(U"BackGroundSky");
 	TextureAsset::Load(U"Empty");
 	TextureAsset::Load(U"UIBackWithBox");
+	TextureAsset::Load(U"StageNameIn");
+	TextureAsset::Load(U"StageNameOut");
+	TextureAsset::Load(U"Rain");
+	TextureAsset::Load(U"SkyMorning");
+	TextureAsset::Load(U"SkyNoon");
+	TextureAsset::Load(U"SkyAfterNoon");
+	TextureAsset::Load(U"SkyEvening");
+	TextureAsset::Load(U"SkyNight");
+	TextureAsset::Load(U"SkyMidNight");
+
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
 	FontAsset::Load(U"GameUI_BestTen");
@@ -172,8 +203,8 @@ void Main()
 	manager.add<StageEditor>(State::StageEditor);
 
 	//ゲームシーンから開始
-	//manager.init(State::Game, 0);
-	manager.init(State::StageEditor, 0);
+	manager.init(State::Game, 0);
+	//manager.init(State::StageEditor, 0);
 
 	while (System::Update())
 	{
