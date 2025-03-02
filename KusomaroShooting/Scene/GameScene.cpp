@@ -32,7 +32,8 @@ struct DamageEffect : IEffect
 		}
 		TextureAsset(U"DamageEffect")(n * TextureAsset(U"DamageEffect").size().x / 6.0, 0, TextureAsset(U"DamageEffect").size().x / 6.0, TextureAsset(U"DamageEffect").size().y).scaled(3).drawAt(pos);
 
-		//Print << pos;
+		//
+		// << pos;
 
 		//trueの間継続
 		return (n < 5);
@@ -47,8 +48,12 @@ GameScene::GameScene(const InitData& init)
 
 	//loadJson(U"stage/test.json");
 
+	//初めのステージをロード
+	loadJson(U"stage/stage1.json");
+
 	//Debug
-	objects.enemies << std::make_unique<GarbageBox>(objects, Vec2( Scene::Size().x+100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
+	//ボス
+	//objects.enemies << std::make_unique<GarbageBox>(objects, Vec2( Scene::Size().x+100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
 }
 
 void GameScene::drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY, double healEase, double damageEase)const {
@@ -96,7 +101,7 @@ void GameScene::drawBossBar(double currentNum, double maxNum, TextureAsset backB
 
 	//ダメージアニメーションのカット後pxを計算
 	const double damageBarDrawEndPosX = frontBar.size().x * ((double)boss->getPrevHpDamage()/(double)boss->getMaxHp()) * ((double)boss->getPrevHpDamage() - (double)boss->getCurrentHp())/(double)boss->getPrevHpDamage() * boss->getDamageEase();
-	Print << U"bossBar:" << damageBarDrawEndPosX;
+	//Print << U"bossBar:" << damageBarDrawEndPosX;
 	//ダメージ時の減少アニメーションを描画
 	TextureAsset(U"HpBarDamage")(0, 0, damageBarDrawEndPosX, frontBar.size().y).scaled(6).draw(backBarPosX + 12 + (frontBar.size().x - damageBarDrawEndPosX - frontBar.size().x * ((double)boss->getCurrentHp() / (double)boss->getMaxHp())) * 6, barPosY);
 
@@ -127,17 +132,17 @@ void GameScene::drawMarshmallowUI() const {
 		}
 	}
 	if (flag==true && isHpAnimationStart) {
-		TextureAsset(U"UIBackWithBox")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0-6 + damageUIEffectOffsetX , -easeBossAppear * marshmallowUIOffset);
+		TextureAsset(U"UIBackWithBox")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0-6 + damageUIEffectOffsetX ,-6 -easeBossAppear * marshmallowUIOffset);
 	}
 	else {
-		TextureAsset(U"UIBack")(n * TextureAsset(U"UIBack").size().x / 65, 0, TextureAsset(U"UIBack").size().x / 65.0, TextureAsset(U"UIBack").size().y).scaled(6).draw(-6 + damageUIEffectOffsetX, -easeBossAppear * marshmallowUIOffset);
+		TextureAsset(U"UIBack")(n * TextureAsset(U"UIBack").size().x / 65, 0, TextureAsset(U"UIBack").size().x / 65.0, TextureAsset(U"UIBack").size().y).scaled(6).draw(-6 + damageUIEffectOffsetX,-6 -easeBossAppear * marshmallowUIOffset);
 	}
 
 	//HPバー
-	drawHpBar(objects.player->getHpEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50 * 3 + damageUIEffectOffsetX, 6 * 3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getHpHealEase(), objects.player->getDamageEase());
+	drawHpBar(objects.player->getHpEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50 * 3 -4 + damageUIEffectOffsetX, 6 * 3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getHpHealEase(), objects.player->getDamageEase());
 
 	//マシュマロバー
-	drawMaroBar(objects.player->getMaroEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50 * 3 + damageUIEffectOffsetX, 26 * 3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getMaroAddEase());
+	drawMaroBar(objects.player->getMaroEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50 * 3-4  + damageUIEffectOffsetX, 24 * 3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getMaroAddEase());
 
 	//ボスのHPバー
 	for (int i = 0; i < objects.enemies.size(); i++) {
@@ -150,19 +155,21 @@ void GameScene::drawMarshmallowUI() const {
 				}
 				easeBossHpAnimationTimer += Scene::DeltaTime();
 				const double easeHpAnimation = Min(EaseInLinear(easeBossHpAnimationTimer/3.0), (double)bossPtr->getCurrentHp() / (double)bossPtr->getMaxHp());
-				drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - easeBossAppear * marshmallowUIOffset, bossPtr);
+				drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - 6 - easeBossAppear * marshmallowUIOffset, bossPtr);
 			}
 		}
 	}
 
+	//Print << U"ease*mar" << easeBossAppear * marshmallowUIOffset;
 	//次のマシュマロを表示
-	TextureAsset(U"MarshmallowBox").scaled(6).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+	TextureAsset(U"MarshmallowBox").scaled(6).drawAt((320 / 2 - 5) * 3 + damageUIEffectOffsetX, 24*3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+
 	switch (objects.player->getNextMaro()) {
-	case MaroType::Normal: TextureAsset(U"Marshmallow").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Up: TextureAsset(U"KusomaroUp").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 - 4)*3 + damageUIEffectOffsetX, 24 * 3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Down: TextureAsset(U"KusomaroDown").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 1)*3 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Sine: TextureAsset(U"KusomaroSine").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 + Math::Cos(drawTimer*Math::Pi*2))*3 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Beam: TextureAsset(U"KusomaroBeam").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Normal: TextureAsset(U"Marshmallow").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Up: TextureAsset(U"KusomaroUp").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 - 4)*3 + damageUIEffectOffsetX, 24 * 3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Down: TextureAsset(U"KusomaroDown").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 1)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Sine: TextureAsset(U"KusomaroSine").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 + Math::Cos(drawTimer*Math::Pi*2))*3 - 6 + 6 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Beam: TextureAsset(U"KusomaroBeam").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
 	}
 
 
@@ -175,18 +182,39 @@ void GameScene::drawMarshmallowUI() const {
 		//アルファ値を戻す
 		const ScopedRenderStates2D renderState{ MaxAlphaBlend() };
 
-		FontAsset(U"GameUI_Pixel")(U"HP").draw(165 + damageUIEffectOffsetX, 24 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		FontAsset(U"GameUI_Pixel")(U"HP").draw(165-4 + damageUIEffectOffsetX, 24 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
+		//Print << U"easeBoss" << marshmallowUIOffset*easeBossAppear;
 		//if (objects.player->getNumMarshmallows() < 10) FontAsset(U"GameUI_Pixel")(U"Marshmallow\n    ", objects.player->getNumMarshmallows(), U"/30").drawAt(74, 93);
-		/*else*/ FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165 + damageUIEffectOffsetX, 85 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		/*else*/ FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165-4 + damageUIEffectOffsetX, 24 * 3 + 14 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
-		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX, 11 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX, 12 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 		//ステージ名orボスの名前
-		for (int i = 0; i < objects.enemies.size();i++) {
-			if (objects.enemies[i]->getId() == -1) {
-				FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(540 + damageUIEffectOffsetX, 25 - easeBossAppear * marshmallowUIOffset);
+		switch (gameState) {
+		case GameState::Tutorial:break;
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:Tutorial").draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset); break;
+
+		case GameState::StageStart:
+		case GameState::Stage:
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:"+ stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset); break;
+
+		case GameState::BossAppear:
+			if (bossAppearState == BossAppearState::AppearBoss) {
+				for (int i = 0; i < objects.enemies.size(); i++) {
+					if (objects.enemies[i]->getId() == -1) {
+						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset);
+					}
+				}
 			}
+			break;
+		case GameState::BossBattle:
+			for (int i = 0; i < objects.enemies.size(); i++) {
+				if (objects.enemies[i]->getId() == -1) {
+					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset);
+				}
+			}
+			break;
 		}
 		//FontAsset(U"GameUI_Pixel")(U"HP").draw(872, 84);
 	}
@@ -196,21 +224,113 @@ void GameScene::drawMarshmallowUI() const {
 void GameScene::update() {
 
 	//Print << U"GameState" << (int)gameState;
-	Print << kusomaroTexts.size();
+	//Print << kusomaroTexts.size();
 	//Debug
 	//if (MouseL.down()) {
 		//effect.add<KusomaroTextEffect>(Cursor::Pos(), kusomaroTexts[Random(0, (int)kusomaroTexts.size()-1)]);
 		//effect.add<BeamTextEffect>(Cursor::Pos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
 	//}
-	
-	AudioManager::Instance()->play(U"MidBoss");
+	//AudioManager::Instance()->play(U"MidBoss");
+
+	//Debug
+	if (Key1.pressed()) currentStage = (Stage)0;
+	if (Key2.pressed()) currentStage = (Stage)1;
+	if (Key3.pressed()) currentStage = (Stage)2;
+	if (Key4.pressed()) currentStage = (Stage)3;
+	if (Key5.pressed()) currentStage = (Stage)4;
+	if (Key6.pressed()) currentStage = (Stage)5;
 
 	switch (gameState) {
 	case GameState::Tutorial:
 		break;
 
+	case GameState::StageStart:
+		{
+			//描画に使うタイマー
+			drawTimer += Scene::DeltaTime();
+
+			stageStartTimer += Scene::DeltaTime();
+
+			switch (stageStartState) {
+			case StageStartState::Start:
+				{
+					stageStartEaseTimer += Scene::DeltaTime();
+					if (currentFrame(7, 0.080, stageStartAnimTimer) != 7) stageStartAnimTimer += Scene::DeltaTime();
+					const double stageStartEase = Min(EaseOutExpo(stageStartEaseTimer / 1.5), 1.0);
+					stageNameTextPos = stageNameTextStartPos.lerp(stageNameTextMiddlePos, stageStartEase);
+					//次に進む
+					if (1.5 <= stageStartEaseTimer) {
+						stageStartState = StageStartState::Middle;
+						stageStartTimer = 0;
+						stageStartEaseTimer = 0;
+					}
+					break;
+				}
+
+			case StageStartState::Middle:
+				{
+					//次に進む
+					if (0.25 <= stageStartTimer) {
+						stageStartState = StageStartState::End;
+						stageStartAnimTimer = 0;
+					}
+					break;
+				}
+
+			case StageStartState::End:
+				{
+					stageStartEaseTimer += Scene::DeltaTime();
+					if (currentFrame(6, 0.100, stageStartAnimTimer) != 6) stageStartAnimTimer += Scene::DeltaTime();
+					const double stageStartEase = Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0);
+					stageNameTextPos = stageNameTextMiddlePos.lerp(stageNameTextEndPos, stageStartEase);
+					//プレイヤーが登場
+					if(currentStage == Stage::Morning) objects.player->toStartPos();
+					//次に進む
+					if (2.0 <= stageStartEaseTimer) {
+						stageStartState = StageStartState::Start;
+						stageStartTimer = 0;
+						stageStartEaseTimer = 0;
+						stageStartAnimTimer = 0;
+						gameState = GameState::Stage;
+					}
+					break;
+				}
+			}
+		}
+		break;
+
 	case GameState::Stage:
 
+		switch (currentStage) {
+		case Stage::Morning:
+
+			//空になったら次のステージ
+			if (spawnEnemyData.empty() && objects.enemies.empty()) {
+				//currentStage = Stage::Noon;
+				//gameState = GameState::StageStart;
+				////次のステージをロード
+				//loadJson(U"stage/stage2.json");
+
+				gameState = GameState::StageStart;
+				gameState = GameState::BossAppear;
+			}
+			break;
+
+		case Stage::Noon:
+			break;
+
+		case Stage::AfterNoon:
+			break;
+
+		case Stage::Evening:
+			break;
+
+		case Stage::Night:
+			break;
+
+		case Stage::MidNight:
+			break;
+		}
 
 		//ヒットストップをするか判定
 		if (objects.player->getIsHitStopStart()) {
@@ -245,6 +365,12 @@ void GameScene::update() {
 		easeTimer1 += Scene::DeltaTime();
 		easeTimer2 += Scene::DeltaTime();
 		easeTimer3 += Scene::DeltaTime();
+
+		if (not isSpawnBoss) {
+			//ボス
+			objects.enemies << std::make_unique<GarbageBox>(objects, Vec2(Scene::Size().x + 100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
+			isSpawnBoss = true;
+		}
 
 		//Print << U"bossAppearState:" << (int)bossAppearState;
 		//Print << U"gaemeStateTimer:" << gameStateTimer;
@@ -295,6 +421,7 @@ void GameScene::update() {
 			//	//枠を出す
 			//	//ease = EaseOutQuint(gameStateTimer / 3.0);
 			//}
+			
 			//敵だけ更新
 			for (int i = 0; i < objects.enemies.size(); i++) {
 				objects.enemies[i]->update();
@@ -419,7 +546,7 @@ void GameScene::collisionAndRemoveUpdate() {
 	//プレイヤー本体と敵本体
 	for (auto& enemy : objects.enemies) {
 		if (enemy->collision().intersects(objects.player->bodyCollision())) {
-			objects.player->damage(enemy->getDamageAmount());
+			objects.player->damage(enemy->getDamageAmount(), false);
 		}
 	}
 
@@ -440,16 +567,15 @@ void GameScene::collisionAndRemoveUpdate() {
 						effect.add<DamageEffect>(enemy->getPos());
 					}
 					else if(maro->getType() == MaroType::Beam) {
-						effect.add<BeamTextEffect>(maro->getPos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
+						effect.add<BeamTextEffect>(maro->getPos(), BaseBullet::beamTexts[Random(0, (int)BaseBullet::beamTexts.size() - 1)]);
 					}
 					else {
-						effect.add<KusomaroTextEffect>(maro->getPos(), kusomaroTexts[Random(0, (int)kusomaroTexts.size() - 1)]);
+						effect.add<KusomaroTextEffect>(maro->getPos(), BaseBullet::kusomaroTexts[Random(0, (int)BaseBullet::kusomaroTexts.size() - 1)]);
 					}
 				}
 				else {
 					//ビームは多段ヒットあり
 					if (maro->getType() == MaroType::Empty) {
-						Print << U"aaaaaaaaaaaaaaaaaaaaaaaaaa";
 						//敵にダメージを与える
 						enemy->damage(maro->getDamageAmount(), false);
 						//エフェクトを追加
@@ -471,15 +597,15 @@ void GameScene::collisionAndRemoveUpdate() {
 				//エフェクトなし
 			}
 			else if (maro->getType() == MaroType::Beam) {
-				effect.add<BeamTextEffect>(maro->getPos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
+				effect.add<BeamTextEffect>(maro->getPos(), BaseBullet::beamTexts[Random(0, (int)BaseBullet::beamTexts.size() - 1)]);
 			}
 			else if (maro->getType() != MaroType::Empty) {
-				effect.add<KusomaroTextEffect>(maro->getPos(), kusomaroTexts[Random(0, (int)kusomaroTexts.size() - 1)]);
+				effect.add<KusomaroTextEffect>(maro->getPos(), BaseBullet::kusomaroTexts[Random(0, (int)BaseBullet::kusomaroTexts.size() - 1)]);
 			}
 
 
 		}
-		Print << U"isOffScreen" << maro->isOffScreen();
+		//Print << U"isOffScreen" << maro->isOffScreen();
 	}
 
 	//不要なオブジェクトを破壊
@@ -489,9 +615,6 @@ void GameScene::collisionAndRemoveUpdate() {
 void GameScene::stageUpdate() {
 	//描画に使うタイマー
 	drawTimer += Scene::DeltaTime();
-
-	//敵を追加
-	spawnEnemy();
 
 	//ダメージ時のUIエフェクト用タイマー
 	if (isDamageUIEffectPlaying) {
@@ -530,6 +653,8 @@ void GameScene::stageUpdate() {
 		for (int i = 0; i < objects.enemies.size(); i++) {
 			objects.enemies[i]->update();
 		}
+		//敵を追加
+		spawnEnemy();
 	}
 
 	//
@@ -646,18 +771,33 @@ void GameScene::commonDraw()const {
 		const ScopedRenderTarget2D renderTarget{ renderTexture };
 
 		//背景
-		Scene::Rect()
-			.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
-		const double farBackMountainPosX = -(int)(drawTimer / 0.0390) % 320 * 3;
-		const double backMountainPosX = -(int)(drawTimer / 0.0370) % 320 * 3;
-		const double middleMountainPosX = -(int)(drawTimer / 0.0350) % 320 * 3;
-		const double frontMountainPosX = -(int)(drawTimer / 0.0330) % 320 * 3;
-		const double frontCityPosX = -(int)(drawTimer / 0.0115) % 320 * 3;
-		const double middleCityPosX = -(int)(drawTimer / 0.0090) % 320 * 3;
-		const double backCityPosX = -(int)(drawTimer / 0.0065) % 320 * 3;
+		//Scene::Rect()
+		//	.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
+		//const double skyPosX = -(int)(drawTimer / 0.0410) % (320 * 3);
+		const double cloudBigPosX = -(int)(drawTimer /    0.0100) % (320 * 3);
+		const double cloudNormalPosX = -(int)(drawTimer / 0.0125) % (320 * 3);
+		const double cloudSmallPosX = -(int)(drawTimer /  0.0150) % (320 * 3);
+		const double farBackMountainPosX = -(int)(drawTimer / 0.0250) % (320 * 3);
+		const double backMountainPosX = -(int)(drawTimer /   0.0300) % (320 * 3);
+		const double middleMountainPosX = -(int)(drawTimer / 0.0175) % (320 * 3);
+		const double frontMountainPosX = -(int)(drawTimer /  0.0125) % (320 * 3);
+		const double frontCityPosX = -(int)(drawTimer /  0.00425) % (320 * 3);
+		const double middleCityPosX = -(int)(drawTimer / 0.00325) % (320 * 3);
+		const double backCityPosX = -(int)(drawTimer /   0.00225) % (320 * 3);
+		const Vec2 rainPos = { -(int)(drawTimer / 0.00200) % (320 * 3), (int)(drawTimer / 0.00200) % (214 * 3) };
 
-		TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
-		TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + farBackMountainPosX, 0);
+		//空
+		switch (currentStage) {
+		case Stage::Morning: TextureAsset(U"SkyMorning").scaled(3).draw(0, 0); break;
+		case Stage::Noon: TextureAsset(U"SkyNoon").scaled(3).draw(0, 0); break;
+		case Stage::AfterNoon: TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0); break;
+		case Stage::Evening: TextureAsset(U"SkyEvening").scaled(3).draw(0, 0); break;
+		case Stage::Night: TextureAsset(U"SkyNight").scaled(3).draw(0, 0); break;
+		case Stage::MidNight: TextureAsset(U"SkyMidNight").scaled(3).draw(0, 0); break;
+		}
+		//TextureAsset(U"BackGroundSky").scaled(3).draw(Scene::Size().x + skyPosX, 0);
+		//TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
+		//TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + farBackMountainPosX, 0);
 		TextureAsset(U"BackGroundMountainBack").scaled(3).draw(backMountainPosX, 0);
 		TextureAsset(U"BackGroundMountainBack").scaled(3).draw(Scene::Size().x + backMountainPosX, 0);
 		TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(middleMountainPosX, 0);
@@ -670,8 +810,22 @@ void GameScene::commonDraw()const {
 		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(Scene::Size().x + middleCityPosX, 0);
 		TextureAsset(U"BackGroundCity").scaled(3).draw(backCityPosX, 0);
 		TextureAsset(U"BackGroundCity").scaled(3).draw(Scene::Size().x + backCityPosX, 0);
+		TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		/*TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, 0 });
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 });
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y });
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y });*/
+
 
 		//背景とオブジェクトの間
+		//後面プレイヤー攻撃エフェクト
+		objects.player->drawEffectBack();
+		//ビームの描画
 		for (auto& maro : objects.marshmallows) {
 			maro->backGroundDraw();
 		}
@@ -691,8 +845,8 @@ void GameScene::commonDraw()const {
 		drawMarshmallowUI();
 
 		//エフェクトを再生
-		//プレイヤー攻撃エフェクト
-		objects.player->drawEffect();
+		//前面プレイヤー攻撃エフェクト
+		objects.player->drawEffectFront();
 		//gameSceneのエフェクト
 		effect.update();
 
@@ -721,6 +875,43 @@ void GameScene::draw() const {
 
 	switch (gameState) {
 	case GameState::Tutorial:
+		break;
+
+	case GameState::StageStart:
+		commonDraw();
+		
+		//if (stageStartTimer <= 1.0) {
+		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos);
+		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 });
+		//}
+		//else if (stageStartTimer < 1.5) {
+		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos);
+		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 });
+		//}
+		//else if (1.5 <= stageStartTimer) {
+		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos);
+		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 });
+		//}
+
+		switch (stageStartState) {
+		case StageStartState::Start:
+			drawSpriteAnim(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(1.0, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(1.0, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
+			break;
+
+		case StageStartState::Middle:
+			drawSpriteAnim(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos);
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 });
+			break;
+
+		case StageStartState::End:
+			drawSpriteAnim(U"StageNameOut", 6, 0.100, Scene::CenterF(), stageStartAnimTimer);
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(1.0, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(1.0, 1.0 * (1.0-Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))) );
+			break;
+		}
 		break;
 
 	case GameState::Stage:
