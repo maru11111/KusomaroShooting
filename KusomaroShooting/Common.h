@@ -34,6 +34,11 @@ inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime
 	int n = (int)(timer / oneFrameTime) % numFrame;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).drawAt(pos);
 }
+//外部のタイマーを使って再生(1フレーム目から再生できるように)+scale
+inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer, int scale) {
+	int n = (int)(timer / oneFrameTime) % numFrame;
+	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(scale).drawAt(pos);
+}
 //総フレーム数、1フレームにかかる時間、timerから現在のフレームを返す
 inline int currentFrame(int numFrame, double oneFrameTime, double timer) {
 	return (int)(timer / oneFrameTime) % numFrame + 1;
@@ -71,7 +76,7 @@ struct KusomaroTextEffect : IEffect {
 		//Print << U"timer" << timer;
 		timer += Scene::DeltaTime();
 		double ease = Min(EaseOutQuart(timer / time), 1.0);
-		FontAsset(U"GameUI_Kei")(str).drawAt(pos.movedBy(0, ease * posYOffset), ColorF(1.0, 1.0 - ease));
+		//FontAsset(U"GameUI_Kei")(str).drawAt(pos.movedBy(0, ease * posYOffset), ColorF(1.0, 1.0 - ease));
 		return (timer < time);
 	}
 };
@@ -116,17 +121,17 @@ struct BeamTextEffect : IEffect {
 				isRedNext = true;
 			}
 			else if (str[i] == U'\n') {
-				pos.y += FontAsset(U"GameUI_Kei").height();
+				//pos.y += FontAsset(U"GameUI_Kei").height();
 				drawedStr = U"";
 			}
 			else if (isRedNext) {
-				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(0.9, 0.0, 0.0, 1.0 - ease));
+				//FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(0.9, 0.0, 0.0, 1.0 - ease));
 				drawedStr += str[i];
 				isRedNext = false;
 
 			}
 			else {
-				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(1.0, 1.0 - ease));
+				//FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(1.0, 1.0 - ease));
 				drawedStr += str[i];
 			}
 		}
