@@ -5,6 +5,29 @@
 
 int BaseBullet::numInstances = 0;
 
+Array<String> BaseBullet::kusomaroTexts =
+{
+	U"俺がしぐれういだ！",
+	U"たわわに実ったヒラメ",
+	U"ういンカー「曲がるが？」",
+	U"ういング「飛ぶが？」",
+	U"簡単なこともわからないわ\n和菓子ってパンだっけ？",
+	U"黄色いトマトはスイカ",
+	U"イラストレーターのしぐれういです！\n今日は1万4千個のマシュマロに回答していきます！\n多分30分くらいで終わるかな？\n\n\n       こ             な             れ             う             い",
+	U"きれいに咲いたしらたき",
+	U"鋭利なみかん",
+	U"トントントントン　カニのうどん",
+};
+
+Array<String> BaseBullet::beamTexts =
+{
+	U"R難しいかもしれないけれど\nR今、転職を考えております\nR美術系の仕事を探しているのですが\nRいい感じの\nRうなぎ",
+	U"Rうい先生に質問です絵を描き始めるのに\nRいち万円で板タブを譲ってもらったのですが\nRびみょうに古いです\nRいまからでも新型を買った方がいいですか？\nRむだにならない値段も教えてほしいです",
+	U"ういRうRいうい麦畑でね\n君とR日なたぼっこ　眠りましょ\n仲良Rい　良い　良いとかよしてよね\n夢はR夢でやっぱお断り",
+	U"嫌になっちゃRうぐらい\n伝え切れなRいから引き続き\n凸凹コンRビネーションで\nso YES R/ NOならどーなの？\nNO 成R仏してくださーい！",
+	U"Rうに食べたい\nこRいも食べたい\n甘エRビもいいな\nアルコRールと一緒に\n海鮮系のRムニエルで",
+	U"Rうちの娘がうい先生のファンで\nRいつもかじりついて配信を見ていますｗ\n\nR美術の授業でもうい先生の絵を描いて\nR一番かわいくできたと持って帰って飾ってます\nR娘は本当はいません"
+};
 
 BaseBullet::BaseBullet(Objects& objects_, Vec2 pos_)
 	: objects{objects_}
@@ -221,7 +244,7 @@ Beam::Beam(Objects& objects_, Vec2 pos_)
 
 void Beam::update() {
 
-	Print << U"ColliderOn" << isColliderActive;
+	//Print << U"ColliderOn" << isColliderActive;
 
 	beamTimer += Scene::DeltaTime();
 	beamColTimer += Scene::DeltaTime();

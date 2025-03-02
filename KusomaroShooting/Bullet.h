@@ -14,6 +14,10 @@ enum class MaroType {
 class BaseBullet {
 public:
 
+	//マシュマロ文章
+	static Array<String>kusomaroTexts;
+	static Array<String>beamTexts;
+
 	BaseBullet(Objects& objects_, Vec2 pos_);
 
 	virtual ~BaseBullet();
