@@ -29,6 +29,32 @@ struct AttackEffect : IEffect
 	}
 };
 
+struct MoveEffect : IEffect {
+
+	Vec2 pos;
+	int size;
+	ColorF color;
+
+	explicit MoveEffect(Vec2 pos_)
+		: pos{pos_ + RandomVec2(RectF(0.0, 0.0, -20.0, 20.0))}
+		, size{Random(5, 15)}
+	{
+		switch (Random(0, 3)) {
+		case 0: color = ColorF(229 / 256.0, 222 / 256.0,  66 / 256.0); break;
+		case 1: color = ColorF( 97 / 256.0, 126 / 256.0, 209 / 256.0); break;
+		case 2: color = ColorF(129 / 256.0, 201 / 256.0,  76 / 256.0); break;
+		case 3: color = ColorF(255 / 256.0, 144 / 256.0, 144 / 256.0); break;
+		}
+
+		//color = HSV{ (Random(0, 6) * 60) };
+	}
+
+	bool update(double t)override {
+		RectF(pos.movedBy(-30 * t, 30 * t), size).draw( ColorF(color, Max(0.0, 0.7-t)) );
+		return t < 1.0;
+	}
+};
+
 Player::Player(Objects& objects_)
 	:objects{ objects_ }
 {
@@ -87,6 +113,13 @@ void Player::update() {
 	//	}
 	//}
 	//Print << U"aaaa";
+
+	effectTimer += Scene::DeltaTime();
+	if (0.05 <= effectTimer) {
+		//筆のエフェクト
+		effectBack.add<MoveEffect>(pos.movedBy(-50, 20));
+		effectTimer -= 0.05;
+	}
 
 	//時間経過でマシュマロ補充
 	if (numMarshmallows < maxNumMarshmallows) {
@@ -167,7 +200,7 @@ void Player::update() {
 
 		//エフェクト追加
 		if (not isAttackEffectStarted) {
-			effect.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20));
+			effectBack.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20));
 			isAttackEffectStarted = true;
 		}
 
@@ -193,10 +226,43 @@ void Player::update() {
 		}
 	}
 
-	//回復
-	if (KeyH.down()) {
-		heal(1);
+	//マシュマロを食べる
+	if (KeyC.down() && 0 < numMarshmallows && not isEating) {
+		//マシュマロを食べる。
+		//効果音
+		AudioManager::Instance()->play(U"Eat");
+		isEating = true;
+		eatTimer = 0;
+		ateMaroType = maroBox[0];
+		maroBox.pop_front();
+		numMarshmallows--;
 	}
+	else if(KeyC.down()){
+		AudioManager::Instance()->play(U"Beep");
+	}
+
+	//マシュマロ食べ中
+	if (isEating) {
+		eatTimer += Scene::DeltaTime();
+		if (0.25 <= eatTimer) {
+			isEating = false;
+			//食べたマシュマロの効果が発動
+			switch (ateMaroType) {
+			case MaroType::Normal:
+				heal(1);
+				break;
+			case MaroType::Beam:
+				heal(5);
+				break;
+			default:
+				damage(1, true);
+				effectBack.add<KusomaroTextEffect>(pos, BaseBullet::kusomaroTexts[Random(0, (int)BaseBullet::kusomaroTexts.size() - 1)]);
+				break;
+			}
+		}
+	}
+	//回復中
+
 	if (isHealing) {
 		healBackAnimTimer += Scene::DeltaTime();
 		if(0.5<=healBackAnimTimer)healSumForAnim += healAmountForAnim * Scene::DeltaTime();
@@ -226,6 +292,14 @@ void Player::update() {
 void Player::bossAppearStateUpdate(double timer) {
 	double ease = EaseOutQuad(Min(timer/3.5, 1.0));
 	pos = prevPos.lerp(basePos, ease);
+}
+
+void Player::toStartPos() {
+	toBaseTimer += Scene::DeltaTime();
+	const double toBaseEase = Min(EaseOutCubic(toBaseTimer), 1.0);
+	pos = Vec2{ -100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3 }.lerp(startPos, toBaseEase);
+	if (1.0 <= toBaseTimer) {
+	}
 }
 
 void Player::move() {
@@ -275,11 +349,14 @@ void Player::attack() {
 		maroBox.pop_front();
 		numMarshmallows--;
 	}
+	else {
+		AudioManager::Instance()->play(U"Beep");
+	}
 }
 
-void Player::damage(int damageAmount) {
+void Player::damage(int damageAmount, bool piercingInv) {
 	//無敵時間中
-	if (isInvincibility()) {
+	if (isInvincibility() && not piercingInv) {
 		//ダメージを受けない
 		//Print << U"MUTEKI";
 	}
@@ -351,7 +428,7 @@ RectF Player::bodyCollision() const {
 	return RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3)), 15 * 3, 15 * 3);
 }
 RectF Player::attackCollision()const {
-	return RectF(Arg::center(pos.movedBy(20 * 3, 0)), 12 * 3, 22 * 3);
+	return RectF(Arg::center(pos.movedBy(20 * 3, 0)), 18 * 3, 22 * 3);
 }
 
 void Player::startInvincibilityTime() {
@@ -408,6 +485,8 @@ bool Player::getIsHitStopStart(){
 }
 
 void Player::heal(int healAmount) {
+	//効果音
+	AudioManager::Instance()->play(U"Heal");
 	if (hp == maxHp) return;
 	if (not isHealing) {
 		prevHpHeal = hp;
@@ -448,6 +527,9 @@ void Player::addMarshmallow() {
 			maroAddBackAnimTimer = 0;
 		}
 		isMaroAdding = true;
+
+		//効果音
+		AudioManager::Instance()->play(U"AddMaro");
 
 		numMarshmallows++;
 
@@ -490,19 +572,20 @@ void Player::drawForAttack(double opacity) {
 		.drawAt(pos.moveBy(eS * 10 * Scene::DeltaTime() + 5 * Math::Cos(2 * 2 * Math::Pi * attackTimer), -5 * Math::Sin(2 * 2 * Math::Pi * attackTimer)), ColorF(1.0, opacity));
 }
 
-void Player::drawEffect() {
-	effect.update();
+void Player::drawEffectFront() {
+	effectFront.update();
+}
+
+void Player::drawEffectBack() {
+	effectBack.update();
 }
 
 void Player::draw() {
 
 	//Debug
 	//RectF(pos.movedBy(60, -TextureAsset(U"UiBeam").size().y / 15.0 - 32), Min(TextureAsset(U"UiBeam").size().x/5 * 3, Scene::Size().x) , TextureAsset(U"UiBeam").size().y/15 * 3).draw();
-
-	//スプライトシートを再生
-	//int n = (int)(Scene::Time() / 0.05) % (5*15);
-
-	//TextureAsset(U"UiBeam")( (n % 5) * TextureAsset(U"UiBeam").size().x / 5, (int)(n/5) * TextureAsset(U"UiBeam").size().y/15 , TextureAsset(U"UiBeam").size().x/5, TextureAsset(U"UiBeam").size().y/15 ).scaled(3).draw(pos.movedBy(40, -TextureAsset(U"UiBeam").size().y/15.0 -32));
+	//Debug プレイヤーの当たり判定
+	//RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3)), 15 * 3, 15 * 3).draw(ColorF(1, 0, 0, 0.3));
 
 	//無敵時間中
 	if (isInvincibility()) {
@@ -549,6 +632,8 @@ void Player::draw() {
 	//近接攻撃中
 	else if (isAttack) {
 		drawForAttack(1.0);
+		//Debug 当たり判定
+		//RectF(Arg::center(pos.movedBy(20 * 3, 0)), 18 * 3, 22 * 3).draw(ColorF(1,0,0,0.3));
 	}
 	//ビーム中
 	else if (isBeamAttacking) {

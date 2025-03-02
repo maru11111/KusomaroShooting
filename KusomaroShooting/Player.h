@@ -15,11 +15,13 @@ public:
 
 	void bossAppearStateUpdate(double timer);
 
+	void toStartPos();
+
 	void move();
 
 	void attack();
 
-	void damage(int damageAmount);
+	void damage(int damageAmount, bool piercingInv);
 
 	MaroType chooseMaro();
 
@@ -66,7 +68,8 @@ public:
 
 	void drawForAttack(double opacity);
 
-	void drawEffect();
+	void drawEffectFront();
+	void drawEffectBack();
 
 	void draw();
 
@@ -74,8 +77,10 @@ private:
 	Objects& objects;
 	int maxHp = 10;
 	int hp = maxHp;
-	int damageAmount=10;
-	Vec2 pos = { 100,100 };
+	int damageAmount = 10;
+	Vec2 pos = { -100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3};
+	Vec2 startPos = { 100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3 };
+	double toBaseTimer = 0;
 	Vec2 vec = { 0,0 };
 	double speed = 100*3;
 	double remainingInvincibilityTime=0;
@@ -85,7 +90,7 @@ private:
 	double marshmallowAddTimer = 0;
 	const double marshmallowAddInterval = 5;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 20;
+	int normalMaroAppearProbability = 80;
 	//クソマロ判定をされたマロのなかでの確率(％)
 	int upMaroAppearProbability = 30;
 	int downMaroAppearProbability = 30;
@@ -108,7 +113,9 @@ private:
 	double beamTimer=0;
 	bool startBlink = false;
 	bool keepBlink = false;
-	Effect effect;
+	Effect effectFront;
+	Effect effectBack;
+
 
 	//hpHealAnim
 	bool isHealing = false;
@@ -131,7 +138,15 @@ private:
 	double maroAddBackAnimTimer = 0;
 	double prevBackAnimMaro = 0;
 
+	//eat
+	double eatTimer=0;
+	double isEating = false;
+	MaroType ateMaroType;
+
 	//基準位置
 	Vec2 basePos = Vec2(100, TextureAsset(U"UIBack").size().y * 6 + (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6)/2.0);
 	Vec2 prevPos=pos;
+
+	//移動時エフェクト
+	double effectTimer = 0;
 };
