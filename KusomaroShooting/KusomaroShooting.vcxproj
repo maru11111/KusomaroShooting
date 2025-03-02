@@ -57,7 +57,7 @@
     <OutDir>$(SolutionDir)Intermediate\$(ProjectName)\Release\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\Release\Intermediate\</IntDir>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)App</LocalDebuggerWorkingDirectory>
-    <IncludePath>$(SIV3D_0_6_14)\include;$(SIV3D_0_6_14)\include\ThirdParty;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\丸山隆也\Downloads\KusomaroShooting-master\KusomaroShooting-master\KusomaroShooting-master\KusomaroShooting;C:\Users\丸山隆也\Downloads\KusomaroShooting-master\KusomaroShooting-master\KusomaroShooting-master\KusomaroShooting\Scene;$(SIV3D_0_6_14)\include;$(SIV3D_0_6_14)\include\ThirdParty;$(IncludePath)</IncludePath>
     <LibraryPath>$(SIV3D_0_6_14)\lib\Windows;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
