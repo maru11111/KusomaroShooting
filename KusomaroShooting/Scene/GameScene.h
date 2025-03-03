@@ -15,6 +15,8 @@ public:
 
 	void collisionAndRemoveUpdate();
 
+	void updateWithHitStop();
+
 	virtual void spawnEnemy();
 
 	void destroyObjects();
@@ -31,7 +33,9 @@ public:
 	double drawTimer = 0;
 	double damageUIEffectTimer = 0;
 	bool isDamageUIEffectPlaying=false;
-	int counterForSlowUpdate=0;
+	//int counterForSlowUpdate=0;
+	double slowTimer=0;
+	const double slowInterval = 1.0 / 60.0 * 3;
 
 	void loadJson(String path)const;
 
@@ -61,6 +65,8 @@ private:
 	double easeTimer6 = 0;
 	double easeTimer7 = 0;
 
+
+
 	bool isHpAnimationStart = false;
 	bool isHpAnimationEnd = false;
 	mutable double easeBossHpAnimationTimer = 0;
@@ -72,11 +78,12 @@ private:
 
 	//BossAppearのステート
 	enum class BossAppearState {
+		ChangeBackGround,
 		HideUI,
 		DrawRect,
 		AppearBoss
 	};
-	BossAppearState bossAppearState = BossAppearState::HideUI;
+	BossAppearState bossAppearState = BossAppearState::ChangeBackGround;
 	double marshmallowUIOffset = TextureAsset(U"UIBack").size().y * 6;
 	double easeBossAppear=0.0;
 	Camera2D camera{ Vec2{Scene::Center() + Vec2{0,-1}}, 1.0 , CameraControl::None_};
@@ -97,7 +104,7 @@ private:
 		MidNight
 	};
 	Array<String>stageName = {
-		U"Uinitil Dawn",
+		U"Uinitial Dawn",
 		U"Blue Pallete Noon",
 		U"a",
 		U"a",
@@ -122,7 +129,8 @@ private:
 	StageStartState stageStartState = StageStartState::Start;
 
 	//ステージ移動演出
-
+	double backGroundOpacity = 1.0;
+	double rainOpacity = 0.0;
 
 protected:
 	Objects objects;

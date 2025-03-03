@@ -12,6 +12,13 @@ BlendState MaxAlphaBlend()
 	return blend;
 }
 
+struct DamageScreenEffect : IEffect {
+	bool update(double t)override {
+		drawSpriteAnimForTimer(U"DamageScreenEffect", 7, 0.040, { 0, 0 }, t, 3, true);
+		return currentFrame(7, 0.040, t) != 7;
+	}
+};
+
 struct DamageEffect : IEffect
 {
 	Vec2 pos;
@@ -133,9 +140,13 @@ void GameScene::drawMarshmallowUI() const {
 	}
 	if (flag==true && isHpAnimationStart) {
 		TextureAsset(U"UIBackWithBox")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0-6 + damageUIEffectOffsetX ,-6 -easeBossAppear * marshmallowUIOffset);
+		if (objects.player->isInvincibility()) drawSpriteAnim(U"UimmDamageForUI", 3, 0.250, { 0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY }, 6);
+		else TextureAsset(U"UimmNormalForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
 	}
 	else {
 		TextureAsset(U"UIBack")(n * TextureAsset(U"UIBack").size().x / 65, 0, TextureAsset(U"UIBack").size().x / 65.0, TextureAsset(U"UIBack").size().y).scaled(6).draw(-6 + damageUIEffectOffsetX,-6 -easeBossAppear * marshmallowUIOffset);
+		if (objects.player->isInvincibility()) drawSpriteAnim(U"UimmDamageForUI", 3, 0.250, { 0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY }, 6);
+		else TextureAsset(U"UimmNormalForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
 	}
 
 	//HPバー
@@ -182,28 +193,36 @@ void GameScene::drawMarshmallowUI() const {
 		//アルファ値を戻す
 		const ScopedRenderStates2D renderState{ MaxAlphaBlend() };
 
+		FontAsset(U"GameUI_Pixel")(U"HP").draw(165 - 4 + damageUIEffectOffsetX+2.0, 24 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.5, ColorF(0.25, 0.25, 0.25));
 		FontAsset(U"GameUI_Pixel")(U"HP").draw(165-4 + damageUIEffectOffsetX, 24 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 		//Print << U"easeBoss" << marshmallowUIOffset*easeBossAppear;
 		//if (objects.player->getNumMarshmallows() < 10) FontAsset(U"GameUI_Pixel")(U"Marshmallow\n    ", objects.player->getNumMarshmallows(), U"/30").drawAt(74, 93);
-		/*else*/ FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165-4 + damageUIEffectOffsetX, 24 * 3 + 14 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		/*else*/
+		FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165 - 4 + damageUIEffectOffsetX+2.0, 24 * 3 + 14 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.0, ColorF(0.25, 0.25, 0.25));
+		FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165-4 + damageUIEffectOffsetX, 24 * 3 + 14 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
+		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX+2.0, 12 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.0, ColorF(0.25, 0.25, 0.25));
 		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX, 12 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 		//ステージ名orボスの名前
 		switch (gameState) {
 		case GameState::Tutorial:break;
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage:Tutorial").draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset); break;
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:Tutorial").draw(548 + damageUIEffectOffsetX+2.0, 25 - 6 - easeBossAppear * marshmallowUIOffset+2.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0)); break;
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:Tutorial").draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95)); break;
 
 		case GameState::StageStart:
 		case GameState::Stage:
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage:"+ stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset); break;
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:" + stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:"+ stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+			break;
 
 		case GameState::BossAppear:
 			if (bossAppearState == BossAppearState::AppearBoss) {
 				for (int i = 0; i < objects.enemies.size(); i++) {
 					if (objects.enemies[i]->getId() == -1) {
-						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset);
+						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX+3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
 					}
 				}
 			}
@@ -211,7 +230,8 @@ void GameScene::drawMarshmallowUI() const {
 		case GameState::BossBattle:
 			for (int i = 0; i < objects.enemies.size(); i++) {
 				if (objects.enemies[i]->getId() == -1) {
-					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset);
+					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX+3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
 				}
 			}
 			break;
@@ -254,10 +274,17 @@ void GameScene::update() {
 			switch (stageStartState) {
 			case StageStartState::Start:
 				{
+				Print << U"backGroundOpacity" << backGroundOpacity;
 					stageStartEaseTimer += Scene::DeltaTime();
 					if (currentFrame(7, 0.080, stageStartAnimTimer) != 7) stageStartAnimTimer += Scene::DeltaTime();
 					const double stageStartEase = Min(EaseOutExpo(stageStartEaseTimer / 1.5), 1.0);
 					stageNameTextPos = stageNameTextStartPos.lerp(stageNameTextMiddlePos, stageStartEase);
+					//背景切替演出
+					//空切替
+					if (currentStage != Stage::Morning) backGroundOpacity = Math::Lerp(1.0, 0.0, stageStartTimer / 1.5);
+					//雨切替
+					if (currentStage == Stage::AfterNoon) rainOpacity = Math::Lerp(0.0, 1.0, stageStartTimer / 1.5);
+					if (currentStage == Stage::Evening) rainOpacity = Math::Lerp(1.0, 0.0, stageStartTimer / 1.5);
 					//次に進む
 					if (1.5 <= stageStartEaseTimer) {
 						stageStartState = StageStartState::Middle;
@@ -273,6 +300,7 @@ void GameScene::update() {
 					if (0.25 <= stageStartTimer) {
 						stageStartState = StageStartState::End;
 						stageStartAnimTimer = 0;
+						stageStartTimer = 0;
 					}
 					break;
 				}
@@ -286,7 +314,7 @@ void GameScene::update() {
 					//プレイヤーが登場
 					if(currentStage == Stage::Morning) objects.player->toStartPos();
 					//次に進む
-					if (2.0 <= stageStartEaseTimer) {
+					if (2.0 <= stageStartTimer) {
 						stageStartState = StageStartState::Start;
 						stageStartTimer = 0;
 						stageStartEaseTimer = 0;
@@ -305,58 +333,77 @@ void GameScene::update() {
 		case Stage::Morning:
 
 			//空になったら次のステージ
-			if (spawnEnemyData.empty() && objects.enemies.empty()) {
-				//currentStage = Stage::Noon;
-				//gameState = GameState::StageStart;
-				////次のステージをロード
+			if (true /*spawnEnemyData.empty() && objects.enemies.empty()*/) {
+				currentStage = Stage::Noon;
+				gameState = GameState::StageStart;
+				//次のステージをロード
 				//loadJson(U"stage/stage2.json");
 
-				gameState = GameState::StageStart;
-				gameState = GameState::BossAppear;
+				//gameState = GameState::StageStart;
+				//gameState = GameState::BossAppear;
+
+				//背景の不透明度をリセット
+				backGroundOpacity = 1.0;
 			}
 			break;
 
 		case Stage::Noon:
+			//空になったら次のステージ
+			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
+				currentStage = Stage::AfterNoon;
+				gameState = GameState::StageStart;
+				//次のステージをロード
+				//loadJson(U"stage/stage3.json");
+
+				//背景の不透明度をリセット
+				backGroundOpacity = 1.0;
+			}
 			break;
 
 		case Stage::AfterNoon:
+			//空になったら次のステージ
+			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
+				currentStage = Stage::Evening;
+				gameState = GameState::StageStart;
+				//次のステージをロード
+				//loadJson(U"stage/stage4.json");
+				// 
+				//背景の不透明度をリセット
+				backGroundOpacity = 1.0;
+			}
 			break;
 
 		case Stage::Evening:
+			//空になったら次のステージ
+			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
+				currentStage = Stage::Night;
+				gameState = GameState::StageStart;
+				//次のステージをロード
+				//loadJson(U"stage/stage5.json");
+				
+				//背景の不透明度をリセット
+				backGroundOpacity = 1.0;
+			}
 			break;
 
 		case Stage::Night:
+			//空になったら次のステージ
+			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
+				currentStage = Stage::MidNight;
+				gameState = GameState::BossAppear;
+
+				//背景の不透明度をリセット
+				backGroundOpacity = 1.0;
+			}
 			break;
 
 		case Stage::MidNight:
 			break;
 		}
 
-		//ヒットストップをするか判定
-		if (objects.player->getIsHitStopStart()) {
-			hitStopTimer = 0;
-			isHitStopping = true;
-			isDamageUIEffectPlaying = true;
-			counterForSlowUpdate = 0;
-		}
+		//ヒットストップありupdate
+		updateWithHitStop();
 
-		//ヒットストップ時
-		if (isHitStopping) {
-			//タイマー
-			hitStopTimer += Scene::DeltaTime();
-			counterForSlowUpdate++;
-			//3フレームに一回だけ更新(スローにする)
-			if (counterForSlowUpdate % /*(int)(Max(*/3/* * (1.0 - Min(EaseOutQuart(hitStopTimer) / hitStopTime, 1.0)), 1.0))*/ == 0) {
-				stageUpdate();
-			}
-			if (hitStopTime <= hitStopTimer) {
-				isHitStopping = false;
-			}
-		}
-		//ヒットストップなし
-		else {
-			stageUpdate();
-		}
 		break;
 
 	case GameState::BossAppear:
@@ -365,6 +412,8 @@ void GameScene::update() {
 		easeTimer1 += Scene::DeltaTime();
 		easeTimer2 += Scene::DeltaTime();
 		easeTimer3 += Scene::DeltaTime();
+		//背景を動かす
+		drawTimer += Scene::DeltaTime()/2.0;
 
 		if (not isSpawnBoss) {
 			//ボス
@@ -377,6 +426,23 @@ void GameScene::update() {
 
 		//BossAppearのステート
 		switch (bossAppearState) {
+		case BossAppearState::ChangeBackGround:
+
+			//背景を徐々に出す
+			if (currentStage != Stage::Morning) backGroundOpacity = Math::Lerp(1.0, 0.0, gameStateTimer / (1.0 / 1.5));
+			if (currentStage == Stage::AfterNoon) rainOpacity = Math::Lerp(0.0, 1.0, gameStateTimer / (1.0 / 1.5));
+
+			//次に移る
+			if (2.0 <= gameStateTimer) {
+				//タイマーリセット
+				gameStateTimer = 0;
+				easeTimer1 = 0;
+				easeTimer2 = 0;
+				//ボス出現演出のステートを次に進める
+				bossAppearState = BossAppearState::HideUI;
+			}
+			break;
+
 		case BossAppearState::HideUI:
 			
 			if (gameStateTimer <= 1.0/1.5) {
@@ -480,31 +546,8 @@ void GameScene::update() {
 		break;
 
 	case GameState::BossBattle:
-		//ヒットストップをするか判定
-		if (objects.player->getIsHitStopStart()) {
-			hitStopTimer = 0;
-			isHitStopping = true;
-			isDamageUIEffectPlaying = true;
-			counterForSlowUpdate = 0;
-		}
-
-		//ヒットストップ時
-		if (isHitStopping) {
-			//タイマー
-			hitStopTimer += Scene::DeltaTime();
-			counterForSlowUpdate++;
-			//3フレームに一回だけ更新(スローにする)
-			if (counterForSlowUpdate % /*(int)(Max(*/3/* * (1.0 - Min(EaseOutQuart(hitStopTimer) / hitStopTime, 1.0)), 1.0))*/ == 0) {
-				stageUpdate();
-			}
-			if (hitStopTime <= hitStopTimer) {
-				isHitStopping = false;
-			}
-		}
-		//ヒットストップなし
-		else {
-			stageUpdate();
-		}
+		//ヒットストップありupdate
+		updateWithHitStop();
 		break;
 	}
 
@@ -546,6 +589,9 @@ void GameScene::collisionAndRemoveUpdate() {
 	//プレイヤー本体と敵本体
 	for (auto& enemy : objects.enemies) {
 		if (enemy->collision().intersects(objects.player->bodyCollision())) {
+			//ダメージ時画面エフェクト
+			if (not objects.player->isInvincibility())effect.add<DamageScreenEffect>();
+			//ダメージ
 			objects.player->damage(enemy->getDamageAmount(), false);
 		}
 	}
@@ -612,10 +658,35 @@ void GameScene::collisionAndRemoveUpdate() {
 	destroyObjects();
 }
 
-void GameScene::stageUpdate() {
-	//描画に使うタイマー
-	drawTimer += Scene::DeltaTime();
+void GameScene::updateWithHitStop() {
+	//ヒットストップをするか判定
+	if (objects.player->getIsHitStopStart()) {
+		hitStopTimer = 0;
+		isHitStopping = true;
+		isDamageUIEffectPlaying = true;
+		slowTimer = 0;
+	}
 
+	//ヒットストップ時
+	if (isHitStopping) {
+		//タイマー
+		hitStopTimer += Scene::DeltaTime();
+		slowTimer += Scene::DeltaTime();
+		//3フレームに一回だけ更新(スローにする)
+		if (slowInterval <= slowTimer) {
+			stageUpdate();
+		}
+		if (hitStopTime <= hitStopTimer) {
+			isHitStopping = false;
+		}
+	}
+	//ヒットストップなし
+	else {
+		stageUpdate();
+	}
+}
+
+void GameScene::stageUpdate() {
 	//ダメージ時のUIエフェクト用タイマー
 	if (isDamageUIEffectPlaying) {
 		damageUIEffectTimer += Scene::DeltaTime();
@@ -635,6 +706,8 @@ void GameScene::stageUpdate() {
 
 	//プレイヤーとビーム以外は停止
 	if (isEnemyTimeStopped) {
+		//背景をゆっくり動かす
+		drawTimer += Scene::DeltaTime()/2.0;
 		//敵以外を更新
 		objects.player->update();
 		for (int i = 0; i < objects.marshmallows.size();i++) {
@@ -643,6 +716,8 @@ void GameScene::stageUpdate() {
 	}
 	//敵が停止していない
 	else {
+		//背景を動かす
+		drawTimer += Scene::DeltaTime();
 		//更新
 		objects.player->update();
 		for (int i = 0; i < objects.marshmallows.size(); i++) {
@@ -781,19 +856,41 @@ void GameScene::commonDraw()const {
 		const double backMountainPosX = -(int)(drawTimer /   0.0300) % (320 * 3);
 		const double middleMountainPosX = -(int)(drawTimer / 0.0175) % (320 * 3);
 		const double frontMountainPosX = -(int)(drawTimer /  0.0125) % (320 * 3);
-		const double frontCityPosX = -(int)(drawTimer /  0.00425) % (320 * 3);
-		const double middleCityPosX = -(int)(drawTimer / 0.00325) % (320 * 3);
-		const double backCityPosX = -(int)(drawTimer /   0.00225) % (320 * 3);
+		const double frontCityPosX = -(int)(drawTimer /  0.004125) % (320 * 3);
+		const double middleCityPosX = -(int)(drawTimer / 0.003125) % (320 * 3);
+		const double backCityPosX = -(int)(drawTimer /   0.002125) % (320 * 3);
 		const Vec2 rainPos = { -(int)(drawTimer / 0.00200) % (320 * 3), (int)(drawTimer / 0.00200) % (214 * 3) };
 
 		//空
 		switch (currentStage) {
-		case Stage::Morning: TextureAsset(U"SkyMorning").scaled(3).draw(0, 0); break;
-		case Stage::Noon: TextureAsset(U"SkyNoon").scaled(3).draw(0, 0); break;
-		case Stage::AfterNoon: TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0); break;
-		case Stage::Evening: TextureAsset(U"SkyEvening").scaled(3).draw(0, 0); break;
-		case Stage::Night: TextureAsset(U"SkyNight").scaled(3).draw(0, 0); break;
-		case Stage::MidNight: TextureAsset(U"SkyMidNight").scaled(3).draw(0, 0); break;
+		case Stage::Morning:
+			TextureAsset(U"SkyMorning").scaled(3).draw(0, 0);
+			break;
+
+		case Stage::Noon:
+			TextureAsset(U"SkyNoon").scaled(3).draw(0, 0);
+			TextureAsset(U"SkyMorning").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::AfterNoon:
+			TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0);
+			TextureAsset(U"SkyNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::Evening:
+			TextureAsset(U"SkyEvening").scaled(3).draw(0, 0);
+			TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::Night:
+			TextureAsset(U"SkyNight").scaled(3).draw(0, 0);
+			TextureAsset(U"SkyEvening").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::MidNight:
+			TextureAsset(U"SkyMidNight").scaled(3).draw(0, 0);
+			TextureAsset(U"SkyNight").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+			break;
 		}
 		//TextureAsset(U"BackGroundSky").scaled(3).draw(Scene::Size().x + skyPosX, 0);
 		//TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
@@ -810,16 +907,100 @@ void GameScene::commonDraw()const {
 		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(Scene::Size().x + middleCityPosX, 0);
 		TextureAsset(U"BackGroundCity").scaled(3).draw(backCityPosX, 0);
 		TextureAsset(U"BackGroundCity").scaled(3).draw(Scene::Size().x + backCityPosX, 0);
-		TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0);
-		TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-		TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0);
-		TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-		TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0);
-		TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-		/*TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, 0 });
-		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 });
-		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y });
-		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y });*/
+
+		//雲
+		switch (currentStage) {
+		case Stage::Morning:
+			TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
+			TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+			TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0);
+			TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+			TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0);
+			TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+			break;
+
+		case Stage::Noon:
+			TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0);
+			TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+			TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0);
+			TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+			TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0);
+			TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+			TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::AfterNoon:
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0);
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0);
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
+			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+			TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::Evening:
+			TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
+			TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+			TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0);
+			TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+			TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0);
+			TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::Night:
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0);
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0);
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
+			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+			TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			break;
+
+		case Stage::MidNight:
+			TextureAsset(U"CloudSmallMidNight").scaled(3).draw(cloudSmallPosX, 0);
+			TextureAsset(U"CloudSmallMidNight").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+			TextureAsset(U"CloudNormalMidNight").scaled(3).draw(cloudNormalPosX, 0);
+			TextureAsset(U"CloudNormalMidNight").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+			TextureAsset(U"CloudBigMidNight").scaled(3).draw(cloudBigPosX, 0);
+			TextureAsset(U"CloudBigMidNight").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+			break;
+		}
+
+		if (currentStage == Stage::AfterNoon || currentStage == Stage::Evening) {
+			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, 0 }, ColorF(1.0, rainOpacity));
+			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 }, ColorF(1.0, rainOpacity));
+			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y }, ColorF(1.0, rainOpacity));
+			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y }, ColorF(1.0, rainOpacity));
+		}
 
 
 		//背景とオブジェクトの間
@@ -895,21 +1076,27 @@ void GameScene::draw() const {
 
 		switch (stageStartState) {
 		case StageStartState::Start:
-			drawSpriteAnim(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(1.0, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(1.0, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
+			drawSpriteAnimForTimerAt(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos+Vec2{3.0, 3.0}, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(0.95, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0+3.0, 34+3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(0.95, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
 			break;
 
 		case StageStartState::Middle:
-			drawSpriteAnim(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos);
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 });
+			drawSpriteAnimForTimerAt(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos+Vec2{3.0, 3.0}, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos, ColorF(0.95));
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0 + 3.0, 34 + 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 }, ColorF(0.95));
 			break;
 
 		case StageStartState::End:
-			drawSpriteAnim(U"StageNameOut", 6, 0.100, Scene::CenterF(), stageStartAnimTimer);
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(1.0, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(1.0, 1.0 * (1.0-Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))) );
+			drawSpriteAnimForTimerAt(U"StageNameOut", 6, 0.100, Scene::CenterF(), stageStartAnimTimer);
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos+Vec2{3.0, 3.0}, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(0.95, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0+3.0, 34+3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * (1.0-Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))) );
+			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(0.95, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
 			break;
 		}
 		break;
@@ -921,6 +1108,10 @@ void GameScene::draw() const {
 
 	case GameState::BossAppear:
 		switch (bossAppearState) {
+		case BossAppearState::ChangeBackGround:
+			commonDraw();
+			break;
+
 		case BossAppearState::HideUI:
 			commonDraw();
 			break;
