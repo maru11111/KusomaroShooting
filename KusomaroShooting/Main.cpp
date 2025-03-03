@@ -87,6 +87,15 @@ void Main()
 	TextureAsset::Register(U"CloudBig", Resource(U"texture/CloudBig.png"));
 	TextureAsset::Register(U"CloudNormal", Resource(U"texture/CloudNormal.png"));
 	TextureAsset::Register(U"CloudSmall", Resource(U"texture/CloudSmall.png"));
+	TextureAsset::Register(U"CloudBigMorning", Resource(U"texture/CloudBigMorning.png"));
+	TextureAsset::Register(U"CloudNormalMorning", Resource(U"texture/CloudNormalMorning.png"));
+	TextureAsset::Register(U"CloudSmallMorning", Resource(U"texture/CloudSmallMorning.png"));
+	TextureAsset::Register(U"CloudBigRain", Resource(U"texture/CloudBigRain.png"));
+	TextureAsset::Register(U"CloudNormalRain", Resource(U"texture/CloudNormalRain.png"));
+	TextureAsset::Register(U"CloudSmallRain", Resource(U"texture/CloudSmallRain.png"));
+	TextureAsset::Register(U"CloudBigMidNight", Resource(U"texture/CloudBigMidNight.png"));
+	TextureAsset::Register(U"CloudNormalMidNight", Resource(U"texture/CloudNormalMidNight.png"));
+	TextureAsset::Register(U"CloudSmallMidNight", Resource(U"texture/CloudSmallMidNight.png"));
 	TextureAsset::Register(U"StageNameIn", Resource(U"texture/StageNameIn.png"));
 	TextureAsset::Register(U"StageNameOut", Resource(U"texture/StageNameOut.png"));
 	TextureAsset::Register(U"Rain", Resource(U"texture/Rain.png"));
@@ -96,12 +105,14 @@ void Main()
 	TextureAsset::Register(U"SkyEvening", Resource(U"texture/SkyEvening.png"));
 	TextureAsset::Register(U"SkyNight", Resource(U"texture/SkyNight.png"));
 	TextureAsset::Register(U"SkyMidNight", Resource(U"texture/SkyMidNight.png"));
-
+	TextureAsset::Register(U"UimmNormalForUI", Resource(U"texture/UimmNormalForUI.png"));
+	TextureAsset::Register(U"UimmDamageForUI", Resource(U"texture/UimmDamageForUI.png"));
+	TextureAsset::Register(U"DamageScreenEffect", Resource(U"texture/DamageScreenEffect.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
-	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf")/*, FontStyle::Bitmap*/);
-	FontAsset::Register(U"GameUI_BestTenDot", 25, Resource(U"font/BestTen-DOT.otf")/*, FontStyle::Bitmap*/);
-	FontAsset::Register(U"GameUI_BestTenDot30", 30, Resource(U"font/BestTen-DOT.otf")/*, FontStyle::Bitmap*/);
+	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
+	FontAsset::Register(U"GameUI_BestTenDot", 25, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
+	FontAsset::Register(U"GameUI_BestTenDot30", 30, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_Pixel", 25, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_Pixel6", 30, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 
@@ -188,6 +199,21 @@ void Main()
 	TextureAsset::Load(U"SkyEvening");
 	TextureAsset::Load(U"SkyNight");
 	TextureAsset::Load(U"SkyMidNight");
+	TextureAsset::Load(U"CloudSmall");
+	TextureAsset::Load(U"CloudSmallMorning");
+	TextureAsset::Load(U"CloudSmallRain");
+	TextureAsset::Load(U"CloudNormal");
+	TextureAsset::Load(U"CloudNormalMorning");
+	TextureAsset::Load(U"CloudNormalRain");
+	TextureAsset::Load(U"CloudBig");
+	TextureAsset::Load(U"CloudBigMorning");
+	TextureAsset::Load(U"CloudBigRain");
+	TextureAsset::Load(U"CloudSmallMidNight");
+	TextureAsset::Load(U"CloudSmallRainMidNight");
+	TextureAsset::Load(U"CloudNormalMidNight");
+	TextureAsset::Load(U"UimmNormalForUI");
+	TextureAsset::Load(U"UimmDamageForUI");
+	TextureAsset::Load(U"DamageScreenEffect");
 
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
