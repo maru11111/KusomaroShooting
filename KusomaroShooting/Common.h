@@ -20,31 +20,41 @@ enum class EnemyType {
 
 /*TextureAsset、総フレーム数、1フレームにかかる時間を受け取って
 スプライトアニメーションを再生*/
-inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos) {
+inline void drawSpriteAnimAt(String textureName, int numFrame, double oneFrameTime, Vec2 pos) {
 	int n = (int)(Scene::Time() / oneFrameTime) % numFrame;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).drawAt(pos);
 }
 //rotateバージョン
-inline void drawRotateSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double angle) {
+inline void drawRotateSpriteAnimAt(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double angle) {
 	int n = (int)(Scene::Time() / oneFrameTime) % numFrame;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).rotated(angle).drawAt(pos);
 }
+//scale + not drawAt
+inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, int scale) {
+	int n = (int)(Scene::Time() / oneFrameTime) % numFrame;
+	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(scale).draw(pos);
+}
 //外部のタイマーを使って再生(1フレーム目から再生できるように)
-inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer) {
+inline void drawSpriteAnimForTimerAt(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer) {
 	int n = (int)(timer / oneFrameTime) % numFrame;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).drawAt(pos);
 }
 //外部のタイマーを使って再生(1フレーム目から再生できるように)+scale
-inline void drawSpriteAnim(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer, int scale) {
+inline void drawSpriteAnimForTimerAt(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer, int scale) {
 	int n = (int)(timer / oneFrameTime) % numFrame;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(scale).drawAt(pos);
+}
+//外部のタイマーを使って再生(1フレーム目から再生できるように) + scale + not drawAt
+inline void drawSpriteAnimForTimer(String textureName, int numFrame, double oneFrameTime, Vec2 pos, double timer, int scale, bool flag) {
+	int n = (int)(timer / oneFrameTime) % numFrame;
+	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(scale).draw(pos);
 }
 //総フレーム数、1フレームにかかる時間、timerから現在のフレームを返す
 inline int currentFrame(int numFrame, double oneFrameTime, double timer) {
 	return (int)(timer / oneFrameTime) % numFrame + 1;
 }
 //あるフレームのみを描画
-inline void drawSprite(String textureName, int numFrame, int n ,Vec2 pos) {
+inline void drawSpriteAt(String textureName, int numFrame, int n ,Vec2 pos) {
 	n--;
 	TextureAsset(textureName)(n * TextureAsset(textureName).size().x / (double)numFrame, 0, TextureAsset(textureName).size().x / (double)numFrame, TextureAsset(textureName).size().y).scaled(3).drawAt(pos);
 }
