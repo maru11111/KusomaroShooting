@@ -832,25 +832,25 @@ void GarbageBox::draw() {
 
 	switch (state) {
 	case State::Appear:
-		drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+		drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
 		break;
 
 	case State::Idle:
-		drawSpriteAnim(U"GarbageBox", 3, 0.14, pos);
+		drawSpriteAnimAt(U"GarbageBox", 3, 0.14, pos);
 		break;
 
 	case State::ThrowCan:
-		if (not isLidOpen) drawSpriteAnim(U"GarbageBoxOpen", 56, 0.08, pos, timers[(int)state].timer);
-		else drawSprite(U"GarbageBoxOpen", 56, 51, pos);
+		if (not isLidOpen) drawSpriteAnimForTimerAt(U"GarbageBoxOpen", 56, 0.08, pos, timers[(int)state].timer);
+		else drawSpriteAt(U"GarbageBoxOpen", 56, 51, pos);
 		break;
 
 	case State::RollingAttack:
 		switch (rollingState) {
 		case RollingState::PreAction:
-			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
 			break;
 		case RollingState::Rolling:
-			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
 			break;
 		}
 		break;
@@ -858,16 +858,16 @@ void GarbageBox::draw() {
 	case State::RollingAttackLong:
 		switch (rollingState) {
 		case RollingState::PreAction:
-			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
 			break;
 		case RollingState::Rolling:
-			drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
 			break;
 		}
 		break;
 
 	case State::DashAttack:
-		drawRotateSpriteAnim(U"GarbageBox", 3, 0.14, pos, currentAngle);
+		drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
 		break;
 	}
 
