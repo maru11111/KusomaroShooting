@@ -17,7 +17,11 @@ public:
 
 	void updateWithHitStop();
 
+	void dyingUpdate();
+
 	virtual void spawnEnemy();
+
+	void addScore(int score);
 
 	void destroyObjects();
 
@@ -28,7 +32,7 @@ public:
 	Objects& getObj();
 
 	bool isHitStopping = false;;
-	double hitStopTime = 0.15;
+	const double hitStopTime = 0.15;
 	double hitStopTimer = 0;
 	double drawTimer = 0;
 	double damageUIEffectTimer = 0;
@@ -37,21 +41,35 @@ public:
 	double slowTimer=0;
 	const double slowInterval = 1.0 / 60.0 * 3;
 
+	bool isInitDyingVar=false;
+	const double dyingHitStopTime = 3.0;
+	const double dyingSlowInterval = 1.0 / 60.0 * 3 /*30/1.5*/;
+
 	void loadJson(String path)const;
 
+	void drawUIUimm(double offsetX, double offsetY)const;
 	void drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, double healEase, double damageEase)const;
 	void drawMaroBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, double healEase)const;
 	void drawBossBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, BaseBoss *boss)const;
 	void drawMarshmallowUI()const;
 
 private:
+	//スコア
+	int currentScore = 0;
+	int stageStartScore = 0;
+	double prevScore = 0;
+	double currentTime = 0;
+	double scoreAnimTimer = 0;
+	bool isPlayScoreAnim = false;
+
 	//GameSceneのステート
 	enum class GameState {
 		Tutorial,
 		StageStart,
 		Stage,
 		BossAppear,
-		BossBattle
+		BossBattle,
+		Pause
 	};
 	GameState gameState = GameState::StageStart;
 	bool isChangeGameState=false;
@@ -64,7 +82,6 @@ private:
 	double easeTimer5 = 0;
 	double easeTimer6 = 0;
 	double easeTimer7 = 0;
-
 
 
 	bool isHpAnimationStart = false;
@@ -95,14 +112,6 @@ private:
 	bool isEnemyTimeStopped=false;	
 
 	//ステージ
-	enum class Stage {
-		Morning,
-		Noon,
-		AfterNoon,
-		Evening,
-		Night,
-		MidNight
-	};
 	Array<String>stageName = {
 		U"Uinitial Dawn",
 		U"Blue Pallete Noon",
@@ -131,6 +140,18 @@ private:
 	//ステージ移動演出
 	double backGroundOpacity = 1.0;
 	double rainOpacity = 0.0;
+
+	//ゲームオーバー
+	enum class SelectedButton {
+		Continue,
+		ReStart,
+		BackToTitle
+	};
+	mutable SelectedButton selectedButton = SelectedButton::ReStart;
+	ColorF activeColor = ColorF(0.9);
+	ColorF inactiveColor = ColorF(0.5);
+	ColorF shadowColor = ColorF(0.2);
+	double gameOverTimer = 0;
 
 protected:
 	Objects objects;

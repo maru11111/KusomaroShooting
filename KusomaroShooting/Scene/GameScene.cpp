@@ -58,9 +58,14 @@ GameScene::GameScene(const InitData& init)
 	//初めのステージをロード
 	loadJson(U"stage/stage1.json");
 
+	//スコア
+	currentScore = getData().lastContinueScore;
+
 	//Debug
 	//ボス
 	//objects.enemies << std::make_unique<GarbageBox>(objects, Vec2( Scene::Size().x+100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
+	//Debug
+	AudioManager::Instance()->play(U"MidBoss");
 }
 
 void GameScene::drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY, double healEase, double damageEase)const {
@@ -121,6 +126,25 @@ void GameScene::drawBossBar(double currentNum, double maxNum, TextureAsset backB
 	//Print << remainingParcentage;
 }
 
+void GameScene::drawUIUimm(double damageUIEffectOffsetX, double damageUIEffectOffsetY)const {
+	int n = (int)(drawTimer / 0.08) % 65;
+	//プレイヤーが瀕死なら
+	if (objects.player->getIsCrisis()) {
+		//赤く点滅
+		const ScopedColorMul2D colorMul{ ColorF(1.0, 0.8 + 0.2 * Periodic::Sawtooth0_1(0.9135s), 0.8 + 0.2 * Periodic::Sawtooth0_1(0.9135s), 1.0) };
+		if (objects.player->isInvincibility()) drawSpriteAnim(U"UimmDamageForUI", 3, 0.250, { 0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY }, 6);
+		else if (objects.player->getIsCrisis()) TextureAsset(U"UimmCrisisForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+		else TextureAsset(U"UimmNormalForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+
+	}
+	else {
+		if (objects.player->isInvincibility()) drawSpriteAnim(U"UimmDamageForUI", 3, 0.250, { 0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY }, 6);
+		else if (objects.player->getIsCrisis()) TextureAsset(U"UimmCrisisForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+		else TextureAsset(U"UimmNormalForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+
+	}
+}
+
 void GameScene::drawMarshmallowUI() const {
 
 	//Rect{ 0,0,Scene::Size().x,40 }.draw(ColorF(0.9, 0.3, 0.3));
@@ -132,22 +156,17 @@ void GameScene::drawMarshmallowUI() const {
 
 	//UIの背景
 	int n = (int)(drawTimer / 0.08) % 65;
-	bool flag = false;
-	for (int i = 0; i < objects.enemies.size(); i++) {
-		if (objects.enemies[i]->getId() == -1) {
-			flag = true;
-		}
+	//ボス戦中
+	if (isHpAnimationStart) {
+		TextureAsset(U"UIBackWithBox")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+		drawUIUimm(damageUIEffectOffsetX, damageUIEffectOffsetY);
 	}
-	if (flag==true && isHpAnimationStart) {
-		TextureAsset(U"UIBackWithBox")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0-6 + damageUIEffectOffsetX ,-6 -easeBossAppear * marshmallowUIOffset);
-		if (objects.player->isInvincibility()) drawSpriteAnim(U"UimmDamageForUI", 3, 0.250, { 0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY }, 6);
-		else TextureAsset(U"UimmNormalForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
-	}
+	//ボス戦以外
 	else {
-		TextureAsset(U"UIBack")(n * TextureAsset(U"UIBack").size().x / 65, 0, TextureAsset(U"UIBack").size().x / 65.0, TextureAsset(U"UIBack").size().y).scaled(6).draw(-6 + damageUIEffectOffsetX,-6 -easeBossAppear * marshmallowUIOffset);
-		if (objects.player->isInvincibility()) drawSpriteAnim(U"UimmDamageForUI", 3, 0.250, { 0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY }, 6);
-		else TextureAsset(U"UimmNormalForUI")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+		TextureAsset(U"UIBack")(n * TextureAsset(U"UIBack").size().x / 65, 0, TextureAsset(U"UIBack").size().x / 65.0, TextureAsset(U"UIBack").size().y).scaled(6).draw(-6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
+		drawUIUimm(damageUIEffectOffsetX, damageUIEffectOffsetY);
 	}
+
 
 	//HPバー
 	drawHpBar(objects.player->getHpEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50 * 3 -4 + damageUIEffectOffsetX, 6 * 3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getHpHealEase(), objects.player->getDamageEase());
@@ -161,7 +180,7 @@ void GameScene::drawMarshmallowUI() const {
 			BaseBoss *bossPtr = static_cast<BaseBoss*>(objects.enemies[i].get());
 			if (isHpAnimationStart && not isHpAnimationEnd) {
 				if (not isPlayHpAnimation) {
-					AudioManager::Instance()->play(U"BossHpAnimation");
+					AudioManager::Instance()->playOneShot(U"BossHpAnimation");
 					isPlayHpAnimation = true;
 				}
 				easeBossHpAnimationTimer += Scene::DeltaTime();
@@ -213,8 +232,11 @@ void GameScene::drawMarshmallowUI() const {
 
 		case GameState::StageStart:
 		case GameState::Stage:
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage:" + stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage:"+ stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:" + stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX + 3.0, 25 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:"+ stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX, 25 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+			//スコア表示
+			FontAsset(U"GameUI_BestTenDot")(U"Score:", (int)Min(prevScore + ((double)currentScore - prevScore) * Min(EaseOutLinear(scoreAnimTimer), 1.0), (double)currentScore)).draw(548+14 + damageUIEffectOffsetX + 3.0, 25 - 6 + 54 + 3.0 - easeBossAppear * marshmallowUIOffset, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot")(U"Score:", (int)Min(prevScore + ((double)currentScore - prevScore) * Min(EaseOutLinear(scoreAnimTimer), 1.0), (double)currentScore)).draw(548+14 + damageUIEffectOffsetX, 25 - 6 + 54 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
 			break;
 
 		case GameState::BossAppear:
@@ -260,6 +282,9 @@ void GameScene::update() {
 	if (Key5.pressed()) currentStage = (Stage)4;
 	if (Key6.pressed()) currentStage = (Stage)5;
 
+	//クリアタイム時間を測る(後でポーズ画面では行わないようにする)
+	currentTime += Scene::DeltaTime();
+
 	switch (gameState) {
 	case GameState::Tutorial:
 		break;
@@ -270,6 +295,9 @@ void GameScene::update() {
 			drawTimer += Scene::DeltaTime();
 
 			stageStartTimer += Scene::DeltaTime();
+
+			//初めのスコアを保存
+			stageStartScore = currentScore;
 
 			switch (stageStartState) {
 			case StageStartState::Start:
@@ -312,9 +340,9 @@ void GameScene::update() {
 					const double stageStartEase = Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0);
 					stageNameTextPos = stageNameTextMiddlePos.lerp(stageNameTextEndPos, stageStartEase);
 					//プレイヤーが登場
-					if(currentStage == Stage::Morning) objects.player->toStartPos();
+					if(currentStage == getData().startStage) objects.player->toStartPos();
 					//次に進む
-					if (2.0 <= stageStartTimer) {
+					if (0.5 <= stageStartTimer) {
 						stageStartState = StageStartState::Start;
 						stageStartTimer = 0;
 						stageStartEaseTimer = 0;
@@ -334,8 +362,8 @@ void GameScene::update() {
 
 			//空になったら次のステージ
 			if (true /*spawnEnemyData.empty() && objects.enemies.empty()*/) {
-				currentStage = Stage::Noon;
-				gameState = GameState::StageStart;
+				//currentStage = Stage::Noon;
+				//gameState = GameState::StageStart
 				//次のステージをロード
 				//loadJson(U"stage/stage2.json");
 
@@ -577,10 +605,11 @@ void GameScene::collisionAndRemoveUpdate() {
 	if (objects.player->getIsAttackColOn()) {
 		for (auto& enemy : objects.enemies) {
 			if (enemy->collision().intersects(objects.player->attackCollision())) {
-				//Print << U"damage!!!";
-				bool isDamaged = enemy->damage(objects.player->getDamageAmount(), true);
 				//ダメージエフェクト
-				if (isDamaged) effect.add<DamageEffect>(enemy->getPos());
+				if (not enemy->isInvincibility()) effect.add<DamageEffect>(enemy->getPos());
+				bool isDead = enemy->damage(objects.player->getDamageAmount(), true, currentScore);
+				//スコアを加算
+				addScore(enemy->score);
 			}
 		}
 	}
@@ -607,7 +636,9 @@ void GameScene::collisionAndRemoveUpdate() {
 					//IDを受け取る
 					maro->addId(enemy->getId());
 					//敵にダメージを与える
-					enemy->damage(maro->getDamageAmount(), false);
+					bool isDead = enemy->damage(maro->getDamageAmount(), false, currentScore);
+					//スコアを加算
+					if (isDead) addScore(enemy->score);
 					//エフェクトを追加
 					if (maro->getType() == MaroType::Normal || maro->getType() == MaroType::Empty) {
 						effect.add<DamageEffect>(enemy->getPos());
@@ -623,7 +654,7 @@ void GameScene::collisionAndRemoveUpdate() {
 					//ビームは多段ヒットあり
 					if (maro->getType() == MaroType::Empty) {
 						//敵にダメージを与える
-						enemy->damage(maro->getDamageAmount(), false);
+						enemy->damage(maro->getDamageAmount(), false, currentScore);
 						//エフェクトを追加
 						effect.add<DamageEffect>(enemy->getPos());
 					}
@@ -634,7 +665,7 @@ void GameScene::collisionAndRemoveUpdate() {
 
 	for (auto& maro : objects.marshmallows) {
 		//画面外に行ったクソマロはもう一度boxに
-		//boxに戻さないよう変更
+		//→boxに戻さないよう変更
 		//if (maro->isOffScreen() && (maro->getType() != MaroType::Normal || maro->getType() != MaroType::Empty)) objects.player->setKusomaro(maro->getType());
 		//敵に当たらず画面外に行った時にもクソマロ文章開示
 		if (not maro->getIsHit() && maro->isOffScreen()) {
@@ -659,30 +690,136 @@ void GameScene::collisionAndRemoveUpdate() {
 }
 
 void GameScene::updateWithHitStop() {
-	//ヒットストップをするか判定
-	if (objects.player->getIsHitStopStart()) {
-		hitStopTimer = 0;
-		isHitStopping = true;
-		isDamageUIEffectPlaying = true;
-		slowTimer = 0;
-	}
 
-	//ヒットストップ時
-	if (isHitStopping) {
-		//タイマー
-		hitStopTimer += Scene::DeltaTime();
-		slowTimer += Scene::DeltaTime();
-		//3フレームに一回だけ更新(スローにする)
-		if (slowInterval <= slowTimer) {
+	//プレイヤー生存中
+	if (objects.player->getHp() != 0) {
+		//ヒットストップをするか判定
+		if (objects.player->getIsHitStopStart()) {
+			hitStopTimer = 0;
+			isHitStopping = true;
+			isDamageUIEffectPlaying = true;
+			slowTimer = 0;
+		}
+
+		//ヒットストップ時
+		if (isHitStopping) {
+			//タイマー
+			hitStopTimer += Scene::DeltaTime();
+			slowTimer += Scene::DeltaTime();
+			//3フレームに一回だけ更新(スローにする)
+			if (slowInterval <= slowTimer) {
+				stageUpdate();
+			}
+			if (hitStopTime <= hitStopTimer) {
+				isHitStopping = false;
+			}
+		}
+		//ヒットストップなし
+		else {
 			stageUpdate();
 		}
-		if (hitStopTime <= hitStopTimer) {
-			isHitStopping = false;
+
+		//共通処理
+		if (isPlayScoreAnim) {
+			scoreAnimTimer += Scene::DeltaTime();
+			//次のフレームで終了するなら(厳密には違うがおそらくそうなるので無視)
+			if (not 1.0 <= scoreAnimTimer && 1.0 <= scoreAnimTimer + Scene::DeltaTime()) AudioManager::Instance()->play(U"AddScoreEnd");
+			if (1.0 <= scoreAnimTimer) {
+				isPlayScoreAnim = false;
+				AudioAsset(U"AddScore").stop();
+			}
 		}
 	}
-	//ヒットストップなし
+	//プレイヤ―死亡後
 	else {
-		stageUpdate();
+		if (not isInitDyingVar) {
+			hitStopTimer = 0;
+			slowTimer = 0;
+			isInitDyingVar = true;
+			AudioManager::Instance()->stopAllSE();
+			AudioManager::Instance()->play(U"ReceiveDamageDying");
+		}
+
+		hitStopTimer += Scene::DeltaTime();
+		slowTimer += Scene::DeltaTime();
+		//ヒットストップ
+		if (hitStopTimer <= dyingHitStopTime) {
+			//スローにする
+			if (( dyingSlowInterval/Max(3.0*Min(EaseInCubic(hitStopTimer/2.5), 1.0), 1.0) ) <= slowTimer) {
+				dyingUpdate();
+				slowTimer -= dyingSlowInterval / Max(3.0 * Min(EaseInCubic(hitStopTimer / 2.5), 1.0), 1.0);
+			}
+		}
+		//ヒットストップ終了後
+		else {
+			drawTimer += Scene::DeltaTime() / 4.0;
+			objects.player->dyingUpdate();
+			for (int i = 0; i < objects.marshmallows.size(); i++) {
+				objects.marshmallows[i]->update();
+			}
+			for (int i = 0; i < objects.enemies.size(); i++) {
+				objects.enemies[i]->update();
+			}
+		}
+		//ボタン出現後
+		if (1.5 <= hitStopTimer) {
+			gameOverTimer += Scene::DeltaTime();
+		
+			switch (selectedButton) {
+			case SelectedButton::ReStart:
+				//決定
+				if (KeyZ.pressed() || KeySpace.pressed() || KeyEnter.pressed()) {
+					getData().startStage = Stage::Morning;
+					SpawnEnemyData::spawnTimer = 0;
+					getData().lastContinueScore = 0;
+					AudioManager::Instance()->play(U"Select");
+					changeScene(State::Game, 1.0s);
+				}
+
+				//移動
+				if (KeyRight.down() || KeyD.down()) {
+					selectedButton = SelectedButton::Continue;
+					AudioManager::Instance()->playOneShot(U"ChangeButton");
+				}
+
+				break;
+
+			case SelectedButton::Continue:
+				//決定
+				if (KeyZ.pressed() || KeySpace.pressed() || KeyEnter.pressed()) {
+					getData().startStage = currentStage;
+					SpawnEnemyData::spawnTimer = 0;
+					getData().lastContinueScore = stageStartScore;
+					AudioManager::Instance()->play(U"Select");
+					changeScene(State::Game, 1.0s);
+				}
+
+				//移動
+				if (KeyRight.down() || KeyD.down()) {
+					selectedButton = SelectedButton::BackToTitle;
+					AudioManager::Instance()->playOneShot(U"ChangeButton");
+				}
+				if (KeyLeft.down() || KeyA.down()) {
+					selectedButton = SelectedButton::ReStart;
+					AudioManager::Instance()->playOneShot(U"ChangeButton");
+				}
+				break;
+
+			case SelectedButton::BackToTitle:
+				//決定
+				if (KeyZ.pressed() || KeySpace.pressed() || KeyEnter.pressed()) {
+					AudioManager::Instance()->play(U"Select");
+				}
+
+				//移動
+				if (KeyLeft.down() || KeyA.down()) {
+					selectedButton = SelectedButton::Continue;
+					AudioManager::Instance()->playOneShot(U"ChangeButton");
+				}
+				break;
+			}
+
+		}
 	}
 }
 
@@ -732,8 +869,21 @@ void GameScene::stageUpdate() {
 		spawnEnemy();
 	}
 
-	//
+	//当たり判定と削除
 	collisionAndRemoveUpdate();
+}
+
+void GameScene::dyingUpdate() {
+	//背景を動かす
+	drawTimer += Scene::DeltaTime()/4.0;
+	//更新
+	objects.player->dyingUpdate();
+	for (int i = 0; i < objects.marshmallows.size(); i++) {
+		objects.marshmallows[i]->update();
+	}
+	for (int i = 0; i < objects.enemies.size(); i++) {
+		objects.enemies[i]->update();
+	}
 }
 
 void GameScene::spawnEnemy() {
@@ -792,6 +942,16 @@ void GameScene::spawnEnemy() {
 	//	case 5: objects.enemies << std::make_unique<Umbrella>(objects, pos); break;
 	//	}
 	//}
+}
+
+void GameScene::addScore(int score) {
+	if (isPlayHpAnimation) prevScore = prevScore + (currentScore - prevScore) * Min(EaseOutCubic(scoreAnimTimer), 1.0);
+	else prevScore = currentScore;
+	currentScore += score;
+	isPlayScoreAnim = true;
+	scoreAnimTimer = 0;
+	if (not AudioAsset(U"AddScore").isPlaying()) AudioManager::Instance()->play(U"AddScore");
+	Print << U"ADDDDDDDDDDD";
 }
 
 void GameScene::destroyObjects() {
@@ -1012,15 +1172,29 @@ void GameScene::commonDraw()const {
 		}
 
 		//オブジェクト
-		objects.player->draw();
+		//プレイヤー生存時
+		if (objects.player->getHp() != 0) {
+			objects.player->draw();
+			for (int i = 0; i < objects.marshmallows.size(); i++) {
+				objects.marshmallows[i]->draw();
+			}
 
-		for (int i = 0; i < objects.marshmallows.size(); i++) {
-			objects.marshmallows[i]->draw();
+			for (auto& enemy : objects.enemies) {
+				enemy->draw();
+			}
+		}
+		//プレイヤー死亡時
+		else {
+			objects.player->dyingDraw();
+			for (int i = 0; i < objects.marshmallows.size(); i++) {
+				objects.marshmallows[i]->draw();
+			}
+
+			for (auto& enemy : objects.enemies) {
+				enemy->draw();
+			}
 		}
 
-		for (auto& enemy : objects.enemies) {
-			enemy->draw();
-		}
 
 		//UI
 		drawMarshmallowUI();
@@ -1031,6 +1205,10 @@ void GameScene::commonDraw()const {
 		//gameSceneのエフェクト
 		effect.update();
 
+		//瀕死時画面エフェクト
+		if (objects.player->getIsCrisis()) {
+			TextureAsset(U"LowHpFrame").scaled(3).draw(ColorF(1.0, 1.0 - Periodic::Sawtooth0_1(0.9135s)));
+		}
 
 		//Debug
 		//TextureAsset(U"Fish").draw(300,200);
@@ -1050,6 +1228,78 @@ void GameScene::commonDraw()const {
 	Scene::SetTextureFilter(TextureFilter::Linear);
 	//文字のレンダーテクスチャをdraw
 	fontRenderTexture.draw();
+
+	//プレイヤー生存時
+	if (objects.player->getHp() != 0) {
+	}
+	//プレイヤー死亡時
+	else {
+		
+		if (1.5 <= hitStopTimer) {
+			//Print << 1.0 * Clamp(EaseOutCubic(gameOverTimer), 0.0, 1.0);
+			//不透明度を上げる
+			const ScopedColorMul2D colorMul{ ColorF(1.0, 1.0 * Min(EaseOutCubic(gameOverTimer/1.5), 1.0)) };
+
+			Rect(0, 0, Scene::Size()).draw(ColorF(0, 0.6));
+			//GameOver 
+			FontAsset(U"GameUI_BestTenDot90")(U"GameOver").drawAt(Scene::CenterF().movedBy(3, -50 + 3), shadowColor);
+			FontAsset(U"GameUI_BestTenDot90")(U"GameOver").drawAt(Scene::CenterF().movedBy(0, -50), ColorF(0.90));
+
+			switch (selectedButton) {
+			case SelectedButton::ReStart:
+
+				Triangle(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-110, 2.25), 35).rotated(90_deg).draw(ColorF(activeColor, 1-Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10+3, 0+3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), activeColor);
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10+3, 0+3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 +1.5, -10 - 10 +1.5), shadowColor);
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10, -10 - 10), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot")(U"初めのステージからやり直します。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), ColorF(0.2));
+				FontAsset(U"GameUI_BestTenDot")(U"初めのステージからやり直します。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				break;
+
+			case SelectedButton::Continue:
+
+				Triangle(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-140, 2.25), 35).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), activeColor);
+
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 + 1.5, -10 - 10 + 1.5), shadowColor);
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10, -10 - 10), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot")(U"                 現在のステージの初めからやり直します。\nただし、これを選んでクリアした場合、ランキングにデータは保存されません。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot")(U"                 現在のステージの初めからやり直します。\nただし、これを選んでクリアした場合、ランキングにデータは保存されません。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				break;
+
+			case SelectedButton::BackToTitle:
+
+				Triangle(Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-205-10, -23-10), 25).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time()+0.9135/2)));
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10+3, 0+3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10 + 1.5, -10-10 + 1.5), shadowColor);
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10, -10-10), activeColor);
+
+				FontAsset(U"GameUI_BestTenDot")(U"タイトルに戻ります。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot")(U"タイトルに戻ります。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				break;
+			}
+
+		}
+	}
 }
 
 void GameScene::draw() const {
