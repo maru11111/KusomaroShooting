@@ -27,7 +27,7 @@ void BaseEnemy::update() {
 	}
 }
 
-bool BaseEnemy::damage(int damageAmount, bool isExistInv) {
+bool BaseEnemy::damage(int damageAmount, bool isExistInv, int& gameScore) {
 	//無敵時間を考慮
 	if (isExistInv) {
 		//無敵時間中
@@ -37,13 +37,15 @@ bool BaseEnemy::damage(int damageAmount, bool isExistInv) {
 		}
 		else {
 			//ダメージを受ける
-			remainingInvincibilityTime = invincibilityTime;
 			hp -= damageAmount;
 			if (hp < 0)hp = 0;
+			//無敵時間
+			if (hp != 0)remainingInvincibilityTime = invincibilityTime;;
 			//ダメージSE
-			if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
-			else AudioManager::Instance()->play(U"HitLow");
-			return true;
+			if (hp == 0) AudioManager::Instance()->playOneShot(U"HitHigh");
+			else AudioManager::Instance()->playOneShot(U"HitLow");
+			if (hp == 0)return true;
+			else return false;
 		}
 	}
 	//無敵時間を考慮しない
@@ -52,9 +54,10 @@ bool BaseEnemy::damage(int damageAmount, bool isExistInv) {
 		hp -= damageAmount;
 		if (hp < 0)hp = 0;
 		//ダメージSE
-		if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
-		else AudioManager::Instance()->play(U"HitLow");
-		return true;
+		if (hp == 0) AudioManager::Instance()->playOneShot(U"HitHigh");
+		else AudioManager::Instance()->playOneShot(U"HitLow");
+		if (hp == 0) return true;
+		else return false;
 	}
 }
 
@@ -89,6 +92,7 @@ GarbageBagNormal::GarbageBagNormal(Objects& objects_, Vec2 pos_)
 	vec = { -1,0 };
 	speed = 75*3;
 	damageAmount = 1;
+	score = 110;
 }
 
 void GarbageBagNormal::move() {
@@ -122,6 +126,7 @@ GarbageBagFast::GarbageBagFast(Objects& objects_, Vec2 pos_)
 	vec = { -1,0 };
 	speed = 75 * 3 * 2;
 	damageAmount = 1;
+	score = 220;
 }
 
 void GarbageBagFast::move() {
@@ -149,6 +154,7 @@ GarbageBagWithCan::GarbageBagWithCan(Objects& objects_, Vec2 pos_)
 	vec = { -1,0 };
 	speed = 75;
 	damageAmount = 1;
+	score = 310;
 }
 
 void GarbageBagWithCan::move(){
@@ -170,11 +176,11 @@ void GarbageBagWithCan::attack() {
 		//缶を飛ばす音
 		//int type = Random(0, 2);
 		//switch (type) {
-		//case 0:AudioManager::Instance()->play(U"Can1"); break;
-		//case 1:AudioManager::Instance()->play(U"Can2"); break;
-		//case 2:AudioManager::Instance()->play(U"Can3"); break;
+		//case 0:AudioManager::Instance()->playOneShot(U"Can1"); break;
+		//case 1:AudioManager::Instance()->playOneShot(U"Can2"); break;
+		//case 2:AudioManager::Instance()->playOneShot(U"Can3"); break;
 		//}
-		AudioManager::Instance()->play(U"Can2");
+		AudioManager::Instance()->playOneShot(U"Can2");
 	}
 }
 
@@ -198,6 +204,7 @@ Can::Can(Objects& objects_, Vec2 pos_, Vec2 vec_)
 	vec = vec_;
 	speed = 75*3*2;
 	damageAmount = 1;
+	score = 20;
 
 	//缶の種類を抽選
 	canType = (CanType)Random(0, (int)CanType::Size-1);
@@ -231,6 +238,7 @@ Fish::Fish(Objects& objects_, Vec2 pos_)
 	speed = 75 * 3;
 	damageAmount = 1;
 	vec = (objects.player->getPos() - pos).normalized();
+	score = 320;
 }
 
 void Fish::move() {
@@ -239,7 +247,7 @@ void Fish::move() {
 	if (moveInterval <= timer) {
 		isMoving = true;
 		timer = 0;
-		AudioManager::Instance()->play(U"KaraKara");
+		AudioManager::Instance()->playOneShot(U"KaraKara");
 	}
 
 	if (isMoving) {
@@ -276,6 +284,7 @@ Umbrella::Umbrella(Objects& objects_, Vec2 pos_)
 	maxHp = 10;
 	hp = maxHp;
 	damageAmount = 1;
+	score = 330;
 }
 
 void Umbrella::move() {
@@ -359,6 +368,7 @@ GarbageBox::GarbageBox(Objects& objects_, Vec2 pos_)
 	damageAmount = 1;
 	name = U"巨大ゴミ箱";
 	initPos = pos_;
+	score = 5000;
 }
 
 void GarbageBox::move() {
@@ -376,7 +386,7 @@ void GarbageBox::move() {
 
 		switch (appearState) {
 		case AppearState::ToAppearBasePos:
-			if (ease == 0) AudioManager::Instance()->play(U"AppearBoss");
+			if (ease == 0) AudioManager::Instance()->playOneShot(U"AppearBoss");
 			//登場基準位置に移動
 			ease = EaseOutCirc(timers[(int)state].timer / 2.0);
 			pos = initPos.lerp(appearBasePos, ease);
@@ -397,7 +407,7 @@ void GarbageBox::move() {
 			pos.x += ease * 1.0 * Periodic::Square1_1(0.1s);
 			//ガタガタ効果音
 			if (not isPlayPullAudio) {
-				AudioManager::Instance()->play(U"BossAppearPull");
+				AudioManager::Instance()->playOneShot(U"BossAppearPull");
 				isPlayPullAudio = true;
 			}
 
@@ -419,7 +429,7 @@ void GarbageBox::move() {
 			//pos.x += ease * 2.5 * Periodic::Square1_1(0.1s);
 			//体を乗り出すときの効果音
 			if (not isPlayPushAudio) {
-				AudioManager::Instance()->play(U"RollingAttack");
+				AudioManager::Instance()->playOneShot(U"RollingAttack");
 				isPlayPushAudio = true;
 			}
 
@@ -499,14 +509,14 @@ void GarbageBox::move() {
 		//缶を飛ばす
 	case State::ThrowCan:
 		//効果音
-		if(timers[(int)state].timer==0) AudioManager::Instance()->play(U"ReadyToThrowCan");
+		if(timers[(int)state].timer==0) AudioManager::Instance()->playOneShot(U"ReadyToThrowCan");
 
 		//タイマー更新
 		timers[(int)state].timer += Scene::DeltaTime();
 
 		//ふたが開くときの効果音
 		if (currentFrame(56, 0.08, timers[(int)state].timer) == 47 && not isPlayOpenSE) {
-			AudioManager::Instance()->play(U"Open");
+			AudioManager::Instance()->playOneShot(U"Open");
 			isPlayOpenSE = true;
 		}
 
@@ -525,11 +535,11 @@ void GarbageBox::move() {
 				//缶を飛ばす音
 				//int type = Random(0, 2);
 				//switch (type) {
-				//case 0:AudioManager::Instance()->play(U"Can1"); break;
-				//case 1:AudioManager::Instance()->play(U"Can2"); break;
-				//case 2:AudioManager::Instance()->play(U"Can3"); break;
+				//case 0:AudioManager::Instance()->playOneShot(U"Can1"); break;
+				//case 1:AudioManager::Instance()->playOneShot(U"Can2"); break;
+				//case 2:AudioManager::Instance()->playOneShot(U"Can3"); break;
 				//}
-				AudioManager::Instance()->play(U"Can2");
+				AudioManager::Instance()->playOneShot(U"Can2");
 				//リセット
 				throwCanIntervalTimer.timer -= throwCanIntervalTimer.time;
 				//飛ばした缶の数をカウント
@@ -546,7 +556,7 @@ void GarbageBox::move() {
 		}
 		//ふたを閉じるときの効果音
 		if (currentFrame(56, 0.08, timers[(int)state].timer) == 55 && not isPlayCloseSE && isLidClosing) {
-			AudioManager::Instance()->play(U"Close");
+			AudioManager::Instance()->playOneShot(U"Close");
 			isPlayCloseSE = true;
 		}
 
@@ -574,7 +584,7 @@ void GarbageBox::move() {
 		switch (rollingState) {
 		case RollingState::PreAction:
 			//効果音
-			if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToDashAttack");
+			if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"ReadyToDashAttack");
 			if (timers[(int)state].timer <= 2.25) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
@@ -588,7 +598,7 @@ void GarbageBox::move() {
 			}
 			break;
 		case RollingState::Rolling:
-			if(easeTimer==0) AudioManager::Instance()->play(U"RollingAttack");
+			if(easeTimer==0) AudioManager::Instance()->playOneShot(U"RollingAttack");
 			if (timers[(int)state].timer <= 1.0) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCubic(easeTimer / 1.0);
@@ -623,7 +633,7 @@ void GarbageBox::move() {
 		
 		switch (rollingState) {
 		case RollingState::PreAction:
-			if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToRollingAttackLong");
+			if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"ReadyToRollingAttackLong");
 			if (timers[(int)state].timer <= 3.25) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
@@ -637,7 +647,7 @@ void GarbageBox::move() {
 			}
 			break;
 		case RollingState::Rolling:
-			if (easeTimer == 0) AudioManager::Instance()->play(U"RollingAttackLong");
+			if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"RollingAttackLong");
 			if (timers[(int)state].timer <= 1.0) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCubic(easeTimer / 1.0);
@@ -673,7 +683,7 @@ void GarbageBox::move() {
 		switch (dashState) {
 		case DashState::PreAction:
 			if (timers[(int)state].timer <= 2.25) {
-				if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToDashAttack");
+				if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"ReadyToDashAttack");
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
@@ -690,7 +700,7 @@ void GarbageBox::move() {
 
 		case DashState::Dash1:
 			if (timers[(int)state].timer <= 2.75) {
-				if(easeTimer==0) AudioManager::Instance()->play(U"DashAttack");
+				if(easeTimer==0) AudioManager::Instance()->playOneShot(U"DashAttack");
 				easeTimer += Scene::DeltaTime();
 				ease = EaseInQuad(Min(easeTimer / 1.75, 1.0));
 				currentAngle -= 20 * Scene::DeltaTime();
@@ -772,7 +782,7 @@ void GarbageBox::updateAttackStateTimer() {
 	}
 }
 
-bool BaseBoss::damage(int damageAmount, bool isExistInv) {
+bool BaseBoss::damage(int damageAmount, bool isExistInv, int& gameScore) {
 	//無敵時間を考慮
 	if (isExistInv) {
 		//無敵時間中
@@ -781,16 +791,18 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv) {
 			return false;
 		}
 		else {
+			Print << U"aaaaaa";
 			//ダメージを受ける前のhpを保存
 			if (not isDamageHpAnimation)prevHpDamage = hp;
 			else prevHpDamage = (1.0 - Min(EaseInQuart(damageHpAnimEaseTimer), 1.0)) * ((double)prevHpDamage - (double)hp)+(double)hp;
 			//ダメージを受ける
-			remainingInvincibilityTime = invincibilityTime;
 			hp -= damageAmount;
-			if (hp < 0)hp = 0;
+			if (hp < 0) hp = 0;
+			//無敵時間
+			if(hp!=0) remainingInvincibilityTime = invincibilityTime;
 			//ダメージSE
-			if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
-			else AudioManager::Instance()->play(U"HitLow");
+			if (hp == 0) AudioManager::Instance()->playOneShot(U"HitHigh");
+			else AudioManager::Instance()->playOneShot(U"HitLow");
 			//ダメージ減少アニメーション
 			//ダメージ時のhp減少アニメーションのためのタイマー
 			damageHpAnimTimer = 0;
@@ -798,7 +810,8 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv) {
 			// 〃 のためのフラグ
 			isDamageHpAnimation = true;
 
-			return true;
+			if (hp == 0) return true;
+			else return false;
 		}
 
 	}
@@ -811,15 +824,16 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv) {
 		hp -= damageAmount;
 		if (hp < 0)hp = 0;
 		//ダメージSE
-		if (hp == 0) AudioManager::Instance()->play(U"HitHigh");
-		else AudioManager::Instance()->play(U"HitLow");
+		if (hp == 0) AudioManager::Instance()->playOneShot(U"HitHigh");
+		else AudioManager::Instance()->playOneShot(U"HitLow");
 		//ダメージ減少アニメーション
 		//ダメージ時のhp減少アニメーションのためのタイマー
 		damageHpAnimTimer = 0;
 		damageHpAnimEaseTimer = 0;
 		// 〃 のためのフラグ
 		isDamageHpAnimation = true;
-		return true;
+		if (hp == 0)return true;
+		else return false;
 	}
 }
 

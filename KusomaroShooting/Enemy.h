@@ -14,8 +14,8 @@ public:
 
 	virtual void move()=0;
 
-	//ダメージを受ける関数。無敵時間ならfalse, そうでなければtrueを返す
-	virtual bool damage(int damageAmount, bool isExistInv);
+	//死んだらtrue, 生きていたらfalseを返す
+	virtual bool damage(int damageAmount, bool isExistInv, int& gameScore);
 
 	virtual bool isDestroy();
 
@@ -30,6 +30,8 @@ public:
 	int getId();
 
 	virtual void draw()=0;
+
+	int score;
 
 protected:
 	Objects& objects;
@@ -145,7 +147,7 @@ public:
 
 	double getPrevHpDamage();
 
-	bool damage(int damageAmount, bool isExistInv)override;
+	bool damage(int damageAmount, bool isExistInv, int& gameScore)override;
 
 protected:
 	String name;
