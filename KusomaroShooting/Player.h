@@ -15,6 +15,8 @@ public:
 
 	void bossAppearStateUpdate(double timer);
 
+	void dyingUpdate();
+
 	void toStartPos();
 
 	void move();
@@ -59,6 +61,8 @@ public:
 
 	bool getIsHitStopStart();
 
+	bool getIsCrisis();
+
 	void heal(int healAmount);
 	double getHpEase();
 	double getHpHealEase();
@@ -73,9 +77,13 @@ public:
 
 	void draw();
 
+	void dyingDraw();
+
 private:
+	void drawPlayer();
+
 	Objects& objects;
-	int maxHp = 10;
+	int maxHp = 1;
 	int hp = maxHp;
 	int damageAmount = 10;
 	Vec2 pos = { -100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3};
@@ -90,12 +98,12 @@ private:
 	double marshmallowAddTimer = 0;
 	const double marshmallowAddInterval = 5;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 80;
+	int normalMaroAppearProbability = 100;
 	//クソマロ判定をされたマロのなかでの確率(％)
-	int upMaroAppearProbability = 30;
-	int downMaroAppearProbability = 30;
-	int sineMaroAppearProbability = 30;
-	int beamMaroAppearProbability = 10;
+	int upMaroAppearProbability = 100;
+	int downMaroAppearProbability = 0;
+	int sineMaroAppearProbability =0;
+	int beamMaroAppearProbability = 0;
 	Array<MaroType>maroBox;
 	bool isHitStopStart = false;
 	bool isHitBack=false;
@@ -129,6 +137,10 @@ private:
 	double damageHpAnimTimer = 0;
 	double damageHpAnimEaseTimer = 0;
 	int prevHpDamage;
+	//hpが低いとき
+	const double LowHpBorder = 0.2;
+	const double lowHpEffectRange=0.20;
+	double prevValue = 0;
 
 	//maroAnim
 	bool isMaroAdding = false;

@@ -97,29 +97,18 @@ Player::~Player() {
 	maroBox.clear();
 }
 
+void Player::dyingUpdate() {
+	pos += Vec2{-90 - 80 * Math::Cos(Math::TwoPi*Scene::Time()), 100-40*Math::Sin(Math::TwoPi*Scene::Time())} *Scene::DeltaTime();
+}
 
 void Player::update() {
 
-	//Debug
-	//for (auto& maro : maroBox)Print << (int)maro;
-	//int a[5] = { 0,0,0,0,0 };
-	//for (auto& maro : maroBox){
-	//	switch (maro) {
-	//	case MaroType::Normal:a[0]++; break;
-	//	case MaroType::Up: a[1]++; break;
-	//	case MaroType::Down: a[2]++; break;
-	//	case MaroType::Sine: a[3]++; break;
-	//	case MaroType::Beam: a[4]++; break;
-	//	}
+	//effectTimer += Scene::DeltaTime();
+	//if (0.05 <= effectTimer) {
+	//	//筆のエフェクト
+	//	effectBack.add<MoveEffect>(pos.movedBy(-50, 20));
+	//	effectTimer -= 0.05;
 	//}
-	//Print << U"aaaa";
-
-	effectTimer += Scene::DeltaTime();
-	if (0.05 <= effectTimer) {
-		//筆のエフェクト
-		effectBack.add<MoveEffect>(pos.movedBy(-50, 20));
-		effectTimer -= 0.05;
-	}
 
 	//時間経過でマシュマロ補充
 	if (numMarshmallows < maxNumMarshmallows) {
@@ -186,12 +175,12 @@ void Player::update() {
 	}
 
 	//近接攻撃
-	if (isMovable() && (KeyT.pressed() || KeyX.pressed()) && not isAttack ) {
+	if (isMovable() && (KeyT.pressed() || KeyZ.pressed()) && not isAttack ) {
 		isAttack = true;
 		isAttackColOn = true;
 		isAttackEffectStarted = false;
 		//近接攻撃効果音
-		AudioManager::Instance()->play(U"CloseRangeAttack");
+		AudioManager::Instance()->playOneShot(U"CloseRangeAttack");
 	}
 
 	//近接攻撃中なら
@@ -221,7 +210,7 @@ void Player::update() {
 
 	//マシュマロを投げる
 	if (isMovable()) {
-		if (KeyJ.down() || KeySpace.down() || KeyEnter.down() || KeyZ.down()) {
+		if (KeyJ.down() || KeySpace.down() || KeyEnter.down() || KeyX.down()) {
 			attack();
 		}
 	}
@@ -230,7 +219,7 @@ void Player::update() {
 	if (KeyC.down() && 0 < numMarshmallows && not isEating) {
 		//マシュマロを食べる。
 		//効果音
-		AudioManager::Instance()->play(U"Eat");
+		AudioManager::Instance()->playOneShot(U"Eat");
 		isEating = true;
 		eatTimer = 0;
 		ateMaroType = maroBox[0];
@@ -238,7 +227,7 @@ void Player::update() {
 		numMarshmallows--;
 	}
 	else if(KeyC.down()){
-		AudioManager::Instance()->play(U"Beep");
+		AudioManager::Instance()->playOneShot(U"Beep");
 	}
 
 	//マシュマロ食べ中
@@ -343,14 +332,14 @@ void Player::attack() {
 		}
 
 		//マシュマロ(or beam or クソマロ)を投げる音
-		if (maroBox[0] == MaroType::Normal) AudioManager::Instance()->play(U"Throw");
-		else AudioManager::Instance()->play(U"Kusomaro");
+		if (maroBox[0] == MaroType::Normal) AudioManager::Instance()->playOneShot(U"Throw");
+		else AudioManager::Instance()->playOneShot(U"Kusomaro");
 
 		maroBox.pop_front();
 		numMarshmallows--;
 	}
 	else {
-		AudioManager::Instance()->play(U"Beep");
+		AudioManager::Instance()->playOneShot(U"Beep");
 	}
 }
 
@@ -378,7 +367,7 @@ void Player::damage(int damageAmount, bool piercingInv) {
 		isHitBack = true;
 		hitBackTimer = 0;
 		//効果音
-		AudioManager::Instance()->play(U"ReceiveDamage");
+		AudioManager::Instance()->playOneShot(U"ReceiveDamage");
 		//簡易慣性をリセット
 		vec = Vec2(0,0);
 		//ヒットストップを始める
@@ -486,7 +475,7 @@ bool Player::getIsHitStopStart(){
 
 void Player::heal(int healAmount) {
 	//効果音
-	AudioManager::Instance()->play(U"Heal");
+	AudioManager::Instance()->playOneShot(U"Heal");
 	if (hp == maxHp) return;
 	if (not isHealing) {
 		prevHpHeal = hp;
@@ -529,7 +518,7 @@ void Player::addMarshmallow() {
 		isMaroAdding = true;
 
 		//効果音
-		AudioManager::Instance()->play(U"AddMaro");
+		AudioManager::Instance()->playOneShot(U"AddMaro");
 
 		numMarshmallows++;
 
@@ -554,6 +543,9 @@ double Player::getMaroEase() {
 double Player::getMaroAddEase() {
 	if (isMaroAdding) return (Min(EaseOutExpo(maroAddBackAnimTimer * 1.5), 1.0) * ((double)numMarshmallows - prevBackAnimMaro) + prevBackAnimMaro) / (double)maxNumMarshmallows;
 	else return 0.0;
+}
+bool Player::getIsCrisis() {
+	return (double)hp <= (double)maxHp * LowHpBorder;
 }
 
 
@@ -580,13 +572,7 @@ void Player::drawEffectBack() {
 	effectBack.update();
 }
 
-void Player::draw() {
-
-	//Debug
-	//RectF(pos.movedBy(60, -TextureAsset(U"UiBeam").size().y / 15.0 - 32), Min(TextureAsset(U"UiBeam").size().x/5 * 3, Scene::Size().x) , TextureAsset(U"UiBeam").size().y/15 * 3).draw();
-	//Debug プレイヤーの当たり判定
-	//RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3)), 15 * 3, 15 * 3).draw(ColorF(1, 0, 0, 0.3));
-
+void Player::drawPlayer() {
 	//無敵時間中
 	if (isInvincibility()) {
 		//ヒットバック中
@@ -647,6 +633,32 @@ void Player::draw() {
 		int n = (int)(Scene::Time() / 0.0625) % 102;
 		TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos);
 	}
+}
+
+void Player::dyingDraw() {
+	drawSpriteAnimAt(U"UiDamage", 3, 0.250, pos);
+}
+
+void Player::draw() {
+
+	//Debug
+	//RectF(pos.movedBy(60, -TextureAsset(U"UiBeam").size().y / 15.0 - 32), Min(TextureAsset(U"UiBeam").size().x/5 * 3, Scene::Size().x) , TextureAsset(U"UiBeam").size().y/15 * 3).draw();
+	//Debug プレイヤーの当たり判定
+	//RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3)), 15 * 3, 15 * 3).draw(ColorF(1, 0, 0, 0.3));
+
+	//hpが低いときは赤く点滅
+	if (getIsCrisis()) {
+		const ScopedColorMul2D colorMul{ ColorF(1.0, 0.8 + lowHpEffectRange * Periodic::Sawtooth0_1(0.9135s), 0.8 + lowHpEffectRange * Periodic::Sawtooth0_1(0.9135s), 1.0) };
+		//点滅効果音
+		if (Periodic::Sawtooth0_1(0.9135s) < prevValue ) AudioManager::Instance()->playOneShot(U"LowHp");
+		prevValue = Periodic::Sawtooth0_1(0.9135s);
+		drawPlayer();
+	}
+	else {
+		drawPlayer();
+	}
+	
+	//TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos, ColorF(1.0, 0.0, 0.0, 0.1));
 
 	//Debug
 	//int n = (int)(Scene::Time() / 0.05) % 51;
