@@ -7,7 +7,7 @@ StageEditor::StageEditor(const InitData& init)
 	, objects(gameScene.getObj())
 {
 	//プレイヤー作成
-	objects.player = std::make_unique<Player>(objects, Vec2(-50, Scene::Size().y/2.0));
+	objects.player = std::make_unique<Player>(objects, Vec2(100, Scene::Size().y/2.0));
 	//初期化
 	for (int i = 0; i < maxGridNum; i++) {
 		for (int j = 0; j < row; j++) {
@@ -92,9 +92,9 @@ void StageEditor::update() {
 void StageEditor::updateEditMode() {
 	Print << U"\n";
 
-	Print << U"timer:" << timer;
-	Print << U"static_cast<int>(Parse<double>(Format(timer))):" << static_cast<int>(Parse<double>(Format(timer)));
-	Print << U"static_cast<int>(timer):" << static_cast<int>(timer);
+	//Print << U"timer:" << timer;
+	//Print << U"static_cast<int>(Parse<double>(Format(timer))):" << static_cast<int>(Parse<double>(Format(timer)));
+	//Print << U"static_cast<int>(timer):" << static_cast<int>(timer);
 
 	//編集するステージをロード
 	if (KeyL.down()) {
@@ -107,6 +107,19 @@ void StageEditor::updateEditMode() {
 		Optional<FilePath> path = Dialog::SaveFile({ FileFilter::JSON() });;
 		if (path.has_value()) {
 			toJson(*path);
+		}
+	}
+
+	//敵のデータをリセット
+	if (KeyR.pressed() && KeyLShift.pressed()) {
+		//グリッドを初期化
+		for (int i = 0; i < grids.size(); i++) {
+			for (int j = 0; j < row; j++) {
+				for (int k = 0; k < col; k++) {
+					grids[i][j][k].type = EnemyType::Empty;
+					grids[i][j][k].textureName = U"Empty";
+				}
+			}
 		}
 	}
 
@@ -123,7 +136,7 @@ void StageEditor::updateEditMode() {
 	if (Key5.down()) currentSelectedType = EnemyType::Can;
 	if (Key6.down()) currentSelectedType = EnemyType::Fish;
 	if (Key7.down()) currentSelectedType = EnemyType::Umbrella;
-	if (MouseR.pressed()) currentSelectedType = EnemyType::Empty;
+	
 
 	//選択中の敵を表示
 	switch (currentSelectedType) {
@@ -194,6 +207,22 @@ void StageEditor::updateEditMode() {
 				//save機能のための編集後フラグ
 				if(currentSelectedType != EnemyType::Empty) isAfterChange = true;
 			}
+
+			//右クリックでスポイト
+			//フレームをクリックしたら
+			if (grids[getCurrentIntTime()][i][j].rect.rightPressed()) {
+				//選択した敵をスポイト
+				switch (grids[getCurrentIntTime()][i][j].type) {
+				case EnemyType::Empty: currentSelectedType = EnemyType::Empty;break;
+				case EnemyType::Bag: currentSelectedType = EnemyType::Bag;break;
+				case EnemyType::FastBag: currentSelectedType = EnemyType::FastBag; break;
+				case EnemyType::BagWithCan: currentSelectedType = EnemyType::BagWithCan; break;
+				case EnemyType::Can: currentSelectedType = EnemyType::Can; break;
+				case EnemyType::Fish: currentSelectedType = EnemyType::Fish; break;
+				case EnemyType::Umbrella: currentSelectedType = EnemyType::Umbrella; break;
+				}
+			}
+
 		}
 	}
 
