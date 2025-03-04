@@ -2,6 +2,23 @@
 # include<Siv3D.hpp> // Siv3D v0.6.14
 #include "AudioManager.h"
 
+enum class Stage {
+	Morning,
+	Noon,
+	AfterNoon,
+	Evening,
+	Night,
+	MidNight
+};
+
+struct GameData
+{
+	int lastClearScore=0;
+	double lastClearTime=0;
+	int lastContinueScore = 0;
+	Stage startStage = Stage::Morning;
+};
+
 enum class State {
 	//Title,
 	Game,
@@ -79,14 +96,14 @@ struct KusomaroTextEffect : IEffect {
 		if (Scene::Size().y <= pos.y) pos.y = Scene::Size().y - 12.5;
 		if (Scene::Size().x <= pos.x) pos.x = Scene::Size().x - 50;
 		//効果音
-		AudioManager::Instance()->play(U"PopMaroText");
+		AudioManager::Instance()->playOneShot(U"PopMaroText");
 	}
 
 	bool update(double t)override {
-		//Print << U"timer" << timer;
 		timer += Scene::DeltaTime();
 		double ease = Min(EaseOutQuart(timer / time), 1.0);
-		//FontAsset(U"GameUI_Kei")(str).drawAt(pos.movedBy(0, ease * posYOffset), ColorF(1.0, 1.0 - ease));
+		FontAsset(U"GameUI_Kei")(str).drawAt(pos.movedBy(0+2.0, ease * posYOffset+2.0), ColorF(0.3, 1.0 - ease));
+		FontAsset(U"GameUI_Kei")(str).drawAt(pos.movedBy(0, ease * posYOffset), ColorF(0.95, 1.0 - ease));
 		return (timer < time);
 	}
 };
@@ -116,12 +133,12 @@ struct BeamTextEffect : IEffect {
 		};
 		if (Scene::Size().x <= pos.x) pos.x = Scene::Size().x - 50;
 		//効果音
-		AudioManager::Instance()->play(U"PopMaroText");
+		AudioManager::Instance()->playOneShot(U"PopMaroText");
 	}
 
 	bool update(double t)override {
 		timer += Scene::DeltaTime();
-		double ease = Min(EaseOutQuart(timer / time), 1.0);
+		double ease = Min(EaseOutQuad(timer / time), 1.0);
 
 		drawedStr = U"";
 		pos.y = initPosY;
@@ -131,17 +148,19 @@ struct BeamTextEffect : IEffect {
 				isRedNext = true;
 			}
 			else if (str[i] == U'\n') {
-				//pos.y += FontAsset(U"GameUI_Kei").height();
+				pos.y += FontAsset(U"GameUI_Kei").height();
 				drawedStr = U"";
 			}
 			else if (isRedNext) {
-				//FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(0.9, 0.0, 0.0, 1.0 - ease));
+				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w+2.0, ease * posYOffset+2.0), ColorF(100/255.0, 0 / 255.0, 0 / 255.0, 1.0 - ease));
+				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(0.9, 0.0, 0.0, 1.0 - ease));
 				drawedStr += str[i];
 				isRedNext = false;
 
 			}
 			else {
-				//FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(1.0, 1.0 - ease));
+				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w+2.0, ease * posYOffset+2.0), ColorF(0.3, 1.0 - ease));
+				FontAsset(U"GameUI_Kei")(str[i]).drawAt(pos.movedBy(FontAsset(U"GameUI_Kei")(drawedStr).region().w, ease * posYOffset), ColorF(0.95, 1.0 - ease));
 				drawedStr += str[i];
 			}
 		}
@@ -149,4 +168,4 @@ struct BeamTextEffect : IEffect {
 	}
 };
 
-using App = SceneManager<State>;
+using App = SceneManager<State, GameData>;
