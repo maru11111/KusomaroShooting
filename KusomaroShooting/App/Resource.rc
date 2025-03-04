@@ -197,6 +197,8 @@ Resource(texture/SkyMidNight.png)
 Resource(texture/UimmNormalForUI.png)
 Resource(texture/UimmDamageForUI.png)
 Resource(texture/DamageScreenEffect.png)
+Resource(texture/LowHpFrame.png)
+Resource(texture/UimmCrisisForUI.png)
 
 //フォント
 Resource(font/keifont.ttf)
@@ -211,6 +213,7 @@ Resource(font/PixelMplus12-Regular.ttf)
 Resource(audio/MidBoss.wav)
 Resource(audio/KaraKara.wav)
 Resource(audio/ReceiveDamage.wav)
+Resource(audio/ReceiveDamageDying.wav)
 Resource(audio/Throw.wav)
 Resource(audio/HitHigh.wav)
 Resource(audio/HitLow.wav)
@@ -238,6 +241,11 @@ Resource(audio/Eat.mp3)
 Resource(audio/Heal.wav)
 Resource(audio/AddMaro.wav)
 Resource(audio/beep.wav)
+Resource(audio/AddScore.wav)
+Resource(audio/AddScoreEnd.wav)
+Resource(audio/LowHp.wav)
+Resource(audio/ChangeButton.wav)
+Resource(audio/Select.wav)
 
 /* examples
 
