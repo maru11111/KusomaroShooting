@@ -207,8 +207,8 @@ void KusoMarshmallowBeam::move()
 	timer += Scene::DeltaTime();
 
 	if (isHit) {
-		AudioManager::Instance()->play(U"BeamStart");
-		AudioManager::Instance()->play(U"Beam");
+		AudioManager::Instance()->playOneShot(U"BeamStart");
+		AudioManager::Instance()->playOneShot(U"Beam");
 		objects.marshmallows << std::make_unique<Beam>(objects, objects.player->getPos());
 		isShotBeam = true;
 		isHit = false;
