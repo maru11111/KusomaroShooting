@@ -108,17 +108,23 @@ void Main()
 	TextureAsset::Register(U"UimmNormalForUI", Resource(U"texture/UimmNormalForUI.png"));
 	TextureAsset::Register(U"UimmDamageForUI", Resource(U"texture/UimmDamageForUI.png"));
 	TextureAsset::Register(U"DamageScreenEffect", Resource(U"texture/DamageScreenEffect.png"));
+	TextureAsset::Register(U"LowHpFrame", Resource(U"texture/LowHpFrame.png"));
+	TextureAsset::Register(U"UimmCrisisForUI", Resource(U"texture/UimmCrisisForUI.png"));
 
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Register(U"GameUI_BestTen", 30, Resource(U"font/BestTen-CRT.otf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_BestTenDot", 25, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_BestTenDot30", 30, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
+	FontAsset::Register(U"GameUI_BestTenDot45", 45, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
+	FontAsset::Register(U"GameUI_BestTenDot60", 60, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
+	FontAsset::Register(U"GameUI_BestTenDot90", 90, Resource(U"font/BestTen-DOT.otf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_Pixel", 25, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 	FontAsset::Register(U"GameUI_Pixel6", 30, Resource(U"font/PixelMplus10-Regular.ttf"), FontStyle::Bitmap);
 
 	AudioManager::Instance()->setAudio(U"MidBoss", Resource(U"audio/MidBoss.wav"), AudioType::BGM);
 	AudioManager::Instance()->setAudio(U"KaraKara", Resource(U"audio/KaraKara.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"ReceiveDamage", Resource(U"audio/ReceiveDamage.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"ReceiveDamageDying", Resource(U"audio/ReceiveDamageDying.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"Throw", Resource(U"audio/Throw.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"HitHigh", Resource(U"audio/HitHigh.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"HitLow", Resource(U"audio/HitLow.wav"), AudioType::SE);
@@ -146,6 +152,11 @@ void Main()
 	AudioManager::Instance()->setAudio(U"Heal", Resource(U"audio/Heal.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"AddMaro", Resource(U"audio/AddMaro.wav"), AudioType::SE);
 	AudioManager::Instance()->setAudio(U"Beep", Resource(U"audio/Beep.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"AddScore", Resource(U"audio/AddScore.wav"), AudioType::SE, Loop::Yes);
+	AudioManager::Instance()->setAudio(U"AddScoreEnd", Resource(U"audio/AddScoreEnd.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"LowHp", Resource(U"audio/LowHp.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"ChangeButton", Resource(U"audio/ChangeButton.wav"), AudioType::SE);
+	AudioManager::Instance()->setAudio(U"Select", Resource(U"audio/Select.wav"), AudioType::SE);
 
 	//ロード
 	//画像
@@ -214,6 +225,8 @@ void Main()
 	TextureAsset::Load(U"UimmNormalForUI");
 	TextureAsset::Load(U"UimmDamageForUI");
 	TextureAsset::Load(U"DamageScreenEffect");
+	TextureAsset::Load(U"LowHpFrame");
+	TextureAsset::Load(U"UimmCrisisForUI");
 
 	//フォント
 	FontAsset::Load(U"GameUI_Kei");
