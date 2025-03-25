@@ -61,10 +61,7 @@ GameScene::GameScene(const InitData& init)
 	else {
 		changeStage(getData().startStage);
 
-	//初めのステージをロード
-	loadJson(U"stage/stage1.json");
-
-	//スコア
+		//スコア
 		//currentScore = getData().lastContinueScore;
 		scoreAnimTimer = 1;
 	}
@@ -72,8 +69,7 @@ GameScene::GameScene(const InitData& init)
 	//Debug
 	//ボス
 	//objects.enemies << std::make_unique<GarbageBox>(objects, Vec2( Scene::Size().x+100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
-	//Debug
-	AudioManager::Instance()->play(U"MidBoss");
+	
 }
 
 void GameScene::drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int backBarPosX, int barPosY, double healEase, double damageEase)const {
@@ -160,7 +156,7 @@ void GameScene::drawMarshmallowUI() const {
 	//Print << isHpAnimationStart;
 
 	const double damageUIEffectOffsetX = (1.0 - EaseInOutQuart(Min(damageUIEffectTimer, 1.0))) * 2.5 * Sin(damageUIEffectTimer * Math::Pi * 13.0);
-	const double damageUIEffectOffsetY = - (1.0 - EaseInOutCirc(Min(damageUIEffectTimer, 1.0))) * 1.5 * Cos(damageUIEffectTimer * Math::Pi * 13.0);
+	const double damageUIEffectOffsetY = -(1.0 - EaseInOutCirc(Min(damageUIEffectTimer, 1.0))) * 1.5 * Cos(damageUIEffectTimer * Math::Pi * 13.0);
 
 	//UIの背景
 	int n = (int)(getData().backgroundDrawTimer / 0.08) % 65;
@@ -177,17 +173,16 @@ void GameScene::drawMarshmallowUI() const {
 
 
 	//HPバー
-	drawHpBar(objects.player->getHpEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50 * 3 -4 + damageUIEffectOffsetX, 6 * 3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getHpHealEase(), objects.player->getDamageEase());
+	drawHpBar(objects.player->getHpEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"PlayerHpFront"), 50 * 3 - 4 + damageUIEffectOffsetX, 6 * 3 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getHpHealEase(), objects.player->getDamageEase());
 
 	//マシュマロバー
-	drawMaroBar(objects.player->getMaroEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50 * 3-4  + damageUIEffectOffsetX, 24 * 3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getMaroAddEase());
+	drawMaroBar(objects.player->getMaroEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50 * 3 - 4 + damageUIEffectOffsetX, 24 * 3 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getMaroAddEase());
 
 	//ボスのHPバー
 	if (bossPtr != nullptr) {
-			if (isHpAnimationStart && not isHpAnimationEnd) {
+		if (isHpAnimationStart && not isHpAnimationEnd) {
 			const double easeHpAnimation = Min(EaseInLinear(easeBossHpAnimationTimer / 3.0), (double)bossPtr->getCurrentHp() / (double)bossPtr->getMaxHp());
-				drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - 6 - easeBossAppear * marshmallowUIOffset, bossPtr);
-			}
+			drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - 6 - easeBossAppear * marshmallowUIOffset, bossPtr);
 		}
 	}
 
@@ -250,8 +245,8 @@ void GameScene::drawMarshmallowUI() const {
 				if (bossPtr != nullptr) {
 					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
 					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
-					}
 				}
+			}
 			break;
 		case GameState::BossBattle:
 			if(bossPtr != nullptr){
@@ -287,7 +282,7 @@ void GameScene::drawMarshmallowUI() const {
 					}
 				}
 				break;
-		case GameState::BossBattle:
+			case GameState::BossBattle:
 				if (bossPtr != nullptr) {
 					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
 					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
@@ -311,7 +306,8 @@ void GameScene::update() {
 		//effect.add<BeamTextEffect>(Cursor::Pos(), beamTexts[Random(0, (int)beamTexts.size() - 1)]);
 	//}
 	//AudioManager::Instance()->play(U"MidBoss");
-
+	//Debug
+	
 	//Debug
 	if (Key1.pressed()) currentStage = (Stage)0;
 	if (Key2.pressed()) currentStage = (Stage)1;
@@ -321,7 +317,7 @@ void GameScene::update() {
 	if (Key6.pressed()) currentStage = (Stage)5;
 
 	//クリアタイム時間を測る(後でポーズ画面では行わないようにする)
-	currentTime += Scene::DeltaTime();
+	if(gameState!=GameState::Pause) currentTime += Scene::DeltaTime();
 
 	//Debug
 	if (KeyShift.pressed() && Key0.pressed()) {
@@ -346,7 +342,7 @@ void GameScene::update() {
 				AudioManager::Instance()->playOneShot(U"Paper");
 				tutorialState = TutorialState::Attack;
 			}
-		break;
+			break;
 
 		case TutorialState::Attack:
 			//// 攻撃チュートリアル
@@ -474,7 +470,7 @@ void GameScene::update() {
 			switch (stageStartState) {
 			case StageStartState::Start:
 				{
-				Print << U"backGroundOpacity" << backGroundOpacity;
+				//Print << U"backGroundOpacity" << backGroundOpacity;
 					stageStartEaseTimer += Scene::DeltaTime();
 					if (currentFrame(7, 0.080, stageStartAnimTimer) != 7) stageStartAnimTimer += Scene::DeltaTime();
 					const double stageStartEase = Min(EaseOutExpo(stageStartEaseTimer / 1.5), 1.0);
@@ -545,12 +541,7 @@ void GameScene::update() {
 			//空になったら次のステージ
 			if (spawnEnemyData.empty() && objects.enemies.empty()) {
 				changeStage(Stage::Noon);
-
-				//gameState = GameState::StageStart;
-				//gameState = GameState::BossAppear;
-
-				//背景の不透明度をリセット
-				backGroundOpacity = 1.0;
+				
 			}
 			break;
 
@@ -612,7 +603,7 @@ void GameScene::update() {
 			for (int i = 0; i < objects.enemies.size(); i++) {
 				if (objects.enemies[i]->getId() == -1) {
 					bossPtr = static_cast<GarbageBox*>(objects.enemies[i].get());
-		}
+				}
 			}
 		}
 
@@ -625,7 +616,6 @@ void GameScene::update() {
 
 			//背景を徐々に出す
 			if (currentStage != Stage::Morning) backGroundOpacity = Math::Lerp(1.0, 0.0, gameStateTimer / (1.0 / 1.5));
-			if (currentStage == Stage::AfterNoon) rainOpacity = Math::Lerp(0.0, 1.0, gameStateTimer / (1.0 / 1.5));
 
 			//風が吹く
 			if(not AudioAsset(U"Wind").isPlaying())AudioManager::Instance()->play(U"Wind", 2.0s);
@@ -694,10 +684,11 @@ void GameScene::update() {
 			}
 
 			//少しズームイン
-			if (easeTimer4 <= 1.0) {
+			if (easeTimer4 <= 1.0) {;
 				double ease4 = EaseOutExpo(Min(easeTimer4 / 0.08, 1.0));
 				camera.setTargetScale(Math::Lerp(1, 1.04, ease4));
 			}
+
 
 			//溜めながら少しズームアウト
 			if (1.9 <= easeTimer4 && easeTimer4 <= 3.5) {
@@ -772,8 +763,8 @@ void GameScene::update() {
 				AudioManager::Instance()->playOneShot(U"Select");
 			}
 
-		//ヒットストップありupdate
-		updateWithHitStop();
+			//ヒットストップありupdate
+			updateWithHitStop();
 			//ボスのhpバーupdate
 			if (bossPtr != nullptr) {
 				if (isHpAnimationStart && not isHpAnimationEnd) {
@@ -925,7 +916,7 @@ void GameScene::update() {
 				changeScene(State::Title, 1.0s);
 
 			}
-		break;
+			break;
 
 		case PauseState::Config:
 			//ポーズ解除
@@ -934,7 +925,7 @@ void GameScene::update() {
 				AudioManager::Instance()->playAllPauseAudio(0s);
 				AudioManager::Instance()->playOneShot(U"Cancel");
 				break;
-	}
+			}
 
 			if (KeyLeft.down() || KeyA.down()) {
 				pauseTriangleTimer = 0;
@@ -1043,13 +1034,13 @@ void GameScene::collisionAndRemoveUpdate() {
 				objects.player->heal(1);
 				//削除
 				objects.enemies.erase(objects.enemies.begin() + i);
-		}
+			}
 			//チュートリアル
 			else if(gameState == GameState::Tutorial) {
 				//チュートリアル中は死なない
 				if(objects.player->getHp()- objects.enemies[i]->getDamageAmount() <= 0) objects.player->damage(0, false);
 				else objects.player->damage(objects.enemies[i]->getDamageAmount(), false);
-	}
+			}
 		}
 	}
 
@@ -1059,7 +1050,7 @@ void GameScene::collisionAndRemoveUpdate() {
 			if (enemy->collision().intersects(maro->collision())) {
 				//敵にヒットした判定をtrueに
 				if (enemy->name != U"HealUmbrella")
-				maro->setIsHit(true);
+					maro->setIsHit(true);
 				//敵にダメージを与えられるか判定
 				if (maro->isNotEnemyHit(enemy->getId())) {
 					//IDを受け取る
@@ -1414,7 +1405,7 @@ void GameScene::addScore(int score) {
 	isPlayScoreAnim = true;
 	scoreAnimTimer = 0;
 	if (not AudioAsset(U"AddScore").isPlaying()) AudioManager::Instance()->play(U"AddScore");
-	Print << U"ADDDDDDDDDDD";
+	//Print << U"ADDDDDDDDDDD";
 }
 
 void GameScene::destroyObjects() {
@@ -1484,7 +1475,7 @@ void GameScene::changeStage(Stage nextStage) {
 	}
 	else {
 		changeStageTimer = 4;
-}
+	}
 	//-秒経ったら次のステージ
 	changeStageTimer += Scene::DeltaTime();
 	if (2.0 <= changeStageTimer) {
@@ -1586,9 +1577,9 @@ void GameScene::changeStage(Stage nextStage) {
 }
 
 void GameScene::drawBackground()const {
-		//背景
-		//Scene::Rect()
-		//	.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
+	//背景
+//Scene::Rect()
+//	.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
 //const double skyPosX = -(int)(getData().backgroundDrawTimer / 0.0410) % (320 * 3);
 	const double cloudBigPosX = -(int)(getData().backgroundDrawTimer / 0.0100) % (320 * 3);
 	const double cloudNormalPosX = -(int)(getData().backgroundDrawTimer / 0.0125) % (320 * 3);
@@ -1616,142 +1607,142 @@ void GameScene::drawBackground()const {
 
 	const Vec2 rainPos = { -(int)(getData().backgroundDrawTimer / 0.00200) % (320 * 3), (int)(getData().backgroundDrawTimer / 0.00200) % (214 * 3) };
 
-		//空
-		switch (currentStage) {
-		case Stage::Morning:
-			TextureAsset(U"SkyMorning").scaled(3).draw(0, 0);
-			break;
+	//空
+	switch (currentStage) {
+	case Stage::Morning:
+		TextureAsset(U"SkyMorning").scaled(3).draw(0, 0);
+		break;
 
-		case Stage::Noon:
-			TextureAsset(U"SkyNoon").scaled(3).draw(0, 0);
-			TextureAsset(U"SkyMorning").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::Noon:
+		TextureAsset(U"SkyNoon").scaled(3).draw(0, 0);
+		TextureAsset(U"SkyMorning").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::AfterNoon:
-			TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0);
-			TextureAsset(U"SkyNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::AfterNoon:
+		TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0);
+		TextureAsset(U"SkyNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::Evening:
-			TextureAsset(U"SkyEvening").scaled(3).draw(0, 0);
-			TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::Evening:
+		TextureAsset(U"SkyEvening").scaled(3).draw(0, 0);
+		TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::Night:
-			TextureAsset(U"SkyNight").scaled(3).draw(0, 0);
-			TextureAsset(U"SkyEvening").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::Night:
+		TextureAsset(U"SkyNight").scaled(3).draw(0, 0);
+		TextureAsset(U"SkyEvening").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::MidNight:
-			TextureAsset(U"SkyMidNight").scaled(3).draw(0, 0);
-			TextureAsset(U"SkyNight").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::MidNight:
+		TextureAsset(U"SkyMidNight").scaled(3).draw(0, 0);
+		TextureAsset(U"SkyNight").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
 	case Stage::Editor:
 		TextureAsset(U"SkyEvening").scaled(3).draw(0, 0);
 		TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
-		}
-		//TextureAsset(U"BackGroundSky").scaled(3).draw(Scene::Size().x + skyPosX, 0);
-		//TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
-		//TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + farBackMountainPosX, 0);
-		TextureAsset(U"BackGroundMountainBack").scaled(3).draw(backMountainPosX, 0);
-		TextureAsset(U"BackGroundMountainBack").scaled(3).draw(Scene::Size().x + backMountainPosX, 0);
-		TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(middleMountainPosX, 0);
-		TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(Scene::Size().x + middleMountainPosX, 0);
-		TextureAsset(U"BackGroundMountainFront").scaled(3).draw(frontMountainPosX, 0);
-		TextureAsset(U"BackGroundMountainFront").scaled(3).draw(Scene::Size().x + frontMountainPosX, 0);
-		TextureAsset(U"BackGroundCityBack").scaled(3).draw(frontCityPosX, 0);
-		TextureAsset(U"BackGroundCityBack").scaled(3).draw(Scene::Size().x + frontCityPosX, 0);
-		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(middleCityPosX, 0);
-		TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(Scene::Size().x + middleCityPosX, 0);
-		TextureAsset(U"BackGroundCity").scaled(3).draw(backCityPosX, 0);
-		TextureAsset(U"BackGroundCity").scaled(3).draw(Scene::Size().x + backCityPosX, 0);
+	}
+	//TextureAsset(U"BackGroundSky").scaled(3).draw(Scene::Size().x + skyPosX, 0);
+	//TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
+	//TextureAsset(U"BackGroundMountain").scaled(3).draw(Scene::Size().x + farBackMountainPosX, 0);
+	TextureAsset(U"BackGroundMountainBack").scaled(3).draw(backMountainPosX, 0);
+	TextureAsset(U"BackGroundMountainBack").scaled(3).draw(Scene::Size().x + backMountainPosX, 0);
+	TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(middleMountainPosX, 0);
+	TextureAsset(U"BackGroundMountainMiddle").scaled(3).draw(Scene::Size().x + middleMountainPosX, 0);
+	TextureAsset(U"BackGroundMountainFront").scaled(3).draw(frontMountainPosX, 0);
+	TextureAsset(U"BackGroundMountainFront").scaled(3).draw(Scene::Size().x + frontMountainPosX, 0);
+	TextureAsset(U"BackGroundCityBack").scaled(3).draw(frontCityPosX, 0);
+	TextureAsset(U"BackGroundCityBack").scaled(3).draw(Scene::Size().x + frontCityPosX, 0);
+	TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(middleCityPosX, 0);
+	TextureAsset(U"BackGroundCityMiddle").scaled(3).draw(Scene::Size().x + middleCityPosX, 0);
+	TextureAsset(U"BackGroundCity").scaled(3).draw(backCityPosX, 0);
+	TextureAsset(U"BackGroundCity").scaled(3).draw(Scene::Size().x + backCityPosX, 0);
 
-		//雲
-		switch (currentStage) {
-		case Stage::Morning:
-			TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
-			TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-			TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0);
-			TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-			TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0);
-			TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-			break;
+	//雲
+	switch (currentStage) {
+	case Stage::Morning:
+		TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		break;
 
-		case Stage::Noon:
-			TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0);
-			TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-			TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0);
-			TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-			TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0);
-			TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-			TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::Noon:
+		TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::AfterNoon:
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0);
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0);
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
-			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-			TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::AfterNoon:
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::Evening:
+	case Stage::Evening:
 		TextureAsset(U"CloudSmallEvening").scaled(3).draw(cloudSmallPosX, 0);
 		TextureAsset(U"CloudSmallEvening").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
 		TextureAsset(U"CloudNormalEvening").scaled(3).draw(cloudNormalPosX, 0);
 		TextureAsset(U"CloudNormalEvening").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
 		TextureAsset(U"CloudBigEvening").scaled(3).draw(cloudBigPosX, 0);
 		TextureAsset(U"CloudBigEvening").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			break;
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::Night:
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0);
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0);
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
-			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-			TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::Night:
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
-		case Stage::MidNight:
-			TextureAsset(U"CloudSmallMidNight").scaled(3).draw(cloudSmallPosX, 0);
-			TextureAsset(U"CloudSmallMidNight").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-			TextureAsset(U"CloudNormalMidNight").scaled(3).draw(cloudNormalPosX, 0);
-			TextureAsset(U"CloudNormalMidNight").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-			TextureAsset(U"CloudBigMidNight").scaled(3).draw(cloudBigPosX, 0);
-			TextureAsset(U"CloudBigMidNight").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-			break;
+	case Stage::MidNight:
+		TextureAsset(U"CloudSmallMidNight").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmallMidNight").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormalMidNight").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormalMidNight").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBigMidNight").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBigMidNight").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		break;
 
 	case Stage::Editor:
 		TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
@@ -1765,14 +1756,15 @@ void GameScene::drawBackground()const {
 		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 }, ColorF(1.0, 0.9));
 		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y }, ColorF(1.0, 0.9));
 		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y }, ColorF(1.0, 0.9));
-		}
+	}
 
-		if (currentStage == Stage::AfterNoon || currentStage == Stage::Evening) {
-			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, 0 }, ColorF(1.0, rainOpacity));
-			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 }, ColorF(1.0, rainOpacity));
-			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y }, ColorF(1.0, rainOpacity));
-			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y }, ColorF(1.0, rainOpacity));
-		}
+	if (currentStage == Stage::AfterNoon || currentStage == Stage::Evening) {
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, 0 }, ColorF(1.0, rainOpacity));
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 }, ColorF(1.0, rainOpacity));
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y }, ColorF(1.0, rainOpacity));
+		TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y }, ColorF(1.0, rainOpacity));
+	}
+}
 
 void GameScene::commonDraw()const {
 	{
@@ -1830,14 +1822,14 @@ void GameScene::commonDraw()const {
 		//Debug
 		//TextureAsset(U"Fish").draw(300,200);
 		//スプライトシートを再生
-		/*int n = (int)(drawTimer / 0.035) % 21;
+		/*int n = (int)(getData().backgroundDrawTimer / 0.035) % 21;
 		TextureAsset(U"UiAttackEffect")(n * TextureAsset(U"UiAttackEffect").size().x / 21.0, 0, TextureAsset(U"UiAttackEffect").size().x / 21.0, TextureAsset(U"UiAttackEffect").size().y).scaled(3).drawAt(objects.player->getPos());*/
 		//TextureAsset(U"Umbrella").scaled(3).draw(300,200);
 
 	}
 
 	// シーン転送時の拡大縮小方法を最近傍法にする
-	Scene::SetTextureFilter(TextureFilter::Nearest);
+	//Scene::SetTextureFilter(TextureFilter::Nearest);
 	//文字以外のレンダーテクスチャをdraw
 	renderTexture.draw();
 
@@ -1968,7 +1960,7 @@ void GameScene::draw() const {
 
 			//三角
 			Triangle(Scene::CenterF().movedBy(360, 0), 60).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
-		break;
+			break;
 
 		case TutorialState::Attack:
 			// 攻撃方法
@@ -2041,7 +2033,7 @@ void GameScene::draw() const {
 
 	case GameState::StageStart:
 		commonDraw();
-		
+
 		//if (stageStartTimer <= 1.0) {
 		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos);
 		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 });
@@ -2085,7 +2077,7 @@ void GameScene::draw() const {
 	case GameState::Stage:
 		commonDraw();
 
-		break;
+	break;
 
 	case GameState::BossAppear:
 		switch (bossAppearState) {
@@ -2104,24 +2096,24 @@ void GameScene::draw() const {
 			break;
 
 		case BossAppearState::AppearBoss:
-			{
-				// 2D カメラの設定から Transformer2D を作成
-				const auto t = camera.createTransformer();
+		{
+			// 2D カメラの設定から Transformer2D を作成
+			const auto t = camera.createTransformer();
 
-				//描画
-				commonDraw();
-				RectF(0, 0, Scene::Size().x, ease * maxTopRectHeight).draw(ColorF(0, 0, 0, 0.9));
-				RectF(0, Scene::Size().y - ease * maxBottomRectHeight, Scene::Size().x, maxBottomRectHeight).draw(ColorF(0, 0, 0, 0.85));
+			//描画
+			commonDraw();
+			RectF(0, 0, Scene::Size().x, ease * maxTopRectHeight).draw(ColorF(0, 0, 0, 0.9));
+			RectF(0, Scene::Size().y - ease * maxBottomRectHeight, Scene::Size().x, maxBottomRectHeight).draw(ColorF(0, 0, 0, 0.85));
 
-			}
-			break;
 		}
 		break;
+		}
+	break;
 
 	case GameState::BossBattle:
-		commonDraw();
-		break;
-		//}
+			commonDraw();
+			break;
+
 	case GameState::Pause:
 		commonDraw();
 
