@@ -627,6 +627,9 @@ void GameScene::update() {
 			if (currentStage != Stage::Morning) backGroundOpacity = Math::Lerp(1.0, 0.0, gameStateTimer / (1.0 / 1.5));
 			if (currentStage == Stage::AfterNoon) rainOpacity = Math::Lerp(0.0, 1.0, gameStateTimer / (1.0 / 1.5));
 
+			//風が吹く
+			if(not AudioAsset(U"Wind").isPlaying())AudioManager::Instance()->play(U"Wind", 2.0s);
+
 			//次に移る
 			if (2.0 <= gameStateTimer) {
 				//タイマーリセット
