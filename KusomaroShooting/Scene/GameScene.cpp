@@ -529,6 +529,16 @@ void GameScene::update() {
 
 	case GameState::Stage:
 
+		if (objects.player->getHp() != 0) {
+			//ポーズ入力受付
+			if (KeyShift.down() && not objects.player->getIsBeamAttacking()) {
+				prevGameState = gameState;
+				gameState = GameState::Pause;
+				AudioManager::Instance()->pauseAllAudio();
+				AudioManager::Instance()->playOneShot(U"Select");
+			}
+		}
+
 		switch (currentStage) {
 		case Stage::Morning:
 
