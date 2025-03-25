@@ -7,18 +7,28 @@ StageEditor::StageEditor(const InitData& init)
 	, objects(gameScene.getObj())
 {
 	//プレイヤー作成
-	objects.player = std::make_unique<Player>(objects, Vec2(100, Scene::Size().y/2.0));
+	objects.player = std::make_unique<Player>(objects, Vec2(-150, Scene::Size().y/2.0));
 	//初期化
 	for (int i = 0; i < maxGridNum; i++) {
 		for (int j = 0; j < row; j++) {
 			for (int k = 0; k < col; k++) {
-				if (k <= 1) {
-					grids[i][j][k].rect = RectF{ gridStartOffset.x * 2.0 + j * GridSize, GridSize * 2 + gridStartOffset.y + k * GridSize, GridSize, GridSize };
+				//if (k <= 1) {
+				//	grids[i][j][k].rect = RectF{ gridStartOffset.x * 2.0 + j * GridSize, GridSize * 2 + gridStartOffset.y + k * GridSize, GridSize, GridSize };
+				//	grids[i][j][k].centerPos = { (grids[i][j][k].rect.x + grids[i][j][k].rect.w / 2.0), (grids[i][j][k].rect.y + grids[i][j][k].rect.h / 2.0) };
+				//	grids[i][j][k].time = i;
+				//}
+				//else {
+				//	grids[i][j][k].rect = RectF{ Scene::Size().x + j * GridSize, gridStartOffset.y + k * GridSize, GridSize, GridSize };
+				//	grids[i][j][k].centerPos = { (grids[i][j][k].rect.x + grids[i][j][k].rect.w / 2.0), (grids[i][j][k].rect.y + grids[i][j][k].rect.h / 2.0) };
+				//	grids[i][j][k].time = i;
+				//}
+				if (j == row - 1) {
+					grids[i][j][k].rect = RectF{ -GridSize, 0 - GridSize * 2 + GridSize * k, GridSize };
 					grids[i][j][k].centerPos = { (grids[i][j][k].rect.x + grids[i][j][k].rect.w / 2.0), (grids[i][j][k].rect.y + grids[i][j][k].rect.h / 2.0) };
 					grids[i][j][k].time = i;
 				}
 				else {
-					grids[i][j][k].rect = RectF{ Scene::Size().x + j * GridSize, gridStartOffset.y + k * GridSize, GridSize, GridSize };
+					grids[i][j][k].rect = RectF{ (Scene::Size().x - (int)(Scene::Size().x / GridSize) * GridSize) + GridSize * j, 0 - GridSize * 2 + GridSize * k, GridSize };
 					grids[i][j][k].centerPos = { (grids[i][j][k].rect.x + grids[i][j][k].rect.w / 2.0), (grids[i][j][k].rect.y + grids[i][j][k].rect.h / 2.0) };
 					grids[i][j][k].time = i;
 				}
@@ -31,7 +41,7 @@ StageEditor::~StageEditor() {
 	//編集後に保存していなければ
 	if (isAfterChange) {
 		Optional<FilePath> path = Dialog::SaveFile({ FileFilter::JSON() });;
-		if (path.has_value()) toJson(*path);
+		if (path.has_value()) toJson(*path, false);
 	}
 }
 
@@ -75,7 +85,15 @@ void StageEditor::addGrids(int addGridNum) {
 
 void StageEditor::update() {
 
-	ClearPrint();
+	//Clear
+	//
+	//
+	//
+	//
+	// ();
+	Print << U"\n";
+
+	Print << U"編集後未保存:" << isAfterChange;
 
 	//編集モードと試運転モード場合分け
 	switch (currentMode)
@@ -90,7 +108,6 @@ void StageEditor::update() {
 }
 
 void StageEditor::updateEditMode() {
-	Print << U"\n";
 
 	//Print << U"timer:" << timer;
 	//Print << U"static_cast<int>(Parse<double>(Format(timer))):" << static_cast<int>(Parse<double>(Format(timer)));
@@ -106,7 +123,7 @@ void StageEditor::updateEditMode() {
 	if (KeyJ.down()) {
 		Optional<FilePath> path = Dialog::SaveFile({ FileFilter::JSON() });;
 		if (path.has_value()) {
-			toJson(*path);
+			toJson(*path, false);
 		}
 	}
 
@@ -131,26 +148,36 @@ void StageEditor::updateEditMode() {
 	//敵を選択
 	if (Key1.down()) currentSelectedType = EnemyType::Empty;
 	if (Key2.down()) currentSelectedType = EnemyType::Bag;
-	if (Key3.down()) currentSelectedType = EnemyType::FastBag;
-	if (Key4.down()) currentSelectedType = EnemyType::BagWithCan;
-	if (Key5.down()) currentSelectedType = EnemyType::Can;
-	if (Key6.down()) currentSelectedType = EnemyType::Fish;
-	if (Key7.down()) currentSelectedType = EnemyType::Umbrella;
+	if (Key3.down()) currentSelectedType = EnemyType::AccelBag;
+	if (Key4.down()) currentSelectedType = EnemyType::SineBag;
+	if (Key5.down()) currentSelectedType = EnemyType::FastBag;
+	if (Key6.down()) currentSelectedType = EnemyType::BagWithCan;
+	if (Key7.down()) currentSelectedType = EnemyType::BagWithCanStay;
+	if (Key8.down()) currentSelectedType = EnemyType::Can;
+	if (Key9.down()) currentSelectedType = EnemyType::Fish;
+	if (Key0.down()) currentSelectedType = EnemyType::Umbrella;
+	if (KeyMinus.down()) currentSelectedType = EnemyType::HealUmbrella;
 	
 
 	//選択中の敵を表示
 	switch (currentSelectedType) {
 	case EnemyType::Empty: Print << U"現在の敵:" << U"Empty"; break;
 	case EnemyType::Bag: Print << U"現在の敵:" << U"Bag"; break;
+	case EnemyType::AccelBag: Print << U"現在の敵:" << U"AccelBag"; break;
+	case EnemyType::SineBag: Print << U"現在の敵:" << U"SineBag"; break;
 	case EnemyType::FastBag: Print << U"現在の敵:" << U"FastBag"; break;
 	case EnemyType::BagWithCan: Print << U"現在の敵:" << U"BagWithCan"; break;
+	case EnemyType::BagWithCanStay: Print << U"現在の敵:" << U"BagWithCanStay"; break;
 	case EnemyType::Can: Print << U"現在の敵:" << U"Can"; break;
 	case EnemyType::Fish: Print << U"現在の敵:" << U"Fish"; break;
 	case EnemyType::Umbrella: Print << U"現在の敵:" << U"Umbrella"; break;
+	case EnemyType::HealUmbrella: Print << U"現在の敵:" << U"HealUmbrella"; break;
 	}
 
 	// 2D カメラを更新
-	camera.update();
+	if (not MouseR.pressed()) {
+		camera.update();
+	}
 
 	// カメラ座標系の範囲で処理
 	const auto t = camera.createTransformer();
@@ -182,6 +209,14 @@ void StageEditor::updateEditMode() {
 					grids[getCurrentIntTime()][i][j].type = EnemyType::Bag;
 					grids[getCurrentIntTime()][i][j].textureName = U"GarbageBag";
 					break;
+				case EnemyType::AccelBag:
+					grids[getCurrentIntTime()][i][j].type = EnemyType::AccelBag;
+					grids[getCurrentIntTime()][i][j].textureName = U"GarbageBagAccelForEditor";
+					break;
+				case EnemyType::SineBag:
+					grids[getCurrentIntTime()][i][j].type = EnemyType::SineBag;
+					grids[getCurrentIntTime()][i][j].textureName = U"GarbageBagSineForEditor";
+					break;
 				case EnemyType::FastBag:
 					grids[getCurrentIntTime()][i][j].type = EnemyType::FastBag;
 					grids[getCurrentIntTime()][i][j].textureName = U"GarbageBagFastForEditor";
@@ -189,6 +224,10 @@ void StageEditor::updateEditMode() {
 				case EnemyType::BagWithCan:
 					grids[getCurrentIntTime()][i][j].type = EnemyType::BagWithCan;
 					grids[getCurrentIntTime()][i][j].textureName = U"GarbageBagWithCanForEditor";
+					break;
+				case EnemyType::BagWithCanStay:
+					grids[getCurrentIntTime()][i][j].type = EnemyType::BagWithCanStay;
+					grids[getCurrentIntTime()][i][j].textureName = U"GarbageBagWithCanStayForEditor";
 					break;
 				case EnemyType::Can:
 					grids[getCurrentIntTime()][i][j].type = EnemyType::Can;
@@ -201,6 +240,10 @@ void StageEditor::updateEditMode() {
 				case EnemyType::Umbrella:
 					grids[getCurrentIntTime()][i][j].type = EnemyType::Umbrella;
 					grids[getCurrentIntTime()][i][j].textureName = U"Umbrella";
+					break;
+				case EnemyType::HealUmbrella:
+					grids[getCurrentIntTime()][i][j].type = EnemyType::HealUmbrella;
+					grids[getCurrentIntTime()][i][j].textureName = U"HealUmbrella";
 					break;
 				}
 
@@ -215,11 +258,15 @@ void StageEditor::updateEditMode() {
 				switch (grids[getCurrentIntTime()][i][j].type) {
 				case EnemyType::Empty: currentSelectedType = EnemyType::Empty;break;
 				case EnemyType::Bag: currentSelectedType = EnemyType::Bag;break;
+				case EnemyType::AccelBag: currentSelectedType = EnemyType::AccelBag; break;
+				case EnemyType::SineBag: currentSelectedType = EnemyType::SineBag; break;
 				case EnemyType::FastBag: currentSelectedType = EnemyType::FastBag; break;
 				case EnemyType::BagWithCan: currentSelectedType = EnemyType::BagWithCan; break;
+				case EnemyType::BagWithCanStay: currentSelectedType = EnemyType::BagWithCanStay; break;
 				case EnemyType::Can: currentSelectedType = EnemyType::Can; break;
 				case EnemyType::Fish: currentSelectedType = EnemyType::Fish; break;
 				case EnemyType::Umbrella: currentSelectedType = EnemyType::Umbrella; break;
+				case EnemyType::HealUmbrella: currentSelectedType = EnemyType::HealUmbrella; break;
 				}
 			}
 
@@ -252,11 +299,15 @@ void ::StageEditor::updateEnemy()const {
 				switch (grids[i][j][k].type) {
 				case EnemyType::Empty: /*何もしない*/; break;
 				case EnemyType::Bag: objects.enemies << std::make_unique<GarbageBagNormal>(objects, grids[i][j][k].centerPos); break;
+				case EnemyType::AccelBag: objects.enemies << std::make_unique<GarbageBagAccel>(objects, grids[i][j][k].centerPos); break;
+				case EnemyType::SineBag: objects.enemies << std::make_unique<GarbageBagSine>(objects, grids[i][j][k].centerPos); break;
 				case EnemyType::FastBag: objects.enemies << std::make_unique<GarbageBagFast>(objects, grids[i][j][k].centerPos); break;
 				case EnemyType::BagWithCan: objects.enemies << std::make_unique<GarbageBagWithCan>(objects, grids[i][j][k].centerPos); break;
+				case EnemyType::BagWithCanStay: objects.enemies << std::make_unique<GarbageBagWithCanStay>(objects, grids[i][j][k].centerPos); break;
 				case EnemyType::Can: objects.enemies << std::make_unique<Can>(objects, grids[i][j][k].centerPos, Vec2{ -1, 0 }); break;
 				case EnemyType::Fish: objects.enemies << std::make_unique<Fish>(objects, grids[i][j][k].centerPos); break;
 				case EnemyType::Umbrella: objects.enemies << std::make_unique<Umbrella>(objects, grids[i][j][k].centerPos); break;
+				case EnemyType::HealUmbrella: objects.enemies << std::make_unique<HealUmbrella>(objects, grids[i][j][k].centerPos); break;
 				}
 			}
 		}
@@ -296,7 +347,7 @@ void ::StageEditor::updateEnemy()const {
 }
 
 //jsonに書き出し
-void StageEditor::toJson(String name)const {
+void StageEditor::toJson(String name, bool forPlay)const {
 
 	JSON json;
 	Array<JSON>enemies;
@@ -310,11 +361,15 @@ void StageEditor::toJson(String name)const {
 					String name;
 					switch (grids[i][j][k].type) {
 						case EnemyType::Bag: name = U"Bag"; break;
+						case EnemyType::AccelBag: name = U"AccelBag"; break;
+						case EnemyType::SineBag: name = U"SineBag"; break;
 						case EnemyType::FastBag: name = U"FastBag"; break;
 						case EnemyType::BagWithCan: name = U"BagWithCan"; break;
+						case EnemyType::BagWithCanStay: name = U"BagWithCanStay"; break;
 						case EnemyType::Can: name = U"Can"; break;
 						case EnemyType::Fish: name = U"Fish"; break;
 						case EnemyType::Umbrella: name = U"Umbrella"; break;
+						case EnemyType::HealUmbrella: name = U"HealUmbrella"; break;
 					}
 					enemy[U"Type"] = name;
 					enemy[U"Pos"] = grids[i][j][k].centerPos;
@@ -328,7 +383,7 @@ void StageEditor::toJson(String name)const {
 
 	json.save(name);
 
-	isAfterChange = false;
+	if(not forPlay)isAfterChange = false;
 }
 
 //doubleをそのままintにキャストすると誤差が出るのでString→double→intに変換して使う
@@ -354,15 +409,17 @@ void StageEditor::draw()const {
 	if (currentMode == Mode::EditMode) {
 		if (SimpleGUI::Button(U"▶", Vec2{ Scene::Size().x - 71, 50 })) {
 			currentMode = Mode::PlayMode;
-			toJson(U"stage/editorStage.json");
+			toJson(U"stage/editorStage.json", true);
 			gameScene.startPlayMode();
 			gameScene.setStartTime(timer);
 		}
 	}
+	//停止ボタン
 	else {
 		if (SimpleGUI::Button(U"■", Vec2{ Scene::Size().x - 71, 50 })) {
 			currentMode = Mode::EditMode;
 			updateEnemy();
+			objects.player->setEditorPos();
 		}
 	}
 	
@@ -394,7 +451,7 @@ void StageEditor::drawEditMode()const {
 					grids[getCurrentIntTime()][i][j].rect(TextureAsset(grids[getCurrentIntTime()][i][j].textureName)).draw(grids[getCurrentIntTime()][i][j].rectColor).drawFrame(3, 0);
 				}
 				else {
-					grids[getCurrentIntTime()][i][j].rect.draw(grids[getCurrentIntTime()][i][j].rectColor).drawFrame(3, 0);
+					if (not RectF(0, 0, Scene::Size()).contains(grids[getCurrentIntTime()][i][j].centerPos))grids[getCurrentIntTime()][i][j].rect.draw(grids[getCurrentIntTime()][i][j].rectColor).drawFrame(3, 0);
 				}
 			}
 		}
@@ -468,6 +525,7 @@ void StageEditor::loadEditJson(String path) {
 	JSON json = JSON::Load(path);
 	if (not json) throw Error{ path + U"がありません" };
 	//jsonのデータを SpawnEnemyDataに移す
+	spawnEnemyData.clear();
 	{
 		for (const auto& object : json[U"Enemies"].arrayView())
 		{
@@ -479,11 +537,20 @@ void StageEditor::loadEditJson(String path) {
 			if (str == U"Bag") {
 				n = (int)EnemyType::Bag;
 			}
+			else if (str == U"AccelBag") {
+				n = (int)EnemyType::AccelBag;
+			}
+			else if (str == U"SineBag") {
+				n = (int)EnemyType::SineBag;
+			}
 			else if (str == U"FastBag") {
 				n = (int)EnemyType::FastBag;
 			}
 			else if (str == U"BagWithCan") {
 				n = (int)EnemyType::BagWithCan;
+			}
+			else if (str == U"BagWithCanStay") {
+				n = (int)EnemyType::BagWithCanStay;
 			}
 			else if (str == U"Can") {
 				n = (int)EnemyType::Can;
@@ -493,6 +560,9 @@ void StageEditor::loadEditJson(String path) {
 			}
 			else if (str == U"Umbrella") {
 				n = (int)EnemyType::Umbrella;
+			}
+			else if (str == U"HealUmbrella") {
+				n = (int)EnemyType::HealUmbrella;
 			}
 			else {
 				throw Error(U"GameSceneForEditor:未定義の敵です");
@@ -514,12 +584,12 @@ void StageEditor::loadEditJson(String path) {
 
 	//グリッドにデータを格納
 	for (int i = 0; i < spawnEnemyData.size(); i++) {
-		int enemyRow = 0;
-		int enemyCol = 0;
+		int enemyRow = -1;
+		int enemyCol = -1;
 		for (int j = 0; j < row; j++){
 			for (int k = 0; k < col; k++) {
 				//敵の位置に対応するグリッドのインデックスを求める
-				if (grids[0][j][k].centerPos == spawnEnemyData[i].pos) {
+				if (grids[0][j][k].centerPos.distanceFrom(spawnEnemyData[i].pos) < GridSize/2.0) {
 					enemyRow = j;
 					enemyCol = k;
 				}
@@ -533,11 +603,20 @@ void StageEditor::loadEditJson(String path) {
 		case EnemyType::Bag:
 			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBag";
 			break;
+		case EnemyType::AccelBag:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagAccelForEditor";
+			break;
+		case EnemyType::SineBag:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagSineForEditor";
+			break;
 		case EnemyType::FastBag:
 			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagFastForEditor";
 			break;
 		case EnemyType::BagWithCan:
 			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagWithCanForEditor";
+			break;
+		case EnemyType::BagWithCanStay:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"GarbageBagWithCanStayForEditor";
 			break;
 		case EnemyType::Can:
 			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"RedCan";
@@ -548,6 +627,10 @@ void StageEditor::loadEditJson(String path) {
 		case EnemyType::Umbrella:
 			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"Umbrella";
 			break;
+		case EnemyType::HealUmbrella:
+			grids[spawnEnemyData[i].time][enemyRow][enemyCol].textureName = U"HealUmbrella";
+			break;
+
 		}
 	}
 }
