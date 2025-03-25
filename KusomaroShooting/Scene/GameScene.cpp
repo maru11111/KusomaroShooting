@@ -1087,11 +1087,16 @@ void GameScene::collisionAndRemoveUpdate() {
 				}
 				else {
 					//ビームは多段ヒットあり
-					if (maro->getType() == MaroType::Empty) {
+					if (not (enemy->name == U"HealUmbrella")) {
+						//攻撃できない
+					}
+					else if (maro->getType() == MaroType::Empty) {
 						//敵にダメージを与える
-						enemy->damage(maro->getDamageAmount(), false, currentScore);
+						bool isDead = enemy->damage(maro->getDamageAmount(), false);
 						//エフェクトを追加
 						effect.add<DamageEffect>(enemy->getPos());
+						//スコアを加算
+						if (isDead && currentStage != Stage::MidNight && gameState != GameState::Tutorial) addScore(enemy->score);
 					}
 				}
 			}
