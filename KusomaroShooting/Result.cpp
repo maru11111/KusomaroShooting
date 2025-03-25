@@ -108,7 +108,7 @@ void Result::update() {
 
 		case ResultState::ViewRanking:
 			LeaderBoard::Instance()->update();
-			if (Rect(Scene::Size().x - 20 - TextureAsset(U"Batu").size().x * 9, 0 + 20, TextureAsset(U"Batu").size().x * 9).leftClicked()) {
+			if (KeyShift.down() || Rect(Scene::Size().x - 20 - TextureAsset(U"Batu").size().x * 9, 0 + 20, TextureAsset(U"Batu").size().x * 9).leftClicked()) {
 				resultState = ResultState::Normal;
 			}
 			break;
