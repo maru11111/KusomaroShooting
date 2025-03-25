@@ -1646,6 +1646,10 @@ void GameScene::drawBackground()const {
 			TextureAsset(U"SkyMidNight").scaled(3).draw(0, 0);
 			TextureAsset(U"SkyNight").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
 			break;
+
+	case Stage::Editor:
+		TextureAsset(U"SkyEvening").scaled(3).draw(0, 0);
+		TextureAsset(U"SkyAfterNoon").scaled(3).draw(0, 0, ColorF(1.0, backGroundOpacity));
 		}
 		//TextureAsset(U"BackGroundSky").scaled(3).draw(Scene::Size().x + skyPosX, 0);
 		//TextureAsset(U"BackGroundMountain").scaled(3).draw(farBackMountainPosX, 0);
