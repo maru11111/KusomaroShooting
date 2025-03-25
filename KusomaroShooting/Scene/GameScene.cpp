@@ -1044,6 +1044,13 @@ void GameScene::collisionAndRemoveUpdate() {
 				//削除
 				objects.enemies.erase(objects.enemies.begin() + i);
 		}
+			//チュートリアル
+			else if(gameState == GameState::Tutorial) {
+				//チュートリアル中は死なない
+				if(objects.player->getHp()- objects.enemies[i]->getDamageAmount() <= 0) objects.player->damage(0, false);
+				else objects.player->damage(objects.enemies[i]->getDamageAmount(), false);
+	}
+		}
 	}
 
 	//マシュマロと敵
