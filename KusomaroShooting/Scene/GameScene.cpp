@@ -1224,6 +1224,7 @@ void GameScene::updateWithHitStop() {
 					//getData().isNoContinueClear = true;
 					AudioAsset(AudioManager::Instance()->currentBGMName).stop();
 					AudioManager::Instance()->play(U"Select");
+					getData().startFromTitle = false;
 					changeScene(State::Game, 1.0s);
 				}
 
