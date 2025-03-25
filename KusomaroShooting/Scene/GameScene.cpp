@@ -727,6 +727,9 @@ void GameScene::update() {
 			}
 			//UIを戻す
 			if (4.8 <= easeTimer4) {
+				//bgmを再生
+				//currentBGMName = U"MidBoss";
+				if(not AudioAsset(U"MidBoss").isPlaying() ) AudioManager::Instance()->play(U"MidBoss", 1s);
 				isHpAnimationStart = true;
 				easeTimer7 += Scene::DeltaTime();
 				easeBossAppear = 1.0 - EaseOutExpo(Min(easeTimer7 / 1.2, 1.0));
