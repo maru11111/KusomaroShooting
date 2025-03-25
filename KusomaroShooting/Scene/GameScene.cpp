@@ -1921,6 +1921,39 @@ void GameScene::commonDraw()const {
 	if (isDrawGuide && gameState!=GameState::Tutorial) TextureAsset(U"Manual").scaled(0.5).draw(ColorF(1.0, 0.5));
 }
 
+void GameScene::updateFadeIn(double t) {
+	//チュートリアル中でない
+	if (not getData().isTutorial) {
+		//タイトルから開始している
+		if (getData().startFromTitle) {
+			fadeInTimer += Scene::DeltaTime();
+			fadeInTimerEase += Scene::DeltaTime();
+			isFadingIn = true;
+			//減速
+			if (0.5 <= fadeInTimer) {
+				const double ease = EaseInOutQuad(Min((fadeInTimerEase - 0.5) / 3.0, 1.0));
+				getData().backgroundDrawTimer += Scene::DeltaTime() * Max(2.5 * (1 - ease), 1.0);
+			}
+			else {
+				getData().backgroundDrawTimer += Scene::DeltaTime() * 2.5;
+			}
+			//if (fadeInTimer <= 1.0) objects.player->toStartPos();
+			update();
+		}
+		else {
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+		}
+	}
+	else {
+		getData().backgroundDrawTimer += Scene::DeltaTime();
+	}
+}
+
+void GameScene::drawFadeIn(double t)const {
+	draw();
+	if (getData().isTutorial)RectF(0, 0, Scene::Size()).draw(ColorF(0.0, 1.0 - t));
+}
+
 void GameScene::draw() const {
 
 	switch (gameState) {
