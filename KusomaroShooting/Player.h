@@ -17,6 +17,9 @@ public:
 
 	void dyingUpdate();
 
+	void defeatBossUpdate();
+	void toMountainUpdate();
+
 	void toStartPos();
 
 	void move();
@@ -32,6 +35,8 @@ public:
 	void stayOnScreen();
 
 	void setKusomaro(MaroType type);
+
+	void setEditorPos();
 
 	RectF bodyCollision()const;
 	RectF attackCollision()const;
@@ -83,9 +88,9 @@ private:
 	void drawPlayer();
 
 	Objects& objects;
-	int maxHp = 1;
+	int maxHp = 10;
 	int hp = maxHp;
-	int damageAmount = 10;
+	int damageAmount = 400;
 	Vec2 pos = { -100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3};
 	Vec2 startPos = { 100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3 };
 	double toBaseTimer = 0;
@@ -98,12 +103,14 @@ private:
 	double marshmallowAddTimer = 0;
 	const double marshmallowAddInterval = 5;
 	//ふつうのマシュマロが出る確率(％)
-	int normalMaroAppearProbability = 100;
+	int normalMaroAppearProbability = 60;
+	//回復マロ
+	int healMaroAppearProbability = 10;
 	//クソマロ判定をされたマロのなかでの確率(％)
-	int upMaroAppearProbability = 100;
-	int downMaroAppearProbability = 0;
-	int sineMaroAppearProbability =0;
-	int beamMaroAppearProbability = 0;
+	int upMaroAppearProbability =   30;
+	int downMaroAppearProbability = 30;
+	int sineMaroAppearProbability = 30;
+	int beamMaroAppearProbability = 10;
 	Array<MaroType>maroBox;
 	bool isHitStopStart = false;
 	bool isHitBack=false;
@@ -138,7 +145,7 @@ private:
 	double damageHpAnimEaseTimer = 0;
 	int prevHpDamage;
 	//hpが低いとき
-	const double LowHpBorder = 0.2;
+	const double LowHpBorder = 0.3;
 	const double lowHpEffectRange=0.20;
 	double prevValue = 0;
 
@@ -161,4 +168,23 @@ private:
 
 	//移動時エフェクト
 	double effectTimer = 0;
+
+	//慣性用タイマー
+	double vecTimer = 0;
+
+	//当たり判定
+	Vec2 bodyColSize = { 45, 45 };
+	double bodyColAttackOffsetY = 0;
+	double bodyColAttackOffsetY_ = 0;
+
+	//ボス撃破後の移動
+	double toMountainTimer = 0;
+	Vec2 toMountainPos = {Scene::Size().x+30, Scene::Size().y+100};
+
+	//近接攻撃
+	double eR;
+	double eS;
+
+	//プレイヤー描画用タイマー
+	double drawTimer = 0;
 };

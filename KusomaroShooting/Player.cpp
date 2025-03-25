@@ -6,23 +6,25 @@
 struct AttackEffect : IEffect
 {
 	int n = 0;
-	double timer = 0;
+	double *timer = 0;
+	double timerOffset;
 	Vec2 pos;
 
 	// このコンストラクタ引数が、Effect::add<RingEffect>() の引数になる
-	explicit AttackEffect(Vec2 pos_)
-		: pos{ pos_ } {}
+	explicit AttackEffect(Vec2 pos_, double *timer_)
+		: pos{ pos_ }
+		, timer{timer_}
+		, timerOffset{*timer_}
+	{ }
 
 	bool update(double t) override
 	{
 		//スプライトシートを再生
-		int n = (int)(timer / (0.035 / 1.5)) % 21;
+		int n = (int)( (*timer - timerOffset) / (0.035 / 1.5)) % 21;
 		TextureAsset(U"UiAttackEffect")
 			(n * TextureAsset(U"UiAttackEffect").size().x / 21.0, 0, TextureAsset(U"UiAttackEffect").size().x / 21.0, TextureAsset(U"UiAttackEffect").size().y)
 			.scaled(3)
 			.drawAt(pos);
-
-		timer += Scene::DeltaTime();
 
 		//trueの間継続
 		return (n < 21 - 1);
@@ -55,6 +57,31 @@ struct MoveEffect : IEffect {
 	}
 };
 
+struct HealEffect : IEffect
+{
+	int n = 0;
+	double *timer;
+	double timerOffset;
+	Vec2 *pos;
+
+	// このコンストラクタ引数が、Effect::add<RingEffect>() の引数になる
+	explicit HealEffect(Vec2 *pos_, double* timer_)
+		: pos{ pos_ }
+		, timer{timer_}
+		, timerOffset{*timer}
+	{}
+
+	bool update(double t) override
+	{
+		//Print << U"heal";
+		//スプライトシートを再生
+		if(pos!=nullptr)drawSpriteAnimForTimerAt(U"HealEffect", 17, 0.045, *pos, *timer-timerOffset);
+
+		//trueの間継続
+		return (currentFrame(17, 0.045, *timer-timerOffset) != 17);
+	}
+};
+
 Player::Player(Objects& objects_)
 	:objects{ objects_ }
 {
@@ -65,6 +92,7 @@ Player::Player(Objects& objects_)
 
 		switch (addType) {
 		case MaroType::Normal:maroBox << MaroType::Normal; break;
+		case MaroType::Heal:maroBox << MaroType::Heal; break;
 		case MaroType::Up:maroBox << MaroType::Up; break;
 		case MaroType::Down:maroBox << MaroType::Down; break;
 		case MaroType::Sine:maroBox << MaroType::Sine; break;
@@ -84,6 +112,7 @@ Player::Player(Objects& objects_, Vec2 pos_)
 
 		switch (addType) {
 		case MaroType::Normal:maroBox << MaroType::Normal; break;
+		case MaroType::Heal:maroBox << MaroType::Heal; break;
 		case MaroType::Up:maroBox << MaroType::Up; break;
 		case MaroType::Down:maroBox << MaroType::Down; break;
 		case MaroType::Sine:maroBox << MaroType::Sine; break;
@@ -98,6 +127,7 @@ Player::~Player() {
 }
 
 void Player::dyingUpdate() {
+	drawTimer += Scene::DeltaTime();
 	pos += Vec2{-90 - 80 * Math::Cos(Math::TwoPi*Scene::Time()), 100-40*Math::Sin(Math::TwoPi*Scene::Time())} *Scene::DeltaTime();
 }
 
@@ -109,6 +139,8 @@ void Player::update() {
 	//	effectBack.add<MoveEffect>(pos.movedBy(-50, 20));
 	//	effectTimer -= 0.05;
 	//}
+
+	drawTimer += Scene::DeltaTime();
 
 	//時間経過でマシュマロ補充
 	if (numMarshmallows < maxNumMarshmallows) {
@@ -175,10 +207,11 @@ void Player::update() {
 	}
 
 	//近接攻撃
-	if (isMovable() && (KeyT.pressed() || KeyZ.pressed()) && not isAttack ) {
+	if (isMovable() && (KeyZ.pressed() || KeyN.pressed() || (MouseL.pressed()&&RectF(0,0,Scene::Size()).contains(Cursor::Pos())) ) && not isAttack ) {
 		isAttack = true;
 		isAttackColOn = true;
 		isAttackEffectStarted = false;
+
 		//近接攻撃効果音
 		AudioManager::Instance()->playOneShot(U"CloseRangeAttack");
 	}
@@ -187,9 +220,27 @@ void Player::update() {
 	if (isAttack) {
 		attackTimer += Scene::DeltaTime();
 
+		//角度のイージング
+		eR = EaseOutCubic(attackTimer * 2);
+
+		//前進速度のイージング
+		eS = EaseOutExpo(attackTimer * 2);
+
+		//当たり判定の座標オフセット
+		bodyColAttackOffsetY_ = -5 * Math::Sin(2 * 2 * Math::Pi * attackTimer);
+
+		//攻撃中の移動
+		pos += Vec2{ eS * 10 * Scene::DeltaTime() + 5 * Math::Cos(2 * 2 * Math::Pi * attackTimer), -5 * Math::Sin(2 * 2 * Math::Pi * attackTimer) };
+
+		//当たり判定のサイズを小さくする
+		bodyColSize = {40, 40};
+
+		//攻撃中に判定を動かさない
+		bodyColAttackOffsetY += bodyColAttackOffsetY_;
+
 		//エフェクト追加
 		if (not isAttackEffectStarted) {
-			effectBack.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20));
+			effectBack.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20), &drawTimer);
 			isAttackEffectStarted = true;
 		}
 
@@ -200,6 +251,10 @@ void Player::update() {
 		if (attackTime <= attackTimer) {
 			isAttack = false;
 			attackTimer = 0;
+			//当たり判定のサイズを戻す
+			bodyColSize = { 45, 45 };
+			bodyColAttackOffsetY_ = 0;
+			bodyColAttackOffsetY  = 0;
 		}
 	}
 	
@@ -210,25 +265,26 @@ void Player::update() {
 
 	//マシュマロを投げる
 	if (isMovable()) {
-		if (KeyJ.down() || KeySpace.down() || KeyEnter.down() || KeyX.down()) {
+		if (KeyX.down() || KeyM.down() || (MouseR.down() && RectF(0, 0, Scene::Size()).contains(Cursor::Pos())) ) {
 			attack();
 		}
 	}
 
 	//マシュマロを食べる
-	if (KeyC.down() && 0 < numMarshmallows && not isEating) {
-		//マシュマロを食べる。
-		//効果音
-		AudioManager::Instance()->playOneShot(U"Eat");
-		isEating = true;
-		eatTimer = 0;
-		ateMaroType = maroBox[0];
-		maroBox.pop_front();
-		numMarshmallows--;
-	}
-	else if(KeyC.down()){
-		AudioManager::Instance()->playOneShot(U"Beep");
-	}
+	//if (KeyC.down() && 3 <= numMarshmallows && not isEating) {
+	//	//マシュマロを食べる。
+	//	//効果音
+	//	AudioManager::Instance()->playOneShot(U"Eat");
+	//	isEating = true;
+	//	eatTimer = 0;
+	//	ateMaroType = maroBox[0];
+	//	maroBox.pop_front();
+	//	//3個消費
+	//	numMarshmallows -= 3;
+	//}
+	//else if(KeyC.down()){
+	//	AudioManager::Instance()->playOneShot(U"Beep");
+	//}
 
 	//マシュマロ食べ中
 	if (isEating) {
@@ -250,8 +306,8 @@ void Player::update() {
 			}
 		}
 	}
-	//回復中
 
+	//回復中
 	if (isHealing) {
 		healBackAnimTimer += Scene::DeltaTime();
 		if(0.5<=healBackAnimTimer)healSumForAnim += healAmountForAnim * Scene::DeltaTime();
@@ -278,12 +334,124 @@ void Player::update() {
 	prevPos = pos;
 }
 
+void Player::defeatBossUpdate() {
+	drawTimer += Scene::DeltaTime();
+
+	//無敵時間があったら更新
+	if (isInvincibility()) {
+		remainingInvincibilityTime -= Scene::DeltaTime();
+		if (remainingInvincibilityTime < 0)remainingInvincibilityTime = 0;
+	}
+
+	//ヒットバック中なら
+	if (isHitBack) {
+		hitBackTimer += Scene::DeltaTime();
+
+		pos.x -= hitBackSpeed * Scene::DeltaTime();
+
+		hitBackSpeed *= 0.9;
+
+		//画面外に出ない
+		stayOnScreen();
+
+
+		if (hitBackTime <= hitBackTimer) {
+			//ヒットバック終了
+			hitBackSpeed = firstHitBackSpeed;
+			isHitBack = false;
+		}
+	}
+
+	//ビーム中なら
+	if (isBeamAttacking) {
+		beamTimer += Scene::DeltaTime();
+
+		//後退する動きのイージング
+		//const double e = EaseOutBack(beamTimer/(75 * 0.05));
+
+		//後ろに下がる
+		if (13 * 0.05 < beamTimer) {
+			pos.x -= 3 * Scene::DeltaTime();
+		}
+
+		if (75 * 0.050 < beamTimer) {
+			isBeamAttacking = false;
+			beamTimer = 0;
+		}
+	}
+
+	//近接攻撃中なら
+	if (isAttack) {
+		attackTimer += Scene::DeltaTime();
+
+		//当たり判定のサイズを小さくする
+		bodyColSize = { 40, 40 };
+
+		//攻撃中に判定を動かさない
+		bodyColAttackOffsetY += bodyColAttackOffsetY_;
+
+		//エフェクト追加
+		if (not isAttackEffectStarted) {
+			effectBack.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20), &drawTimer);
+			isAttackEffectStarted = true;
+		}
+
+		if (attackColTime <= attackTimer) {
+			isAttackColOn = false;
+		}
+
+		if (attackTime <= attackTimer) {
+			isAttack = false;
+			attackTimer = 0;
+			//当たり判定のサイズを戻す
+			bodyColSize = { 45, 45 };
+			bodyColAttackOffsetY_ = 0;
+			bodyColAttackOffsetY = 0;
+		}
+	}
+
+	//回復中
+	if (isHealing) {
+		healBackAnimTimer += Scene::DeltaTime();
+		if (0.5 <= healBackAnimTimer)healSumForAnim += healAmountForAnim * Scene::DeltaTime();
+		if (hp <= prevHpHeal + healSumForAnim) {
+			isHealing = false;
+			healSumForAnim = 0;
+		}
+	}
+
+	//ダメージ時のhp減少アニメーション
+	if (isDamageHpAnimation) {
+		damageHpAnimTimer += Scene::DeltaTime();
+
+		if (1.0 <= damageHpAnimTimer) {
+			damageHpAnimEaseTimer += Scene::DeltaTime();
+
+			if (1.0 <= damageHpAnimEaseTimer) {
+				isDamageHpAnimation = false;
+			}
+		}
+	}
+
+	//最後の位置を記憶
+	prevPos = pos;
+}
+
+void Player::toMountainUpdate() {
+	drawTimer += Scene::DeltaTime();
+	toMountainTimer += Scene::DeltaTime();
+
+	pos = prevPos.lerp(toMountainPos, EaseInQuad(toMountainTimer / 4.0));
+}
+
 void Player::bossAppearStateUpdate(double timer) {
+	drawTimer += Scene::DeltaTime();
 	double ease = EaseOutQuad(Min(timer/3.5, 1.0));
 	pos = prevPos.lerp(basePos, ease);
 }
 
 void Player::toStartPos() {
+	drawTimer += Scene::DeltaTime();
 	toBaseTimer += Scene::DeltaTime();
 	const double toBaseEase = Min(EaseOutCubic(toBaseTimer), 1.0);
 	pos = Vec2{ -100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3 }.lerp(startPos, toBaseEase);
@@ -317,7 +485,12 @@ void Player::move() {
 	stayOnScreen();
 
 	//簡易慣性
-	vec *= 0.9;
+	vecTimer += Scene::DeltaTime();
+	if (1.0 / 60.0 <= vecTimer) {
+		vec *= 0.75;
+		vecTimer =0;
+	}
+	//vec.clear();
 }
 
 void Player::attack() {
@@ -325,6 +498,10 @@ void Player::attack() {
 	if (0 < numMarshmallows) {
 		switch (maroBox[0]) {
 		case MaroType::Normal: objects.marshmallows << std::make_unique<NormalMarshmallow>(objects, pos); break;
+		case MaroType::Heal:
+			objects.marshmallows << std::make_unique<HealMarshmallow>(objects, pos);
+			heal(1);
+			break;
 		case MaroType::Up: objects.marshmallows << std::make_unique<KusoMarshmallowUp>(objects, pos); break;
 		case MaroType::Down: objects.marshmallows << std::make_unique<KusoMarshmallowDown>(objects, pos); break;
 		case MaroType::Sine: objects.marshmallows << std::make_unique<KusoMarshmallowSine>(objects, pos); break;
@@ -333,6 +510,7 @@ void Player::attack() {
 
 		//マシュマロ(or beam or クソマロ)を投げる音
 		if (maroBox[0] == MaroType::Normal) AudioManager::Instance()->playOneShot(U"Throw");
+		else if (maroBox[0] == MaroType::Heal);
 		else AudioManager::Instance()->playOneShot(U"Kusomaro");
 
 		maroBox.pop_front();
@@ -366,6 +544,7 @@ void Player::damage(int damageAmount, bool piercingInv) {
 		//ヒットバック開始
 		isHitBack = true;
 		hitBackTimer = 0;
+		AudioManager::Instance()->pauseAllAudio();
 		//効果音
 		AudioManager::Instance()->playOneShot(U"ReceiveDamage");
 		//簡易慣性をリセット
@@ -382,18 +561,16 @@ void Player::damage(int damageAmount, bool piercingInv) {
 
 MaroType Player::chooseMaro() {
 
-	if (not (0 <= normalMaroAppearProbability || normalMaroAppearProbability <= 100))throw Error{ U"normalMaroAppearProbabilityの値が不正" };
+	if (not( 0 <= normalMaroAppearProbability + healMaroAppearProbability && normalMaroAppearProbability + healMaroAppearProbability <= 100))throw Error{ U"normalMaroAppearProbability || healMaroAPの値が不正" };
 
 	//normalMaroAppearProbabilityの確率でふつうマロ生成
-	if (Random(100) < normalMaroAppearProbability) {
-		return MaroType::Normal;
-	}
+	int num = Random(99);
+	if (num < normalMaroAppearProbability) return MaroType::Normal;
+	else if (num < normalMaroAppearProbability + healMaroAppearProbability) return MaroType::Heal;
 
 	//クソマロだった場合
 	if (upMaroAppearProbability + downMaroAppearProbability + sineMaroAppearProbability + beamMaroAppearProbability != 100)throw Error{ U"クソマロの出現確率が不正" };
-
-	int num = Random(99);
-
+	num = Random(99);
 	if (num < upMaroAppearProbability) return MaroType::Up;
 	else if (num < upMaroAppearProbability + downMaroAppearProbability) return MaroType::Down;
 	else if (num < upMaroAppearProbability + downMaroAppearProbability + sineMaroAppearProbability) return MaroType::Sine;
@@ -413,10 +590,17 @@ void Player::setKusomaro(MaroType type) {
 	else maroBox << type;
 }
 
+void Player::setEditorPos() {
+	pos = Vec2{ -150, Scene::Size().y / 2.0 };
+}
+
 RectF Player::bodyCollision() const {
-	return RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3)), 15 * 3, 15 * 3);
+	return RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3 - bodyColAttackOffsetY)), bodyColSize);
 }
 RectF Player::attackCollision()const {
+	//拡大後
+	return RectF(Arg::center(pos.movedBy(20 * 3 - 30, 0)), 18 * 3 + 30, 22 * 3 + 15);
+	//拡大前
 	return RectF(Arg::center(pos.movedBy(20 * 3, 0)), 18 * 3, 22 * 3);
 }
 
@@ -476,6 +660,8 @@ bool Player::getIsHitStopStart(){
 void Player::heal(int healAmount) {
 	//効果音
 	AudioManager::Instance()->playOneShot(U"Heal");
+	//エフェクト
+	effectFront.add<HealEffect>(&pos, &drawTimer);
 	if (hp == maxHp) return;
 	if (not isHealing) {
 		prevHpHeal = hp;
@@ -526,6 +712,7 @@ void Player::addMarshmallow() {
 
 		switch (addType) {
 		case MaroType::Normal:maroBox << MaroType::Normal; break;
+		case MaroType::Heal:maroBox << MaroType::Heal; break;
 		case MaroType::Up:maroBox << MaroType::Up; break;
 		case MaroType::Down:maroBox << MaroType::Down; break;
 		case MaroType::Sine:maroBox << MaroType::Sine; break;
@@ -550,18 +737,12 @@ bool Player::getIsCrisis() {
 
 
 void Player::drawForAttack(double opacity) {
-	int n = (int)(Scene::Time() / 0.0625) % 102;
-
-	//角度のイージング
-	const double eR = EaseOutCubic(attackTimer * 2);
-
-	//前進速度のイージング
-	const double eS = EaseOutExpo(attackTimer * 2);
+	int n = (int)(drawTimer / 0.0625) % 102;
 
 	TextureAsset(U"UiNormalAndBlink")
 		(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y)
 		.scaled(3).rotated(eR * 2 * (-1) * 360 * attackTime * Math::Pi / 180.0)
-		.drawAt(pos.moveBy(eS * 10 * Scene::DeltaTime() + 5 * Math::Cos(2 * 2 * Math::Pi * attackTimer), -5 * Math::Sin(2 * 2 * Math::Pi * attackTimer)), ColorF(1.0, opacity));
+		.drawAt(pos, ColorF(1.0, opacity));
 }
 
 void Player::drawEffectFront() {
@@ -578,22 +759,22 @@ void Player::drawPlayer() {
 		//ヒットバック中
 		if (isHitBack) {
 			//点滅させる
-			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
+			int isDrawClear = (int)(drawTimer / (0.125 / 1.5)) % 2;
 			if (isDrawClear) {
 				//スプライトシートを再生
-				int n = (int)(Scene::Time() / 0.250) % 3;
+				int n = (int)(drawTimer / 0.250) % 3;
 				TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x / 3.0, 0, TextureAsset(U"UiDamage").size().x / 3.0, TextureAsset(U"UiDamage").size().y).scaled(3).drawAt(pos);
 			}
 			else {
 				//スプライトシートを再生
-				int n = (int)(Scene::Time() / 0.250) % 3;
+				int n = (int)(drawTimer / 0.250) % 3;
 				TextureAsset(U"UiDamage")(n * TextureAsset(U"UiDamage").size().x / 3.0, 0, TextureAsset(U"UiDamage").size().x / 3.0, TextureAsset(U"UiDamage").size().y).scaled(3).drawAt(pos, ColorF(1.0, 0.8));
 			}
 		}
 		//攻撃中
 		else if (isAttack) {
 			//点滅させる
-			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
+			int isDrawClear = (int)(drawTimer / (0.125 / 1.5)) % 2;
 			if (isDrawClear) {
 				drawForAttack(1.0);
 			}
@@ -604,9 +785,9 @@ void Player::drawPlayer() {
 		//それ以外
 		else {
 			//スプライトシートを再生
-			int n = (int)(Scene::Time() / 0.0625) % 102;
+			int n = (int)(drawTimer / 0.0625) % 102;
 			//点滅させる
-			int isDrawClear = (int)(Scene::Time() / (0.125 / 1.5)) % 2;
+			int isDrawClear = (int)(drawTimer / (0.125 / 1.5)) % 2;
 			if (isDrawClear) {
 				TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos, ColorF(1.0, 1.0));
 			}
@@ -630,7 +811,7 @@ void Player::drawPlayer() {
 	//通常
 	else {
 		//スプライトシートを再生
-		int n = (int)(Scene::Time() / 0.0625) % 102;
+		int n = (int)(drawTimer / 0.0625) % 102;
 		TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos);
 	}
 }
@@ -657,16 +838,22 @@ void Player::draw() {
 	else {
 		drawPlayer();
 	}
-	
+
+	//Debug
+	//RectF(Arg::center(pos.movedBy(5 * 3, -5 * 3 - bodyColAttackOffsetY)), bodyColSize).draw();
+
 	//TextureAsset(U"UiNormalAndBlink")(n * TextureAsset(U"UiNormalAndBlink").size().x / 102, 0, TextureAsset(U"UiNormalAndBlink").size().x / 102, TextureAsset(U"UiNormalAndBlink").size().y).scaled(3).drawAt(pos, ColorF(1.0, 0.0, 0.0, 0.1));
 
 	//Debug
-	//int n = (int)(Scene::Time() / 0.05) % 51;
+	//int n = (int)(drawTimer / 0.05) % 51;
 	//TextureAsset(U"UiBeam")(n * TextureAsset(U"UiBeam").size().x / 51, 0, TextureAsset(U"UiBeam").size().x / 51, TextureAsset(U"UiBeam").size().y).drawAt(pos);
 
 	//Debug
 	//RectF(Arg::center(pos.movedBy(5,-5)), 15, 15).draw(ColorF(1, 0, 0));
 
 	//Debug
-	//if(isAttackColOn) RectF(Arg::center(pos.movedBy(20 * 3, 0)), 12 * 3, 22 * 3).draw();
+	// 以前の攻撃当たり判定
+	// 
+	// 現在の攻撃当たり判定
+	//if(isAttackColOn) RectF(Arg::center(pos.movedBy(20 * 3 -30, 0)), 18 * 3 + 30, 22 * 3+15).draw(ColorF(1.0, 0,0, 0.5));
 }
