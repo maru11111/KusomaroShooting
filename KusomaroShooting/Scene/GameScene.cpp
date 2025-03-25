@@ -53,7 +53,13 @@ GameScene::GameScene(const InitData& init)
 {
 	objects.player = std::make_unique<Player>(objects);
 
-	//loadJson(U"stage/test.json");
+	if (getData().isTutorial) {
+		gameState = GameState::Tutorial;
+		//currentBGMName = U"Tutorial";
+		AudioManager::Instance()->play(U"Tutorial", 2.5s);
+	}
+	else {
+		changeStage(getData().startStage);
 
 	//初めのステージをロード
 	loadJson(U"stage/stage1.json");
