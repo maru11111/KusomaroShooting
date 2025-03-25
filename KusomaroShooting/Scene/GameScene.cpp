@@ -185,12 +185,7 @@ void GameScene::drawMarshmallowUI() const {
 	//ボスのHPバー
 	if (bossPtr != nullptr) {
 			if (isHpAnimationStart && not isHpAnimationEnd) {
-				if (not isPlayHpAnimation) {
-					AudioManager::Instance()->playOneShot(U"BossHpAnimation");
-					isPlayHpAnimation = true;
-				}
-				easeBossHpAnimationTimer += Scene::DeltaTime();
-				const double easeHpAnimation = Min(EaseInLinear(easeBossHpAnimationTimer/3.0), (double)bossPtr->getCurrentHp() / (double)bossPtr->getMaxHp());
+			const double easeHpAnimation = Min(EaseInLinear(easeBossHpAnimationTimer / 3.0), (double)bossPtr->getCurrentHp() / (double)bossPtr->getMaxHp());
 				drawBossBar(easeHpAnimation, 1.0, TextureAsset(U"BossBarBack"), TextureAsset(U"BossBarFront"), (320 - TextureAsset(U"BossBarBack").size().x * 2 - 16) * 3 + damageUIEffectOffsetX, 26 * 3 - 6 - easeBossAppear * marshmallowUIOffset, bossPtr);
 			}
 		}
