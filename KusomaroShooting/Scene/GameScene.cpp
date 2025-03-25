@@ -183,9 +183,7 @@ void GameScene::drawMarshmallowUI() const {
 	drawMaroBar(objects.player->getMaroEase(), 1.0, TextureAsset(U"PlayerBarBack"), TextureAsset(U"MarshmallowBarFront"), 50 * 3-4  + damageUIEffectOffsetX, 24 * 3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY, objects.player->getMaroAddEase());
 
 	//ボスのHPバー
-	for (int i = 0; i < objects.enemies.size(); i++) {
-		if (objects.enemies[i]->getId() == -1) {
-			BaseBoss *bossPtr = static_cast<BaseBoss*>(objects.enemies[i].get());
+	if (bossPtr != nullptr) {
 			if (isHpAnimationStart && not isHpAnimationEnd) {
 				if (not isPlayHpAnimation) {
 					AudioManager::Instance()->playOneShot(U"BossHpAnimation");
