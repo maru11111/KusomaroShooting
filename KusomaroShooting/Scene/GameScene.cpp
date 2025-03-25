@@ -1238,7 +1238,7 @@ void GameScene::updateWithHitStop() {
 
 			case SelectedButton::Continue:
 				//決定
-				if (KeyZ.pressed() || KeySpace.pressed() || KeyEnter.pressed()) {
+				if (confirmInput()) {
 					getData().startStage = currentStage;
 					SpawnEnemyData::spawnTimer = 0;
 					getData().lastContinueScore = stageStartScore;
