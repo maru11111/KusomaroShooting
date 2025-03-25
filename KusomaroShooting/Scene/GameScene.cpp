@@ -1589,18 +1589,32 @@ void GameScene::drawBackground()const {
 		//背景
 		//Scene::Rect()
 		//	.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
-		//const double skyPosX = -(int)(drawTimer / 0.0410) % (320 * 3);
-		const double cloudBigPosX = -(int)(drawTimer /    0.0100) % (320 * 3);
-		const double cloudNormalPosX = -(int)(drawTimer / 0.0125) % (320 * 3);
-		const double cloudSmallPosX = -(int)(drawTimer /  0.0150) % (320 * 3);
-		const double farBackMountainPosX = -(int)(drawTimer / 0.0250) % (320 * 3);
-		const double backMountainPosX = -(int)(drawTimer /   0.0300) % (320 * 3);
-		const double middleMountainPosX = -(int)(drawTimer / 0.0175) % (320 * 3);
-		const double frontMountainPosX = -(int)(drawTimer /  0.0125) % (320 * 3);
-		const double frontCityPosX = -(int)(drawTimer /  0.004125) % (320 * 3);
-		const double middleCityPosX = -(int)(drawTimer / 0.003125) % (320 * 3);
-		const double backCityPosX = -(int)(drawTimer /   0.002125) % (320 * 3);
-		const Vec2 rainPos = { -(int)(drawTimer / 0.00200) % (320 * 3), (int)(drawTimer / 0.00200) % (214 * 3) };
+//const double skyPosX = -(int)(getData().backgroundDrawTimer / 0.0410) % (320 * 3);
+	const double cloudBigPosX = -(int)(getData().backgroundDrawTimer / 0.0100) % (320 * 3);
+	const double cloudNormalPosX = -(int)(getData().backgroundDrawTimer / 0.0125) % (320 * 3);
+	const double cloudSmallPosX = -(int)(getData().backgroundDrawTimer / 0.0150) % (320 * 3);
+	const double farBackMountainPosX = -(int)(getData().backgroundDrawTimer / 0.0250) % (320 * 3);
+	const double backMountainPosX = -(int)(getData().backgroundDrawTimer / 0.0300) % (320 * 3);
+	const double middleMountainPosX = -(int)(getData().backgroundDrawTimer / 0.0175) % (320 * 3);
+	const double frontMountainPosX = -(int)(getData().backgroundDrawTimer / 0.0125) % (320 * 3);
+
+	if (defeatBossState == DefeatBossState::ToMountain) {
+		//cityは0から始まる前提
+		frontCityPosX = prevFrontCityPosX - (int)(cityTimer / 0.004125);
+		middleCityPosX = prevMiddleCityPosX - (int)(cityTimer / 0.003125);
+		backCityPosX = prevBackCityPosX - (int)(cityTimer / 0.002125);
+	}
+	else {
+		frontCityPosX = -(int)(getData().backgroundDrawTimer / 0.004125) % (320 * 3);
+		middleCityPosX = -(int)(getData().backgroundDrawTimer / 0.003125) % (320 * 3);
+		backCityPosX = -(int)(getData().backgroundDrawTimer / 0.002125) % (320 * 3);
+
+		prevFrontCityPosX = frontCityPosX;
+		prevMiddleCityPosX = middleCityPosX;
+		prevBackCityPosX = backCityPosX;
+	}
+
+	const Vec2 rainPos = { -(int)(getData().backgroundDrawTimer / 0.00200) % (320 * 3), (int)(getData().backgroundDrawTimer / 0.00200) % (214 * 3) };
 
 		//空
 		switch (currentStage) {
