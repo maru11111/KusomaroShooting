@@ -1440,11 +1440,20 @@ void GameScene::loadJson(String path)const {
 			if (str == U"Bag") {
 				n = (int)EnemyType::Bag;
 			}
+			else if (str == U"AccelBag") {
+				n = (int)EnemyType::AccelBag;
+			}
+			else if (str == U"SineBag") {
+				n = (int)EnemyType::SineBag;
+			}
 			else if (str == U"FastBag") {
 				n = (int)EnemyType::FastBag;
 			}
 			else if (str == U"BagWithCan") {
 				n = (int)EnemyType::BagWithCan;
+			}
+			else if (str == U"BagWithCanStay") {
+				n = (int)EnemyType::BagWithCanStay;
 			}
 			else if (str == U"Can") {
 				n = (int)EnemyType::Can;
@@ -1454,6 +1463,9 @@ void GameScene::loadJson(String path)const {
 			}
 			else if (str == U"Umbrella") {
 				n = (int)EnemyType::Umbrella;
+			}
+			else if (str == U"HealUmbrella") {
+				n = (int)EnemyType::HealUmbrella;
 			}
 			else {
 				throw Error(U"GameSceneForEditor:未定義の敵です");
