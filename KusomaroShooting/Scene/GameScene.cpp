@@ -631,7 +631,7 @@ void GameScene::update() {
 			if(not AudioAsset(U"Wind").isPlaying())AudioManager::Instance()->play(U"Wind", 2.0s);
 
 			//次に移る
-			if (2.0 <= gameStateTimer) {
+			if (4.0 <= gameStateTimer) {
 				//タイマーリセット
 				gameStateTimer = 0;
 				easeTimer1 = 0;
