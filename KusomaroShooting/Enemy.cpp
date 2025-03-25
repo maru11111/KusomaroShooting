@@ -132,7 +132,7 @@ GarbageBagAccel::GarbageBagAccel(Objects& objects_, Vec2 pos_)
 	vec = { -1,0 };
 	maxSpeed = 750;
 	damageAmount = 1;
-	score = 110;
+	score = 300;
 }
 
 void GarbageBagAccel::move() {
@@ -164,7 +164,7 @@ GarbageBagSine::GarbageBagSine(Objects& objects_, Vec2 pos_)
 	maxSpeed = 200;
 	speed = maxSpeed;
 	damageAmount = 1;
-	score = 110;
+	score = 300;
 }
 
 void GarbageBagSine::move() {
@@ -343,7 +343,7 @@ Can::Can(Objects& objects_, Vec2 pos_, Vec2 vec_)
 	vec = vec_;
 	speed = 75*3*2;
 	damageAmount = 1;
-	score = 20;
+	score = 70;
 
 	//缶の種類を抽選
 	canType = (CanType)Random(0, (int)CanType::Size-1);
@@ -512,7 +512,7 @@ HealUmbrella::HealUmbrella(Objects& objects_, Vec2 pos_)
 	maxHp = 10;
 	hp = maxHp;
 	damageAmount = 0;
-	score = 330;
+	score = 0;
 	remainingInvincibilityTime = 60;
 	name = U"HealUmbrella";
 }
