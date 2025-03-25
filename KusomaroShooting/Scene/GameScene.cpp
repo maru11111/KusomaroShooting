@@ -1859,8 +1859,8 @@ void GameScene::commonDraw()const {
 
 			Rect(0, 0, Scene::Size()).draw(ColorF(0, 0.6));
 			//GameOver 
-			FontAsset(U"GameUI_BestTenDot90")(U"GameOver").drawAt(Scene::CenterF().movedBy(3, -50 + 3), shadowColor);
-			FontAsset(U"GameUI_BestTenDot90")(U"GameOver").drawAt(Scene::CenterF().movedBy(0, -50), ColorF(0.90));
+			FontAsset(U"GameUI_BestTenDot90")(U"Game Over").drawAt(Scene::CenterF().movedBy(3, -50 + 3), shadowColor);
+			FontAsset(U"GameUI_BestTenDot90")(U"Game Over").drawAt(Scene::CenterF().movedBy(0, -50), ColorF(0.90));
 
 			switch (selectedButton) {
 			case SelectedButton::ReStart:
