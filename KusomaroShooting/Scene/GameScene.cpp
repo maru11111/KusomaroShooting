@@ -1201,7 +1201,7 @@ void GameScene::updateWithHitStop() {
 		}
 		//ヒットストップ終了後
 		else {
-			drawTimer += Scene::DeltaTime() / 4.0;
+			if (not isFadingIn) getData().backgroundDrawTimer += Scene::DeltaTime() / 4.0;
 			objects.player->dyingUpdate();
 			for (int i = 0; i < objects.marshmallows.size(); i++) {
 				objects.marshmallows[i]->update();
