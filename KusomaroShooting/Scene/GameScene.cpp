@@ -247,10 +247,9 @@ void GameScene::drawMarshmallowUI() const {
 
 		case GameState::BossAppear:
 			if (bossAppearState == BossAppearState::AppearBoss) {
-				for (int i = 0; i < objects.enemies.size(); i++) {
-					if (objects.enemies[i]->getId() == -1) {
-						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX+3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
-						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + static_cast<BaseBoss*>(objects.enemies[i].get())->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+				if (bossPtr != nullptr) {
+					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+					FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
 					}
 				}
 			}
