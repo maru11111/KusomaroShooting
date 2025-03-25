@@ -135,7 +135,7 @@ void GameScene::drawBossBar(double currentNum, double maxNum, TextureAsset backB
 }
 
 void GameScene::drawUIUimm(double damageUIEffectOffsetX, double damageUIEffectOffsetY)const {
-	int n = (int)(drawTimer / 0.08) % 65;
+	int n = (int)(getData().backgroundDrawTimer / 0.08) % 65;
 	//プレイヤーが瀕死なら
 	if (objects.player->getIsCrisis()) {
 		//赤く点滅
@@ -163,7 +163,7 @@ void GameScene::drawMarshmallowUI() const {
 	const double damageUIEffectOffsetY = - (1.0 - EaseInOutCirc(Min(damageUIEffectTimer, 1.0))) * 1.5 * Cos(damageUIEffectTimer * Math::Pi * 13.0);
 
 	//UIの背景
-	int n = (int)(drawTimer / 0.08) % 65;
+	int n = (int)(getData().backgroundDrawTimer / 0.08) % 65;
 	//ボス戦中
 	if (isHpAnimationStart) {
 		TextureAsset(U"UIBackWithBox")(n * TextureAsset(U"UIBackWithBox").size().x / 65, 0, TextureAsset(U"UIBackWithBox").size().x / 65.0, TextureAsset(U"UIBackWithBox").size().y).scaled(6).draw(0 - 6 + damageUIEffectOffsetX, -6 - easeBossAppear * marshmallowUIOffset);
