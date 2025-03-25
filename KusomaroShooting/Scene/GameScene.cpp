@@ -979,6 +979,9 @@ void GameScene::update() {
 		if (gameState == nextState) throw Error(U"equal state");
 		gameState = nextState;
 	}
+
+	//フェードイン中のフラグをfalseに
+	isFadingIn = false;
 }
 
 void GameScene::collisionAndRemoveUpdate() {
