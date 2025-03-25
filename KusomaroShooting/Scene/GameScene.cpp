@@ -1958,7 +1958,86 @@ void GameScene::draw() const {
 
 	switch (gameState) {
 	case GameState::Tutorial:
+
+		switch (tutorialState) {
+		case TutorialState::Move:
+			// 移動
+			commonDraw();
+			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+			TextureAsset(U"TutorialMove").scaled(0.5).draw();
+
+			//三角
+			Triangle(Scene::CenterF().movedBy(360, 0), 60).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
 		break;
+
+		case TutorialState::Attack:
+			// 攻撃方法
+			commonDraw();
+			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+			TextureAsset(U"TutorialAttack").scaled(0.5).draw();
+
+			//左三角
+			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			//右三角
+			Triangle(Scene::CenterF().movedBy(360, 0), 60).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			break;
+
+		case TutorialState::Maro1:
+			// マシュマロの説明1
+			commonDraw();
+			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+			TextureAsset(U"TutorialMaro1").scaled(0.5).draw();
+
+			//左三角
+			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			//右三角
+			Triangle(Scene::CenterF().movedBy(360, 0), 60).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			break;
+
+		case TutorialState::Maro2:
+			//マシュマロの説明2
+			commonDraw();
+			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+			TextureAsset(U"TutorialMaro2").scaled(0.5).draw();
+
+			//左三角
+			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			//右三角
+			Triangle(Scene::CenterF().movedBy(360, 0), 60).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			break;
+
+		case TutorialState::Score:
+			// スコア(ランキング)の説明
+			commonDraw();
+			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+			TextureAsset(U"TutorialScore").scaled(0.5).draw();
+
+			//左三角
+			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			//右三角
+			Triangle(Scene::CenterF().movedBy(360, 0), 60).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			break;
+
+		case TutorialState::Pause:
+			//ポーズ画面の説明
+			commonDraw();
+			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+			TextureAsset(U"TutorialPause").scaled(0.5).draw();
+			//左三角
+			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
+			break;
+
+		case TutorialState::Try:
+			//お試し部屋
+			commonDraw();
+			TextureAsset(U"Manual").scaled(0.5).draw(ColorF(1.0, 0.8));
+
+			if(Rect(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 10 + TextureAsset(U"UIBack").size().y * 6, TextureAsset(U"Question").size() * 5).mouseOver()) TextureAsset(U"Question").scaled(5).draw(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 4 + TextureAsset(U"UIBack").size().y * 6, ColorF(1.0, 1));
+			else TextureAsset(U"Question").scaled(5).draw(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 4 + TextureAsset(U"UIBack").size().y * 6, ColorF(1.0, 0.6));
+			//Rect(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 10 + TextureAsset(U"UIBack").size().y * 6, TextureAsset(U"Question").size()*5).draw(ColorF(1.0, 0.6));
+		}
+		break;
+	break;
 
 	case GameState::StageStart:
 		commonDraw();
