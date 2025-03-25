@@ -90,7 +90,7 @@ private:
 	Objects& objects;
 	int maxHp = 10;
 	int hp = maxHp;
-	int damageAmount = 400;
+	int damageAmount = 10;
 	Vec2 pos = { -100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3};
 	Vec2 startPos = { 100, Scene::CenterF().y + TextureAsset(U"UIBack").size().y * 3 };
 	double toBaseTimer = 0;
