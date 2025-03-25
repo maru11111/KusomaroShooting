@@ -17,6 +17,7 @@ void BaseEnemy::attack() {
 }
 
 void BaseEnemy::update() {
+	drawTimer += Scene::DeltaTime();
 	animTimer += Scene::DeltaTime();
 	move();
 	attack();
@@ -27,7 +28,7 @@ void BaseEnemy::update() {
 	}
 }
 
-bool BaseEnemy::damage(int damageAmount, bool isExistInv, int& gameScore) {
+bool BaseEnemy::damage(int damageAmount, bool isExistInv) {
 	//無敵時間を考慮
 	if (isExistInv) {
 		//無敵時間中
@@ -90,7 +91,8 @@ GarbageBagNormal::GarbageBagNormal(Objects& objects_, Vec2 pos_)
 	maxHp = 10;
 	hp = maxHp;
 	vec = { -1,0 };
-	speed = 75*3;
+	maxSpeed = 75*3;
+	speed = maxSpeed;
 	damageAmount = 1;
 	score = 110;
 }
@@ -98,7 +100,8 @@ GarbageBagNormal::GarbageBagNormal(Objects& objects_, Vec2 pos_)
 void GarbageBagNormal::move() {
 	pos += vec * speed * Scene::DeltaTime();
 	if (pos.x <= Scene::Size().x / 3.5) {
-		speed *= 1.01;
+		exitTimer += Scene::DeltaTime();
+		speed = maxSpeed * ( 1.0 + 0.6*EaseInSine(Min(exitTimer*1.75, 1.0)) );
 	}
 }
 
@@ -118,21 +121,95 @@ void GarbageBagNormal::draw() {
 	//RectF(Arg::center(pos), 7, 7).draw(ColorF(1, 0, 0));
 }
 
+
+
+
+GarbageBagAccel::GarbageBagAccel(Objects& objects_, Vec2 pos_)
+	: BaseEnemy(objects_, pos_)
+{
+	maxHp = 10;
+	hp = maxHp;
+	vec = { -1,0 };
+	maxSpeed = 750;
+	damageAmount = 1;
+	score = 110;
+}
+
+void GarbageBagAccel::move() {
+
+	if (pos.x <= Scene::Size().x)speedTimer += Scene::DeltaTime();
+	else speed = 200;
+
+	speed = Max(175.0, maxSpeed * EaseOutSine(Min(speedTimer/2.0, 1.0)));
+
+	pos += vec * speed * Scene::DeltaTime();
+}
+
+TwoQuads GarbageBagAccel::collision()const {
+	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
+}
+
+void GarbageBagAccel::draw() {
+	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, firstAngle + animTimer * 1 * (-360_deg)).drawAt(pos);
+}
+
+
+
+GarbageBagSine::GarbageBagSine(Objects& objects_, Vec2 pos_)
+	: BaseEnemy(objects_, pos_)
+{
+	maxHp = 10;
+	hp = maxHp;
+	vec = { -1,0 };
+	maxSpeed = 200;
+	speed = maxSpeed;
+	damageAmount = 1;
+	score = 110;
+}
+
+void GarbageBagSine::move() {
+
+	sineTimer += Scene::DeltaTime();
+
+	vec.y = Math::Cos(sineTimer * 2.5);
+
+	pos.y += 1.5 * vec.y;
+
+	pos.x += vec.x * speed * Scene::DeltaTime();
+
+	if (pos.x <= Scene::Size().x / 3.5) {
+		exitTimer += Scene::DeltaTime();
+		speed = maxSpeed * (1.0 + 0.6 * EaseInSine(Min(exitTimer * 1.75, 1.0)));
+	}
+}
+
+TwoQuads GarbageBagSine::collision()const {
+	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
+}
+
+void GarbageBagSine::draw() {
+	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, firstAngle + animTimer * 0.95 * (-360_deg)).drawAt(pos);
+}
+
+
+
 GarbageBagFast::GarbageBagFast(Objects& objects_, Vec2 pos_)
 	: BaseEnemy(objects_, pos_)
 {
 	maxHp = 10;
 	hp = maxHp;
 	vec = { -1,0 };
-	speed = 75 * 3 * 2;
+	maxSpeed = 75 * 3 * 2;
+	speed = maxSpeed;
 	damageAmount = 1;
 	score = 220;
 }
 
 void GarbageBagFast::move() {
 	pos += vec * speed * Scene::DeltaTime();
-	if (pos.x <= Scene::Size().x / 4) {
-		speed *= 1.01;
+	if (pos.x <= Scene::Size().x / 3.5) {
+		exitTimer += Scene::DeltaTime();
+		speed = maxSpeed * (1.0 + 0.6 * EaseInSine(Min(exitTimer * 1.75, 1.0)));
 	}
 }
 
@@ -141,7 +218,7 @@ TwoQuads GarbageBagFast::collision()const {
 }
 
 void GarbageBagFast::draw(){
-	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, Scene::Time() * 1 * (-360_deg)).drawAt(pos);
+	TextureAsset(U"GarbageBag").scaled(3).rotatedAt({ TextureAsset(U"GarbageBag").size().x * 3 / 2.0, TextureAsset(U"GarbageBag").size().y * 3 / 2.0 + 5 }, firstAngle + animTimer * 1 * (-360_deg)).drawAt(pos);
 }
 
 
@@ -152,34 +229,31 @@ GarbageBagWithCan::GarbageBagWithCan(Objects& objects_, Vec2 pos_)
 	maxHp = 10;
 	hp = maxHp;
 	vec = { -1,0 };
-	speed = 75;
+	maxSpeed = 75*3;
+	speed = maxSpeed;
 	damageAmount = 1;
 	score = 310;
+	timer = 2;
 }
 
 void GarbageBagWithCan::move(){
 	pos += vec * speed * Scene::DeltaTime();
-	if (pos.x <= Scene::Size().x / 4) {
-		speed *= 1.01;
+	if (pos.x <= Scene::Size().x / 3.5) {
+		exitTimer += Scene::DeltaTime();
+		speed = maxSpeed * (1.0 + 0.6 * EaseInSine(Min(exitTimer * 1.75, 1.0)));
 	}
 }
 
 void GarbageBagWithCan::attack() {
-	timer += Scene::DeltaTime();
+	if(pos.x <= Scene::Size().x) timer += Scene::DeltaTime();
 
 	//Print << objects.enemies.size();
 
 	if (attackInterval <= timer) {
 		timer -= attackInterval;
 		//缶を飛ばす
-		objects.enemies << std::make_unique<Can>(objects, pos, (objects.player->getPos() - pos).normalized());
+		objects.enemies << std::make_unique<CanForBag>(objects, pos, (objects.player->getPos() - pos).normalized(), &pos);
 		//缶を飛ばす音
-		//int type = Random(0, 2);
-		//switch (type) {
-		//case 0:AudioManager::Instance()->playOneShot(U"Can1"); break;
-		//case 1:AudioManager::Instance()->playOneShot(U"Can2"); break;
-		//case 2:AudioManager::Instance()->playOneShot(U"Can3"); break;
-		//}
 		AudioManager::Instance()->playOneShot(U"Can2");
 	}
 }
@@ -191,9 +265,74 @@ TwoQuads GarbageBagWithCan::collision()const {
 void GarbageBagWithCan::draw() {
 	TextureAsset(U"GarbageBagWithCan")
 		.scaled(3)
-		.rotatedAt({ TextureAsset(U"GarbageBagWithCan").size().x * 3 / 2.0, TextureAsset(U"GarbageBagWithCan").size().y * 3 / 2.0 + 5 }, Scene::Time() * 0.5 * (-360_deg))
+		.rotatedAt({ TextureAsset(U"GarbageBagWithCan").size().x * 3 / 2.0, TextureAsset(U"GarbageBagWithCan").size().y * 3 / 2.0 + 5 }, firstAngle + animTimer * 1 * (-360_deg))
 		.drawAt(pos);
 }
+
+
+
+
+GarbageBagWithCanStay::GarbageBagWithCanStay(Objects& objects_, Vec2 pos_)
+	: BaseEnemy(objects_, pos_)
+	, initPos{pos_}
+{
+	maxHp = 10;
+	hp = maxHp;
+	vec = { -1,0 };
+	maxSpeed = 800;
+	speed = maxSpeed;
+	damageAmount = 1;
+	score = 310;
+	stayPos = Vec2{Scene::Size().x - 150, pos_.y};
+	timer = 2;
+}
+
+void GarbageBagWithCanStay::move() {
+
+	if (not isAppear) {
+		appearTimer += Scene::DeltaTime();
+		pos = initPos.lerp(stayPos, Min(EaseOutCirc(appearTimer/1.5), 1.0) );
+		currentAngle = - 360_deg * 2 * Min(EaseOutCirc(appearTimer / 1.5), 1.0);
+		if (1.5 <= appearTimer) {
+			isAppear = true;
+		}
+	}
+	if (isAppear) {
+		stayTimer += Scene::DeltaTime();
+		pos.y += - 0.1 * Periodic::Sine1_1(5s);
+	}
+	
+	if (stayTime <= stayTimer) {
+		speedEaseTimer += Scene::DeltaTime();
+		pos += EaseInQuart(Clamp(speedEaseTimer/2.5, 0.0, 1.0)) * vec * speed * Scene::DeltaTime();
+		currentAngle += EaseInQuart(Clamp(speedEaseTimer/2.5, 0.0, 1.0)) * Scene::DeltaTime() * 3.0 * (-360_deg);
+	}
+}
+
+void GarbageBagWithCanStay::attack() {
+	if(pos.x <= Scene::Size().x)timer += Scene::DeltaTime();
+
+	if (attackInterval <= timer) {
+		timer -= attackInterval;
+		//缶を飛ばす
+		objects.enemies << std::make_unique<CanForBag>(objects, pos, (objects.player->getPos() - pos).normalized(), &pos);
+		AudioManager::Instance()->playOneShot(U"Can2");
+	}
+}
+
+TwoQuads GarbageBagWithCanStay::collision()const {
+	return (Quad)RectF(Arg::center(pos), 7 * 3, 7 * 3);
+}
+
+void GarbageBagWithCanStay::draw() {
+	TextureAsset(U"GarbageBagWithCan")
+		.scaled(3)
+		.rotatedAt({ TextureAsset(U"GarbageBagWithCan").size().x * 3 / 2.0, TextureAsset(U"GarbageBagWithCan").size().y * 3 / 2.0 + 5 }, currentAngle)
+		.drawAt(pos);
+}
+
+
+
 
 
 Can::Can(Objects& objects_, Vec2 pos_, Vec2 vec_)
@@ -230,6 +369,58 @@ void Can::draw() {
 	texture.scaled(4).rotated(vec.getAngle()).drawAt(pos);
 }
 
+
+
+CanForBag::CanForBag(Objects& objects_, Vec2 pos_, Vec2 vec_, Vec2* bagPos_)
+	: BaseEnemy(objects_, pos_.movedBy(0, -posOffsetY))
+	, bagPos(bagPos_)
+{
+	maxHp = 10;
+	hp = maxHp;
+	vec = vec_;
+	speed = 75 * 3 * 2;
+	damageAmount = 1;
+	score = 20;
+
+	//缶の種類を抽選
+	canType = (CanType)Random(0, (int)CanType::Size - 1);
+
+	//テクスチャ決定
+	switch (canType) {
+	case CanType::Red: texture = TextureAsset(U"RedCan"); break;
+	case CanType::Grape: texture = TextureAsset(U"GrapeCan"); break;
+	case CanType::Orange: texture = TextureAsset(U"OrangeCan"); break;
+	case CanType::White: texture = TextureAsset(U"WhiteCan"); break;
+	}
+}
+
+void CanForBag::move() {
+	stayTimer += Scene::DeltaTime();
+	//待機
+	if (stayTimer < 0.5) {
+		if(bagPos!=nullptr)pos = (*bagPos).movedBy(0, -posOffsetY);
+		vec = (objects.player->getPos() - pos).normalized();
+	}
+	//発射
+	else {
+		if (not playThrowSE) {
+			AudioManager::Instance()->playOneShot(U"ThrowCan");
+			playThrowSE = true;
+		}
+		pos += vec * speed * Scene::DeltaTime();
+	}
+}
+
+TwoQuads CanForBag::collision()const {
+	return (Quad)RectF(Arg::center(pos), 15, 15);
+}
+
+void CanForBag::draw() {
+	texture.scaled(4).rotated(vec.getAngle()).drawAt(pos);
+}
+
+
+
 Fish::Fish(Objects& objects_, Vec2 pos_)
 	:BaseEnemy(objects_, pos_)
 {
@@ -239,6 +430,7 @@ Fish::Fish(Objects& objects_, Vec2 pos_)
 	damageAmount = 1;
 	vec = (objects.player->getPos() - pos).normalized();
 	score = 320;
+	timer = moveInterval;
 }
 
 void Fish::move() {
@@ -278,6 +470,7 @@ void Fish::draw() {
 }
 
 
+
 Umbrella::Umbrella(Objects& objects_, Vec2 pos_)
 	: BaseEnemy{ objects_, pos_ }
 {
@@ -288,13 +481,13 @@ Umbrella::Umbrella(Objects& objects_, Vec2 pos_)
 }
 
 void Umbrella::move() {
-	currentVelX = - maxVelX * Math::Sin(timer);
+	currentVelX = - maxVelX * Math::Sin(timer*1.1);
 
 	//Print << abs(currentVelX) / maxVelX;
 
 	angle = 30_deg * (currentVelX / maxVelX);
 
-	pos += Vec2(currentVelX -30, gravity)*Scene::DeltaTime();
+	pos += Vec2(currentVelX -40, gravity)*Scene::DeltaTime();
 
 	timer += Scene::DeltaTime();
 }
@@ -312,6 +505,48 @@ void Umbrella::draw() {
 }
 
 
+
+HealUmbrella::HealUmbrella(Objects& objects_, Vec2 pos_)
+	: BaseEnemy{ objects_, pos_ }
+{
+	maxHp = 10;
+	hp = maxHp;
+	damageAmount = 0;
+	score = 330;
+	remainingInvincibilityTime = 60;
+	name = U"HealUmbrella";
+}
+
+void HealUmbrella::move() {
+	currentVelX = -maxVelX * Math::Sin(timer * 1.1);
+
+	//Print << abs(currentVelX) / maxVelX;
+
+	angle = 30_deg * (currentVelX / maxVelX);
+
+	pos += Vec2(currentVelX - 40, gravity) * Scene::DeltaTime();
+
+	timer += Scene::DeltaTime();
+}
+
+TwoQuads HealUmbrella::collision()const {
+	return TwoQuads((Quad)RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle), (Quad)(RectF(Arg::center(pos.movedBy(0, 7)), 10, 95).rotated(angle)));
+}
+
+bool HealUmbrella::damage(int damageAmount, bool isExistInv) {
+	return false;
+}
+
+void HealUmbrella::draw() {
+	TextureAsset(U"HealUmbrella").scaled(3).rotated(angle - 45_deg).drawAt(pos);
+	//Debug
+	//今回はcol1だけ使用
+	//RectF(Arg::center(pos.movedBy(0, -13)), 90, 35).rotated(angle).draw();
+	//RectF(Arg::center(pos.movedBy(0, 7)), 10, 95).rotated(angle).draw();
+}
+
+
+
 BaseBoss::BaseBoss(Objects& objects_, Vec2 pos)
 	: BaseEnemy(objects_, pos)
 {
@@ -319,6 +554,7 @@ BaseBoss::BaseBoss(Objects& objects_, Vec2 pos)
 }
 void BaseBoss::update() {
 	//Print << getDamageEase();
+	drawTimer += Scene::DeltaTime();
 
 	move();
 	attack();
@@ -371,6 +607,10 @@ GarbageBox::GarbageBox(Objects& objects_, Vec2 pos_)
 	score = 5000;
 }
 
+void GarbageBox::dyingUpdate() {
+	pos += Vec2{2*Math::Cos(Scene::Time() * Math::TwoPi) -100 *Scene::DeltaTime(), 200*Scene::DeltaTime()};
+}
+
 void GarbageBox::move() {
 	//Print << U"State:" << (int)state;
 	//Print << U"NextState:" << (int)nextState;
@@ -386,7 +626,7 @@ void GarbageBox::move() {
 
 		switch (appearState) {
 		case AppearState::ToAppearBasePos:
-			if (ease == 0) AudioManager::Instance()->playOneShot(U"AppearBoss");
+			if (ease == 0) AudioManager::Instance()->play(U"AppearBoss");
 			//登場基準位置に移動
 			ease = EaseOutCirc(timers[(int)state].timer / 2.0);
 			pos = initPos.lerp(appearBasePos, ease);
@@ -407,7 +647,7 @@ void GarbageBox::move() {
 			pos.x += ease * 1.0 * Periodic::Square1_1(0.1s);
 			//ガタガタ効果音
 			if (not isPlayPullAudio) {
-				AudioManager::Instance()->playOneShot(U"BossAppearPull");
+				AudioManager::Instance()->play(U"BossAppearPull");
 				isPlayPullAudio = true;
 			}
 
@@ -429,7 +669,7 @@ void GarbageBox::move() {
 			//pos.x += ease * 2.5 * Periodic::Square1_1(0.1s);
 			//体を乗り出すときの効果音
 			if (not isPlayPushAudio) {
-				AudioManager::Instance()->playOneShot(U"RollingAttack");
+				AudioManager::Instance()->play(U"RollingAttack");
 				isPlayPushAudio = true;
 			}
 
@@ -509,14 +749,14 @@ void GarbageBox::move() {
 		//缶を飛ばす
 	case State::ThrowCan:
 		//効果音
-		if(timers[(int)state].timer==0) AudioManager::Instance()->playOneShot(U"ReadyToThrowCan");
+		if(timers[(int)state].timer==0) AudioManager::Instance()->play(U"ReadyToThrowCan");
 
 		//タイマー更新
 		timers[(int)state].timer += Scene::DeltaTime();
 
 		//ふたが開くときの効果音
 		if (currentFrame(56, 0.08, timers[(int)state].timer) == 47 && not isPlayOpenSE) {
-			AudioManager::Instance()->playOneShot(U"Open");
+			AudioManager::Instance()->play(U"Open");
 			isPlayOpenSE = true;
 		}
 
@@ -539,7 +779,7 @@ void GarbageBox::move() {
 				//case 1:AudioManager::Instance()->playOneShot(U"Can2"); break;
 				//case 2:AudioManager::Instance()->playOneShot(U"Can3"); break;
 				//}
-				AudioManager::Instance()->playOneShot(U"Can2");
+				AudioManager::Instance()->playOneShot(U"ThrowCan");
 				//リセット
 				throwCanIntervalTimer.timer -= throwCanIntervalTimer.time;
 				//飛ばした缶の数をカウント
@@ -556,7 +796,7 @@ void GarbageBox::move() {
 		}
 		//ふたを閉じるときの効果音
 		if (currentFrame(56, 0.08, timers[(int)state].timer) == 55 && not isPlayCloseSE && isLidClosing) {
-			AudioManager::Instance()->playOneShot(U"Close");
+			AudioManager::Instance()->play(U"Close");
 			isPlayCloseSE = true;
 		}
 
@@ -584,7 +824,7 @@ void GarbageBox::move() {
 		switch (rollingState) {
 		case RollingState::PreAction:
 			//効果音
-			if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"ReadyToDashAttack");
+			if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToDashAttack");
 			if (timers[(int)state].timer <= 2.25) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
@@ -598,7 +838,7 @@ void GarbageBox::move() {
 			}
 			break;
 		case RollingState::Rolling:
-			if(easeTimer==0) AudioManager::Instance()->playOneShot(U"RollingAttack");
+			if(easeTimer==0) AudioManager::Instance()->play(U"RollingAttack");
 			if (timers[(int)state].timer <= 1.0) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCubic(easeTimer / 1.0);
@@ -633,7 +873,7 @@ void GarbageBox::move() {
 		
 		switch (rollingState) {
 		case RollingState::PreAction:
-			if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"ReadyToRollingAttackLong");
+			if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToRollingAttackLong");
 			if (timers[(int)state].timer <= 3.25) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
@@ -647,7 +887,7 @@ void GarbageBox::move() {
 			}
 			break;
 		case RollingState::Rolling:
-			if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"RollingAttackLong");
+			if (easeTimer == 0) AudioManager::Instance()->play(U"RollingAttackLong");
 			if (timers[(int)state].timer <= 1.0) {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCubic(easeTimer / 1.0);
@@ -683,7 +923,7 @@ void GarbageBox::move() {
 		switch (dashState) {
 		case DashState::PreAction:
 			if (timers[(int)state].timer <= 2.25) {
-				if (easeTimer == 0) AudioManager::Instance()->playOneShot(U"ReadyToDashAttack");
+				if (easeTimer == 0) AudioManager::Instance()->play(U"ReadyToDashAttack");
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
@@ -700,7 +940,7 @@ void GarbageBox::move() {
 
 		case DashState::Dash1:
 			if (timers[(int)state].timer <= 2.75) {
-				if(easeTimer==0) AudioManager::Instance()->playOneShot(U"DashAttack");
+				if(easeTimer==0) AudioManager::Instance()->play(U"DashAttack");
 				easeTimer += Scene::DeltaTime();
 				ease = EaseInQuad(Min(easeTimer / 1.75, 1.0));
 				currentAngle -= 20 * Scene::DeltaTime();
@@ -782,7 +1022,7 @@ void GarbageBox::updateAttackStateTimer() {
 	}
 }
 
-bool BaseBoss::damage(int damageAmount, bool isExistInv, int& gameScore) {
+bool BaseBoss::damage(int damageAmount, bool isExistInv) {
 	//無敵時間を考慮
 	if (isExistInv) {
 		//無敵時間中
@@ -791,7 +1031,6 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv, int& gameScore) {
 			return false;
 		}
 		else {
-			Print << U"aaaaaa";
 			//ダメージを受ける前のhpを保存
 			if (not isDamageHpAnimation)prevHpDamage = hp;
 			else prevHpDamage = (1.0 - Min(EaseInQuart(damageHpAnimEaseTimer), 1.0)) * ((double)prevHpDamage - (double)hp)+(double)hp;
@@ -801,7 +1040,7 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv, int& gameScore) {
 			//無敵時間
 			if(hp!=0) remainingInvincibilityTime = invincibilityTime;
 			//ダメージSE
-			if (hp == 0) AudioManager::Instance()->playOneShot(U"HitHigh");
+			if (hp == 0) AudioManager::Instance()->play(U"DefeatBoss");
 			else AudioManager::Instance()->playOneShot(U"HitLow");
 			//ダメージ減少アニメーション
 			//ダメージ時のhp減少アニメーションのためのタイマー
@@ -824,7 +1063,7 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv, int& gameScore) {
 		hp -= damageAmount;
 		if (hp < 0)hp = 0;
 		//ダメージSE
-		if (hp == 0) AudioManager::Instance()->playOneShot(U"HitHigh");
+		if (hp == 0) AudioManager::Instance()->play(U"DefeatBoss");
 		else AudioManager::Instance()->playOneShot(U"HitLow");
 		//ダメージ減少アニメーション
 		//ダメージ時のhp減少アニメーションのためのタイマー
@@ -838,52 +1077,62 @@ bool BaseBoss::damage(int damageAmount, bool isExistInv, int& gameScore) {
 }
 
 bool GarbageBox::isDestroy() {
+	return isEndDefeatAnim;
+}
+
+bool GarbageBox::isDefeated() {
 	if (hp <= 0) return true;
 	else return false;
 }
 
 void GarbageBox::draw() {
 
-	switch (state) {
-	case State::Appear:
-		drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
-		break;
-
-	case State::Idle:
-		drawSpriteAnimAt(U"GarbageBox", 3, 0.14, pos);
-		break;
-
-	case State::ThrowCan:
-		if (not isLidOpen) drawSpriteAnimForTimerAt(U"GarbageBoxOpen", 56, 0.08, pos, timers[(int)state].timer);
-		else drawSpriteAt(U"GarbageBoxOpen", 56, 51, pos);
-		break;
-
-	case State::RollingAttack:
-		switch (rollingState) {
-		case RollingState::PreAction:
-			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
+	if (hp != 0) {
+		switch (state) {
+		case State::Appear:
+			drawRotateSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, currentAngle, drawTimer);
 			break;
-		case RollingState::Rolling:
-			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
+
+		case State::Idle:
+			drawSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, drawTimer);
+			break;
+
+		case State::ThrowCan:
+			if (not isLidOpen) drawSpriteAnimForTimerAt(U"GarbageBoxOpen", 56, 0.08, pos, timers[(int)state].timer);
+			else drawSpriteAt(U"GarbageBoxOpen", 56, 51, pos);
+			break;
+
+		case State::RollingAttack:
+			switch (rollingState) {
+			case RollingState::PreAction:
+				drawRotateSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, currentAngle, drawTimer);
+				break;
+			case RollingState::Rolling:
+				drawRotateSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, currentAngle, drawTimer);
+				break;
+			}
+			break;
+
+		case State::RollingAttackLong:
+			switch (rollingState) {
+			case RollingState::PreAction:
+				drawRotateSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, currentAngle, drawTimer);
+				break;
+			case RollingState::Rolling:
+				drawRotateSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, currentAngle, drawTimer);
+				break;
+			}
+			break;
+
+		case State::DashAttack:
+			drawRotateSpriteAnimForTimerAt(U"GarbageBox", 3, 0.14, pos, currentAngle, drawTimer);
 			break;
 		}
-		break;
-
-	case State::RollingAttackLong:
-		switch (rollingState) {
-		case RollingState::PreAction:
-			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
-			break;
-		case RollingState::Rolling:
-			drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
-			break;
-		}
-		break;
-
-	case State::DashAttack:
-		drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.14, pos, currentAngle);
-		break;
 	}
+	else {
+		drawRotateSpriteAnimAt(U"GarbageBox", 3, 0.5, pos.movedBy(1.5*Periodic::Sine1_1(0.1s), 0), currentAngle, ColorF(1.0, 1-Periodic::Sawtooth0_1(0.5s) ) );
+	}
+
 
 	//当たり判定
 	//RectF(Arg::center(pos.movedBy(0,-5)), 140, 190).draw(ColorF(1, 0, 0, 0.25));

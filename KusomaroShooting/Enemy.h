@@ -15,7 +15,7 @@ public:
 	virtual void move()=0;
 
 	//死んだらtrue, 生きていたらfalseを返す
-	virtual bool damage(int damageAmount, bool isExistInv, int& gameScore);
+	virtual bool damage(int damageAmount, bool isExistInv);
 
 	virtual bool isDestroy();
 
@@ -33,6 +33,8 @@ public:
 
 	int score;
 
+	String name;
+
 protected:
 	Objects& objects;
 	int id;
@@ -41,13 +43,15 @@ protected:
 	int hp;
 	Vec2 pos;
 	Vec2 vec;
+	double maxSpeed;
 	double speed;
 	int damageAmount;
 	double timer = 0;
 	double animTimer = 0;
 	double remainingInvincibilityTime = 0;
 	double invincibilityTime = 0.5;
-	String name;
+	//描画用タイマー
+	double drawTimer = 0;
 };
 
 class GarbageBagNormal : public BaseEnemy {
@@ -62,6 +66,39 @@ public:
 	void draw()override;
 private:
 	double firstAngle = Random(0,360);
+	double exitTimer = 0;
+};
+
+class GarbageBagAccel : public BaseEnemy {
+public:
+
+	GarbageBagAccel(Objects& objects_, Vec2 pos_);
+
+	void move()override;
+
+	TwoQuads collision()const override;
+
+	void draw()override;
+private:
+	double speedTimer = 0;
+	double firstAngle = Random(0, 360);
+};
+
+
+class GarbageBagSine : public BaseEnemy {
+public:
+
+	GarbageBagSine(Objects& objects_, Vec2 pos_);
+
+	void move()override;
+
+	TwoQuads collision()const override;
+
+	void draw()override;
+private:
+	double sineTimer = 0;
+	double firstAngle = Random(0, 360);
+	double exitTimer = 0;
 };
 
 class GarbageBagFast : public BaseEnemy {
@@ -72,6 +109,9 @@ public:
 	TwoQuads collision()const override;
 
 	void draw()override;
+private:
+	double firstAngle = Random(0, 360);
+	double exitTimer = 0;
 };
 
 class GarbageBagWithCan : public BaseEnemy {
@@ -83,6 +123,27 @@ public:
 	void draw()override;
 private:
 	double attackInterval=3;
+	double firstAngle = Random(0, 360);
+	double exitTimer = 0;
+};
+
+class GarbageBagWithCanStay : public BaseEnemy {
+public:
+	GarbageBagWithCanStay(Objects& objects_, Vec2 pos_);
+	void move()override;
+	void attack()override;
+	TwoQuads collision()const override;
+	void draw()override;
+private:
+	double attackInterval = 3;
+	double stayTimer = 0;
+	double stayTime = 6;
+	Vec2 stayPos;
+	Vec2 initPos;
+	bool isAppear = false;
+	double appearTimer = 0;
+	double currentAngle=0;
+	double speedEaseTimer = 0;
 };
 
 class Can : public BaseEnemy {
@@ -101,6 +162,28 @@ public:
 	TwoQuads collision()const;
 	void draw()override;
 private:
+};
+
+class CanForBag : public BaseEnemy {
+public:
+	enum class CanType {
+		Red,
+		Grape,
+		Orange,
+		White,
+		Size
+	};
+	CanType canType;
+	Texture texture;
+	CanForBag(Objects& objects_, Vec2 bagPos_, Vec2 vec_, Vec2* bagPos);
+	void move()override;
+	TwoQuads collision()const;
+	void draw()override;
+private:
+	double stayTimer = 0;
+	Vec2* bagPos;
+	double posOffsetY=20;
+	bool playThrowSE = false;
 };
 
 class Fish : public BaseEnemy {
@@ -122,9 +205,23 @@ public:
 	void draw()override;
 private:
 	double gravity=30;
-	double maxVelX = 200;
+	double maxVelX = 120;
 	double currentVelX=0;
 	double angle=0;
+};
+
+class HealUmbrella : public BaseEnemy {
+public:
+	HealUmbrella(Objects& objects_, Vec2 pos_);
+	void move()override;
+	TwoQuads collision()const;
+	bool damage(int damageAmount, bool isExistInv)override;
+	void draw()override;
+private:
+	double gravity = 30;
+	double maxVelX = 120;
+	double currentVelX = 0;
+	double angle = 0;
 };
 
 class BaseBoss : public BaseEnemy {
@@ -132,6 +229,8 @@ public:
 	BaseBoss(Objects& objects_, Vec2 pos_);
 
 	void update()override;
+
+	virtual void dyingUpdate()=0;
 
 	void move()override=0;
 	TwoQuads collision()const =0;
@@ -147,7 +246,7 @@ public:
 
 	double getPrevHpDamage();
 
-	bool damage(int damageAmount, bool isExistInv, int& gameScore)override;
+	bool damage(int damageAmount, bool isExistInv)override;
 
 protected:
 	String name;
@@ -180,9 +279,11 @@ public:
 	};
 	GarbageBox(Objects& objects_, Vec2 pos_);
 	void move()override;
+	void dyingUpdate()override;
 	TwoQuads collision()const;
 	void updateAttackStateTimer();
 	bool isDestroy()override;
+	bool isDefeated();
 	void draw()override;
 
 private:
@@ -191,6 +292,7 @@ private:
 	double currentAngle = 0;
 	Vec2 basePos = Vec2(Scene::Size().x - 150, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6);
 	Vec2 preReadyToAttackPos;
+	bool isEndDefeatAnim=false;
 
 	TimerVar timers[(int)State::StateNum] =
 	{
