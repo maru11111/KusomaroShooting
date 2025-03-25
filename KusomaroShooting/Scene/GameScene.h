@@ -19,6 +19,8 @@ public:
 
 	void dyingUpdate();
 
+	void updateFadeIn(double t)override;
+
 	virtual void spawnEnemy();
 
 	void addScore(int score);
@@ -27,6 +29,10 @@ public:
 
 	void commonDraw()const;
 
+	void drawBackground()const;
+
+	void drawFadeIn(double t)const override;
+
 	void draw()const override;
 
 	Objects& getObj();
@@ -34,6 +40,7 @@ public:
 	bool isHitStopping = false;;
 	const double hitStopTime = 0.15;
 	double hitStopTimer = 0;
+	bool isHitStopStart = false;
 	double drawTimer = 0;
 	double damageUIEffectTimer = 0;
 	bool isDamageUIEffectPlaying=false;
@@ -54,6 +61,8 @@ public:
 	void drawMarshmallowUI()const;
 
 private:
+	void changeStage(Stage nextStage);
+
 	//スコア
 	int currentScore = 0;
 	int stageStartScore = 0;
@@ -72,6 +81,7 @@ private:
 		Pause
 	};
 	GameState gameState = GameState::StageStart;
+	GameState prevGameState;
 	bool isChangeGameState=false;
 	GameState nextState;
 	double gameStateTimer=0;
@@ -113,14 +123,23 @@ private:
 
 	//ステージ
 	Array<String>stageName = {
-		U"Uinitial Dawn",
-		U"Blue Pallete Noon",
-		U"a",
-		U"a",
-		U"a",
-		U"a"
+		U"Uinitial Dawning",
+		U"Breezy Noon",
+		U"E Rain",
+		U"Amber Sunset",
+		U"Mortal Night", 
+		U"-",
+		U"EDITOR"
 	};
-	Stage currentStage=Stage::Morning;
+	Array<String>stageSubName = {
+		U"ウイニシャル ドーニング",
+		U"ブリージー ヌーン",
+		U"イー レイン",
+		U"アンバー サンセット",
+		U"モータル ナイト",
+		U"-",
+		U"デバッグ"
+	};
 
 	//ステージ開始演出
 	enum class StageStartState {
@@ -140,6 +159,7 @@ private:
 	//ステージ移動演出
 	double backGroundOpacity = 1.0;
 	double rainOpacity = 0.0;
+	double changeStageTimer = 0;
 
 	//ゲームオーバー
 	enum class SelectedButton {
@@ -148,13 +168,69 @@ private:
 		BackToTitle
 	};
 	mutable SelectedButton selectedButton = SelectedButton::ReStart;
-	ColorF activeColor = ColorF(0.9);
-	ColorF inactiveColor = ColorF(0.5);
-	ColorF shadowColor = ColorF(0.2);
 	double gameOverTimer = 0;
+	//String currentBGMName=U"Start";
+
+	//ヒットストップ時audio停止用フラグ
+	bool isPlayAfterPause=false;
+
+	//ボスのポインタ
+	GarbageBox* bossPtr=nullptr;
+
+	//ボス撃破後の動き
+	enum class DefeatBossState {
+		Slow,
+		BossFalling,
+		ToMountain
+	};
+	DefeatBossState defeatBossState = DefeatBossState::Slow;
+	void bossFallingUpdate();
+	void toMountainUpdate();
+	bool isInitDefeatBossState=false;
+	double defeatBossStateTimer = 0;
+	double cityTimer = 0;
+	double backGroundSpeedEase = 1;
+	mutable double prevFrontCityPosX;
+	mutable double prevMiddleCityPosX;
+	mutable double prevBackCityPosX;
+
+	mutable double frontCityPosX;
+	mutable double middleCityPosX;
+	mutable double backCityPosX;
+
+	//ポーズ画面
+	enum class PauseState {
+		GoBack,
+		Retry,
+		Title,
+		Config,
+		ConfigMode
+	};
+	PauseState pauseState = PauseState::GoBack;
+	const double PauseTriangleSize=22.5;
+	double pauseTriangleTimer = 0;
+
+	//チュートリアル
+	enum class TutorialState {
+		Move,
+		Attack,
+		Maro1,
+		Maro2,
+		Score,
+		Pause,
+		Try
+	};
+	TutorialState tutorialState = TutorialState::Move;
+	double spawnTimer = 0;
+
+	//フェードイン
+	bool isFadingIn = false;
+	double fadeInTimerEase = 0;
+	double fadeInTimer = 0;
 
 protected:
 	Objects objects;
 	mutable Array<SpawnEnemyData> spawnEnemyData;
+	Stage currentStage = Stage::Morning;
 };
 
