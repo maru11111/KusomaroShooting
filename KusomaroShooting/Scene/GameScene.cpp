@@ -543,11 +543,8 @@ void GameScene::update() {
 		case Stage::Morning:
 
 			//空になったら次のステージ
-			if (true /*spawnEnemyData.empty() && objects.enemies.empty()*/) {
-				//currentStage = Stage::Noon;
-				//gameState = GameState::StageStart
-				//次のステージをロード
-				//loadJson(U"stage/stage2.json");
+			if (spawnEnemyData.empty() && objects.enemies.empty()) {
+				changeStage(Stage::Noon);
 
 				//gameState = GameState::StageStart;
 				//gameState = GameState::BossAppear;
@@ -559,55 +556,37 @@ void GameScene::update() {
 
 		case Stage::Noon:
 			//空になったら次のステージ
-			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
-				currentStage = Stage::AfterNoon;
-				gameState = GameState::StageStart;
-				//次のステージをロード
-				//loadJson(U"stage/stage3.json");
+			if (spawnEnemyData.empty() && objects.enemies.empty()) {
 
-				//背景の不透明度をリセット
-				backGroundOpacity = 1.0;
+				changeStage(Stage::AfterNoon);
 			}
 			break;
 
 		case Stage::AfterNoon:
 			//空になったら次のステージ
-			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
-				currentStage = Stage::Evening;
-				gameState = GameState::StageStart;
-				//次のステージをロード
-				//loadJson(U"stage/stage4.json");
-				// 
-				//背景の不透明度をリセット
-				backGroundOpacity = 1.0;
+			if (spawnEnemyData.empty() && objects.enemies.empty()) {
+				changeStage(Stage::Evening);
 			}
 			break;
 
 		case Stage::Evening:
 			//空になったら次のステージ
-			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
-				currentStage = Stage::Night;
-				gameState = GameState::StageStart;
-				//次のステージをロード
-				//loadJson(U"stage/stage5.json");
-				
-				//背景の不透明度をリセット
-				backGroundOpacity = 1.0;
+			if (spawnEnemyData.empty() && objects.enemies.empty() ) {
+				changeStage(Stage::Night);
 			}
 			break;
 
 		case Stage::Night:
 			//空になったら次のステージ
-			if (true/*spawnEnemyData.empty() && objects.enemies.empty()*/) {
-				currentStage = Stage::MidNight;
-				gameState = GameState::BossAppear;
-
-				//背景の不透明度をリセット
-				backGroundOpacity = 1.0;
+			if (spawnEnemyData.empty() && objects.enemies.empty()) {
+				changeStage(Stage::MidNight);
 			}
 			break;
 
 		case Stage::MidNight:
+			break;
+
+		case Stage::Editor:
 			break;
 		}
 
@@ -1183,10 +1162,116 @@ void GameScene::loadJson(String path)const {
 	}
 }
 
-void GameScene::commonDraw()const {
-	{
-		const ScopedRenderTarget2D renderTarget{ renderTexture };
+void GameScene::changeStage(Stage nextStage) {
 
+	//bgmを止める
+	if (getData().startStage != nextStage){
+		AudioManager::Instance()->stop(AudioManager::Instance()->currentBGMName, 0.5s);
+	}
+	else {
+		changeStageTimer = 4;
+}
+	//-秒経ったら次のステージ
+	changeStageTimer += Scene::DeltaTime();
+	if (2.0 <= changeStageTimer) {
+		changeStageTimer = 0;
+		//SEを停止
+		AudioManager::Instance()->stopAllSE();
+
+		switch (nextStage) {
+		case Stage::Morning:
+			//ステージをロード
+			loadJson(Resource(U"stage/stageMorning.json"));
+			//ステージを変更
+			currentStage = nextStage;
+			//ゲームステートを変更
+			gameState = GameState::StageStart;
+			//背景の不透明度をリセット
+			backGroundOpacity = 1.0;
+			//タイマーリセット
+			SpawnEnemyData::spawnTimer = 0;
+			//bgm
+			//currentBGMName = U"Morning";
+			if(not AudioAsset(U"Morning").isPlaying()) AudioManager::Instance()->play(U"Morning", 2.5s);
+			break;
+
+		case Stage::Noon:
+			//ステージをロード
+			loadJson(Resource(U"stage/stageNoon.json"));
+			//ステージを変更
+			currentStage = nextStage;
+			//ゲームステートを変更
+			gameState = GameState::StageStart;
+			//背景の不透明度をリセット
+			backGroundOpacity = 1.0;
+			//タイマーリセット
+			SpawnEnemyData::spawnTimer = 0;
+			//bgm
+			//currentBGMName = U"Noon";
+			AudioManager::Instance()->play(U"Noon", 2.5s);
+			break;
+
+		case Stage::AfterNoon:
+			//ステージをロード
+			loadJson(Resource(U"stage/stageAfterNoon.json"));
+			//ステージを変更
+			currentStage = nextStage;
+			//ゲームステートを変更
+			gameState = GameState::StageStart;
+			//背景の不透明度をリセット
+			backGroundOpacity = 1.0;
+			//タイマーリセット
+			SpawnEnemyData::spawnTimer = 0;
+			//bgm
+			//currentBGMName = U"AfterNoon";
+			AudioManager::Instance()->play(U"AfterNoon", 2.5s);
+			break;
+
+		case Stage::Evening:
+			//ステージをロード
+			loadJson(Resource(U"stage/stageEvening.json"));
+			//ステージを変更
+			currentStage = nextStage;
+			//ゲームステートを変更
+			gameState = GameState::StageStart;
+			//背景の不透明度をリセット
+			backGroundOpacity = 1.0;
+			//タイマーリセット
+			SpawnEnemyData::spawnTimer = 0;
+			//bgm
+			//currentBGMName = U"Evening";
+			AudioManager::Instance()->play(U"Evening", 2.5s);
+			break;
+
+		case Stage::Night:
+			//ステージをロード
+			loadJson(Resource(U"stage/stageNight.json"));
+			//ステージを変更
+			currentStage = nextStage;
+			//ゲームステートを変更
+			gameState = GameState::StageStart;
+			//背景の不透明度をリセット
+			backGroundOpacity = 1.0;
+			//タイマーリセット
+			SpawnEnemyData::spawnTimer = 0;
+			//bgm
+			//currentBGMName = U"Night";
+			AudioManager::Instance()->play(U"Night", 2.5s);
+			break;
+
+		case Stage::MidNight:
+			//ステージを変更
+			currentStage = nextStage;
+			//ゲームステートを変更
+			gameState = GameState::BossAppear;
+			//背景の不透明度をリセット
+			backGroundOpacity = 1.0;
+			break;
+		}
+	}
+}
+
+void GameScene::drawBackground()const {
 		//背景
 		//Scene::Rect()
 		//	.draw(Arg::top = ColorF{ 0.2, 0.5, 1.0 }, Arg::bottom = ColorF{ 0.5, 0.8, 1.0 });
