@@ -1139,6 +1139,7 @@ void GameScene::updateWithHitStop() {
 			isHitStopping = true;
 			isDamageUIEffectPlaying = true;
 			slowTimer = 0;
+			isPlayAfterPause = false;
 			isHitStopStart = false;
 		}
 
@@ -1151,6 +1152,12 @@ void GameScene::updateWithHitStop() {
 			if (slowInterval <= slowTimer) {
 				stageUpdate();
 			}
+			//-秒で音声を元に戻す
+			if (0.10 <= hitStopTimer && not isPlayAfterPause) {
+				AudioManager::Instance()->playAllPauseAudio(0s);
+				isPlayAfterPause = true;
+			}
+
 			if (hitStopTime <= hitStopTimer) {
 				isHitStopping = false;
 			}
