@@ -1774,6 +1774,11 @@ void GameScene::drawBackground()const {
 			TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y }, ColorF(1.0, rainOpacity));
 		}
 
+void GameScene::commonDraw()const {
+	{
+		const ScopedRenderTarget2D renderTarget{ renderTexture };
+
+		drawBackground();
 
 		//背景とオブジェクトの間
 		//後面プレイヤー攻撃エフェクト
