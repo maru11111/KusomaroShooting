@@ -2121,5 +2121,103 @@ void GameScene::draw() const {
 	case GameState::BossBattle:
 		commonDraw();
 		break;
+		//}
+	case GameState::Pause:
+		commonDraw();
+
+		//背景を暗く
+		RectF(0, 0, Scene::Size()).draw(ColorF(0.0, 0.3));
+		//UIグラ
+		TextureAsset(U"Pause").scaled(6).draw();
+
+		//ボタン
+		switch (pauseState) {
+		case PauseState::GoBack:
+			//三角
+			Triangle(Vec2(Scene::Size().x / 5.0 * 1 + 30 - FontAsset(U"GameUI_BestTenDot30")(U"戻る").region().w/2.0 - PauseTriangleSize/2.0 -15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0/5.0) * 0.75, 0.75) + 0.2 )));
+
+			//FontAsset(U"GameUI_BestTenDot30")(U"ポーズ").drawAt(Scene::CenterF().movedBy(0, 33), activeColor);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30   , Scene::CenterF().y + 36 + 33), activeColor);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2 , Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3 , Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4-30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
+			break;
+
+		case PauseState::Retry:
+			//三角
+			Triangle(Vec2(Scene::Size().x / 5.0 * 2 - FontAsset(U"GameUI_BestTenDot30")(U"リトライ").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
+
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2       , Scene::CenterF().y + 36 + 33), activeColor);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
+			break;
+
+		case PauseState::Title:
+			//三角
+			Triangle(Vec2(Scene::Size().x / 5.0 * 3 - FontAsset(U"GameUI_BestTenDot30")(U"タイトル").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
+
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3       , Scene::CenterF().y + 36 + 33), activeColor);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
+			break;
+
+		case PauseState::Config:
+			//三角
+			Triangle(Vec2(Scene::Size().x / 5.0 * 4 - 30 - FontAsset(U"GameUI_BestTenDot30")(U"設定").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
+
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), activeColor);
+
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
+			break;
+
+		case PauseState::ConfigMode:
+
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2 - 40, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
+
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30  + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), activeColor);
+
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
+			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
+
+			configDraw();
+			break;
+		}
+		break;
 	}
 }
