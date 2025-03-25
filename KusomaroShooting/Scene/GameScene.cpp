@@ -774,6 +774,191 @@ void GameScene::update() {
 
 		//ヒットストップありupdate
 		updateWithHitStop();
+			//ボスのhpバーupdate
+			if (bossPtr != nullptr) {
+				if (isHpAnimationStart && not isHpAnimationEnd) {
+					if (not isPlayHpAnimation) {
+						AudioManager::Instance()->playOneShot(U"BossHpAnimation");
+						isPlayHpAnimation = true;
+					}
+					easeBossHpAnimationTimer += Scene::DeltaTime();
+				}
+			}
+		}
+		//ボス討伐後
+		else {
+			//初期化
+			if (not isInitDefeatBossState) {
+				hitStopTimer = 0;
+				slowTimer = 0;
+				isInitDefeatBossState = true;
+				AudioManager::Instance()->stop(AudioManager::Instance()->currentBGMName, 1s);
+			}
+			//
+			switch (defeatBossState) {
+			case DefeatBossState::Slow:
+				hitStopTimer += Scene::DeltaTime();
+				slowTimer += Scene::DeltaTime();
+				//ヒットストップ
+				if (hitStopTimer <= dyingHitStopTime) {
+					//スローにする
+					if ((dyingSlowInterval / Max(3.0 * Min(EaseInCubic(hitStopTimer / 2.5), 1.0), 1.0)) <= slowTimer) {
+						bossFallingUpdate();
+						slowTimer -= dyingSlowInterval / Max(3.0 * Min(EaseInCubic(hitStopTimer / 2.5), 1.0), 1.0);
+					}
+				}
+				//ヒットストップ終了後
+				else {
+					defeatBossState = DefeatBossState::ToMountain;
+				}
+				break;
+
+			case DefeatBossState::ToMountain:
+				backGroundSpeedEase = std::lerp(1.0, 6.0, Min(defeatBossStateTimer/4.0, 1.0));
+				defeatBossStateTimer += Scene::DeltaTime();
+				cityTimer += Scene::DeltaTime()/4.0 * backGroundSpeedEase;
+				toMountainUpdate();
+				if (Scene::Size().x+29 <= objects.player->getPos().x) {
+					//スコアを保存
+					getData().lastClearScore = currentScore;
+					//フラグリセット
+					getData().startFromTitle = false;
+					//開始ステージリセット
+					getData().startStage = Stage::Morning;
+					changeScene(State::Result, 1.0s);
+				}
+				break;
+			}
+		}
+		break;
+
+	case GameState::Pause:
+		//三角形アニメーション用タイマー
+		pauseTriangleTimer += Scene::DeltaTime();
+		if (1.25 <= pauseTriangleTimer) {
+			pauseTriangleTimer = 0;
+		}
+
+		//ボタン
+		switch (pauseState) {
+		case PauseState::GoBack:
+			//ポーズ解除
+			if (KeyShift.down()) {
+				gameState = prevGameState;
+				AudioManager::Instance()->playAllPauseAudio(0s);
+				AudioManager::Instance()->playOneShot(U"Cancel");
+				break;
+			}
+
+			if (KeyRight.down() || KeyD.down()) {
+				pauseTriangleTimer = 0;
+				pauseState = PauseState::Retry;
+				AudioManager::Instance()->playOneShot(U"ChangeButton");
+			}
+			if (confirmInput()) {
+				gameState = prevGameState;
+				AudioManager::Instance()->playAllPauseAudio(0s);
+				AudioManager::Instance()->playOneShot(U"Cancel");
+			}
+			break;
+
+		case PauseState::Retry:
+			//ポーズ解除
+			if (KeyShift.down()) {
+				gameState = prevGameState;
+				AudioManager::Instance()->playAllPauseAudio(0s);
+				AudioManager::Instance()->playOneShot(U"Cancel");
+				break;
+			}
+
+			if (KeyLeft.down() || KeyA.down()) {
+				pauseTriangleTimer = 0;
+				pauseState = PauseState::GoBack;
+				AudioManager::Instance()->playOneShot(U"ChangeButton");
+			}
+			if (KeyRight.down() || KeyD.down()) {
+				pauseTriangleTimer = 0;
+				pauseState = PauseState::Title;
+				AudioManager::Instance()->playOneShot(U"ChangeButton");
+			}
+			if (confirmInput()) {
+				getData().startStage = Stage::Morning;
+				SpawnEnemyData::spawnTimer = 0;
+				//getData().lastContinueScore = 0;
+				//getData().isNoContinueClear = true;
+				AudioManager::Instance()->stopAllAudio();
+				AudioManager::Instance()->play(U"Select");
+				getData().startFromTitle = false;
+				changeScene(State::Game, 1.0s);
+			}
+			break;
+
+		case PauseState::Title:
+			//ポーズ解除
+			if (KeyShift.down()) {
+				gameState = prevGameState;
+				AudioManager::Instance()->playAllPauseAudio(0s);
+				AudioManager::Instance()->playOneShot(U"Cancel");
+				break;
+			}
+
+			if (KeyLeft.down() || KeyA.down()) {
+				pauseTriangleTimer = 0;
+				pauseState = PauseState::Retry;
+				AudioManager::Instance()->playOneShot(U"ChangeButton");
+			}
+			if (KeyRight.down() || KeyD.down()) {
+				pauseTriangleTimer = 0;
+				pauseState = PauseState::Config;
+				AudioManager::Instance()->playOneShot(U"ChangeButton");
+			}
+
+			if (confirmInput()) {
+				getData().startStage = Stage::Morning;
+				SpawnEnemyData::spawnTimer = 0;
+				//getData().lastContinueScore = 0;
+				//getData().isNoContinueClear = true;
+				AudioAsset(AudioManager::Instance()->currentBGMName).stop();
+				AudioManager::Instance()->play(U"Select");
+				getData().isTutorial = false;
+				getData().startFromTitle = false;
+				changeScene(State::Title, 1.0s);
+
+			}
+		break;
+
+		case PauseState::Config:
+			//ポーズ解除
+			if (KeyShift.down()) {
+				gameState = prevGameState;
+				AudioManager::Instance()->playAllPauseAudio(0s);
+				AudioManager::Instance()->playOneShot(U"Cancel");
+				break;
+	}
+
+			if (KeyLeft.down() || KeyA.down()) {
+				pauseTriangleTimer = 0;
+				pauseState = PauseState::Title;
+				AudioManager::Instance()->playOneShot(U"ChangeButton");
+			}
+
+			if (confirmInput()) {
+				pauseState = PauseState::ConfigMode;
+				AudioManager::Instance()->playOneShot(U"Select");
+			}
+			break;
+
+		case PauseState::ConfigMode:
+			//前の画面に戻る
+			if ( (KeyShift.down() ) && not isSetting) {
+				pauseState = PauseState::Config;
+				AudioManager::Instance()->playOneShot(U"Cancel");
+				break;
+			}
+			//更新
+			configUpdate();
+			break;
+		}
 		break;
 	}
 
