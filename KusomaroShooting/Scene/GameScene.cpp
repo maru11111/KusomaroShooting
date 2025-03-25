@@ -196,11 +196,12 @@ void GameScene::drawMarshmallowUI() const {
 	TextureAsset(U"MarshmallowBox").scaled(6).drawAt((320 / 2 - 5) * 3 + damageUIEffectOffsetX, 24*3 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 	switch (objects.player->getNextMaro()) {
-	case MaroType::Normal: TextureAsset(U"Marshmallow").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Up: TextureAsset(U"KusomaroUp").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 - 4)*3 + damageUIEffectOffsetX, 24 * 3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Down: TextureAsset(U"KusomaroDown").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 1)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Sine: TextureAsset(U"KusomaroSine").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 + Math::Cos(drawTimer*Math::Pi*2))*3 - 6 + 6 + damageUIEffectOffsetX, 24*3 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
-	case MaroType::Beam: TextureAsset(U"KusomaroBeam").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Normal: TextureAsset(U"Marshmallow").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Heal: TextureAsset(U"HealMaro").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5) * 3 + damageUIEffectOffsetX, 24 * 3 + 6 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Up: TextureAsset(U"KusomaroUp").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 - 4)*3 + damageUIEffectOffsetX, 24 * 3 + 6 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Down: TextureAsset(U"KusomaroDown").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 1)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Sine: TextureAsset(U"KusomaroSine").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5 + Math::Cos(getData().backgroundDrawTimer*Math::Pi*2))*3 - 6 + 6 + damageUIEffectOffsetX, 24*3 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
+	case MaroType::Beam: TextureAsset(U"KusomaroBeam").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
 	}
 
 
@@ -213,23 +214,27 @@ void GameScene::drawMarshmallowUI() const {
 		//アルファ値を戻す
 		const ScopedRenderStates2D renderState{ MaxAlphaBlend() };
 
-		FontAsset(U"GameUI_Pixel")(U"HP").draw(165 - 4 + damageUIEffectOffsetX+2.0, 24 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.5, ColorF(0.25, 0.25, 0.25));
-		FontAsset(U"GameUI_Pixel")(U"HP").draw(165-4 + damageUIEffectOffsetX, 24 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		FontAsset(U"GameUI_Pixel")(U"HP").draw(165 - 4 + damageUIEffectOffsetX+2.0, 24 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.5, ColorF(0.25, 0.25, 0.25));
+		FontAsset(U"GameUI_Pixel")(U"HP").draw(165-4 + damageUIEffectOffsetX, 24 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 		//Print << U"easeBoss" << marshmallowUIOffset*easeBossAppear;
 		//if (objects.player->getNumMarshmallows() < 10) FontAsset(U"GameUI_Pixel")(U"Marshmallow\n    ", objects.player->getNumMarshmallows(), U"/30").drawAt(74, 93);
 		/*else*/
-		FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165 - 4 + damageUIEffectOffsetX+2.0, 24 * 3 + 14 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.0, ColorF(0.25, 0.25, 0.25));
-		FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165-4 + damageUIEffectOffsetX, 24 * 3 + 14 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165 - 4 + damageUIEffectOffsetX+2.0, 24 * 3 + 14 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.0, ColorF(0.25, 0.25, 0.25));
+		FontAsset(U"GameUI_Pixel")(U"MP:", objects.player->getNumMarshmallows(), U"/30").draw(165-4 + damageUIEffectOffsetX      , 24 * 3 + 14 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
-		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX+2.0, 12 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.0, ColorF(0.25, 0.25, 0.25));
-		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX, 12 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX+2.0, 12 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY+2.0, ColorF(0.25, 0.25, 0.25));
+		FontAsset(U"GameUI_Pixel")(U"Next").draw(423 + damageUIEffectOffsetX, 12 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 		//ステージ名orボスの名前
 		switch (gameState) {
-		case GameState::Tutorial:break;
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage:Tutorial").draw(548 + damageUIEffectOffsetX+2.0, 25 - 6 - easeBossAppear * marshmallowUIOffset+2.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0)); break;
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage:Tutorial").draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95)); break;
+		case GameState::Tutorial:
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:おためし部屋").draw(548 + damageUIEffectOffsetX+3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset+3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage:おためし部屋").draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+			//
+			FontAsset(U"GameUI_BestTenDot")(U"・操作の練習ができる部屋です").draw(548 + 14 + damageUIEffectOffsetX + 3.0, 25 - 6 + 54 + 3.0 - easeBossAppear * marshmallowUIOffset, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot")(U"・操作の練習ができる部屋です").draw(548 + 14 + damageUIEffectOffsetX, 25 - 6 + 54 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+			break;
 
 		case GameState::StageStart:
 		case GameState::Stage:
