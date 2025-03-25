@@ -1078,7 +1078,7 @@ void GameScene::collisionAndRemoveUpdate() {
 				}
 				else {
 					//ビームは多段ヒットあり
-					if (not (enemy->name == U"HealUmbrella")) {
+					if (enemy->name == U"HealUmbrella") {
 						//攻撃できない
 					}
 					else if (maro->getType() == MaroType::Empty) {
