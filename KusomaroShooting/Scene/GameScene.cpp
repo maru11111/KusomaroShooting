@@ -1262,8 +1262,12 @@ void GameScene::updateWithHitStop() {
 
 			case SelectedButton::BackToTitle:
 				//決定
-				if (KeyZ.pressed() || KeySpace.pressed() || KeyEnter.pressed()) {
+				if (confirmInput()) {
+					SpawnEnemyData::spawnTimer = 0;
+					AudioAsset(AudioManager::Instance()->currentBGMName).stop();
+					getData().startFromTitle = false;
 					AudioManager::Instance()->play(U"Select");
+					changeScene(State::Title, 1.0s);
 				}
 
 				//移動
