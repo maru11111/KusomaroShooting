@@ -1058,17 +1058,24 @@ void GameScene::collisionAndRemoveUpdate() {
 		for (auto& maro : objects.marshmallows) {
 			if (enemy->collision().intersects(maro->collision())) {
 				//敵にヒットした判定をtrueに
+				if (enemy->name != U"HealUmbrella")
 				maro->setIsHit(true);
 				//敵にダメージを与えられるか判定
 				if (maro->isNotEnemyHit(enemy->getId())) {
 					//IDを受け取る
 					maro->addId(enemy->getId());
 					//敵にダメージを与える
-					bool isDead = enemy->damage(maro->getDamageAmount(), false, currentScore);
+					bool isDead = enemy->damage(maro->getDamageAmount(), false);
 					//スコアを加算
-					if (isDead) addScore(enemy->score);
+					if (not (enemy->name == U"HealUmbrella")) {
+						//攻撃できない
+					}
+					else if (isDead && currentStage != Stage::MidNight && gameState!=GameState::Tutorial) addScore(enemy->score);
 					//エフェクトを追加
-					if (maro->getType() == MaroType::Normal || maro->getType() == MaroType::Empty) {
+					if (enemy->name == U"HealUmbrella") {
+						//攻撃できない
+					}
+					else if (maro->getType() == MaroType::Normal || maro->getType() == MaroType::Empty) {
 						effect.add<DamageEffect>(enemy->getPos());
 					}
 					else if(maro->getType() == MaroType::Beam) {
