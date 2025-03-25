@@ -1134,11 +1134,12 @@ void GameScene::updateWithHitStop() {
 	//プレイヤー生存中
 	if (objects.player->getHp() != 0) {
 		//ヒットストップをするか判定
-		if (objects.player->getIsHitStopStart()) {
+		if (objects.player->getIsHitStopStart() || isHitStopStart) {
 			hitStopTimer = 0;
 			isHitStopping = true;
 			isDamageUIEffectPlaying = true;
 			slowTimer = 0;
+			isHitStopStart = false;
 		}
 
 		//ヒットストップ時
