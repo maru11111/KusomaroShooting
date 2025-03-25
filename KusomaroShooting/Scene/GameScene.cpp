@@ -259,6 +259,34 @@ void GameScene::drawMarshmallowUI() const {
 				FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
 			}
 			break;
+
+		case GameState::Pause:
+			switch (prevGameState) {
+			case GameState::Tutorial:
+				FontAsset(U"GameUI_BestTenDot30")(U"Stage:おためし部屋").draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+				FontAsset(U"GameUI_BestTenDot30")(U"Stage:おためし部屋").draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+				//
+				FontAsset(U"GameUI_BestTenDot")(U"・操作の練習ができる部屋です").draw(548 + 14 + damageUIEffectOffsetX + 3.0, 25 - 6 + 54 + 3.0 - easeBossAppear * marshmallowUIOffset, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+				FontAsset(U"GameUI_BestTenDot")(U"・操作の練習ができる部屋です").draw(548 + 14 + damageUIEffectOffsetX, 25 - 6 + 54 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+				break;
+
+			case GameState::StageStart:
+			case GameState::Stage:
+				FontAsset(U"GameUI_BestTenDot30")(U"Stage:" + stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX + 3.0, 25 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+				FontAsset(U"GameUI_BestTenDot30")(U"Stage:" + stageName[(int)currentStage]).draw(548 + damageUIEffectOffsetX, 25 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+				//スコア表示
+				FontAsset(U"GameUI_BestTenDot")(U"Score:", (int)Min(prevScore + ((double)currentScore - prevScore) * Min(EaseOutLinear(scoreAnimTimer), 1.0), (double)currentScore)).draw(548 + 14 + damageUIEffectOffsetX + 3.0, 25 - 6 + 54 + 3.0 - easeBossAppear * marshmallowUIOffset, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+				FontAsset(U"GameUI_BestTenDot")(U"Score:", (int)Min(prevScore + ((double)currentScore - prevScore) * Min(EaseOutLinear(scoreAnimTimer), 1.0), (double)currentScore)).draw(548 + 14 + damageUIEffectOffsetX, 25 - 6 + 54 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+				break;
+
+			case GameState::BossAppear:
+				if (bossAppearState == BossAppearState::AppearBoss) {
+					if (bossPtr != nullptr) {
+						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX + 3.0, 25 - 6 - easeBossAppear * marshmallowUIOffset + 3.0, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+						FontAsset(U"GameUI_BestTenDot30")(U"Boss:" + bossPtr->getName()).draw(548 + damageUIEffectOffsetX, 25 - 6 - easeBossAppear * marshmallowUIOffset, ColorF(0.95));
+					}
+				}
+				break;
 		case GameState::BossBattle:
 			for (int i = 0; i < objects.enemies.size(); i++) {
 				if (objects.enemies[i]->getId() == -1) {
