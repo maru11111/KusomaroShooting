@@ -645,7 +645,7 @@ void GameScene::update() {
 			
 			if (gameStateTimer <= 1.0/1.5) {
 				//UIを隠す
-				easeBossAppear = EaseOutQuart(easeTimer1*1.0);
+				easeBossAppear = EaseOutQuart(Min(easeTimer1*1.0, 1.0));
 				//プレイヤーの位置を基準位置に
 				objects.player->bossAppearStateUpdate(easeTimer2);
 			}
