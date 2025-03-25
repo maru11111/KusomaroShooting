@@ -464,7 +464,7 @@ void GameScene::update() {
 	case GameState::StageStart:
 		{
 			//描画に使うタイマー
-			drawTimer += Scene::DeltaTime();
+		    if (not isFadingIn) getData().backgroundDrawTimer += Scene::DeltaTime();
 
 			stageStartTimer += Scene::DeltaTime();
 
