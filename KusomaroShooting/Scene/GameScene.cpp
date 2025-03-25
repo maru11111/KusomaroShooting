@@ -761,6 +761,17 @@ void GameScene::update() {
 		break;
 
 	case GameState::BossBattle:
+		//ボス討伐前
+		if (bossPtr->getCurrentHp() != 0) {
+
+			//ポーズ入力受付
+			if (KeyShift.down() && not objects.player->getIsBeamAttacking()) {
+				prevGameState = gameState;
+				gameState = GameState::Pause;
+				AudioManager::Instance()->pauseAllAudio();
+				AudioManager::Instance()->playOneShot(U"Select");
+			}
+
 		//ヒットストップありupdate
 		updateWithHitStop();
 		break;
