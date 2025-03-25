@@ -659,8 +659,10 @@ void GameScene::update() {
 			break;
 
 		case BossAppearState::DrawRect:
-			//
-			if (gameStateTimer <= 2.0) {
+			//風がやむ
+			if(2.0 <= gameStateTimer)AudioManager::Instance()->stop(U"Wind", 0.25s);
+
+			if (gameStateTimer <= 4.0) {
 				//プレイヤーの位置を基準位置に
 				objects.player->bossAppearStateUpdate(easeTimer2);
 				//枠を出す
