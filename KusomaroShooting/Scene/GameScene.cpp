@@ -1303,7 +1303,7 @@ void GameScene::stageUpdate() {
 	//プレイヤーとビーム以外は停止
 	if (isEnemyTimeStopped) {
 		//背景をゆっくり動かす
-		drawTimer += Scene::DeltaTime()/2.0;
+		getData().backgroundDrawTimer += Scene::DeltaTime()/2.0;
 		//敵以外を更新
 		objects.player->update();
 		for (int i = 0; i < objects.marshmallows.size();i++) {
