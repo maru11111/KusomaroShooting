@@ -1917,6 +1917,8 @@ void GameScene::commonDraw()const {
 
 		}
 	}
+	//操作方法
+	if (isDrawGuide && gameState!=GameState::Tutorial) TextureAsset(U"Manual").scaled(0.5).draw(ColorF(1.0, 0.5));
 }
 
 void GameScene::draw() const {
