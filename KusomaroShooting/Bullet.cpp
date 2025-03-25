@@ -34,7 +34,7 @@ BaseBullet::BaseBullet(Objects& objects_, Vec2 pos_)
 	, pos{ pos_ }
 {
 	numInstances++;
-	damageAmount = 10;
+	damageAmount = 13;
 	//Print << numInstances;
 }
 
@@ -52,6 +52,7 @@ void BaseBullet::update() {
 }
 
 void BaseBullet::setIsHit(bool isHit_) {
+	if (isHit) isHitTwice=true;
 	isHit = isHit_;
 }
 
@@ -62,8 +63,7 @@ bool BaseBullet::isOffScreen() {
 
 bool BaseBullet::isDestroy() {
 	if (isDestroyNextFrame)return true;
-	//貫通攻撃に上方修正
-	//else  if (isHit) return true;
+	else  if (isHitTwice) return true;
 	else return false;
 }
 
@@ -122,6 +122,14 @@ void NormalMarshmallow::move() {
 }
 
 
+HealMarshmallow::HealMarshmallow(Objects& objects_, Vec2 pos_)
+	: NormalMarshmallow(objects_, pos_)
+{}
+void HealMarshmallow::draw() {
+	TextureAsset(U"HealMaro").scaled(3).drawAt(pos);
+}
+
+
 
 
 KusoMarshmallowUp::KusoMarshmallowUp(Objects& objects_, Vec2 pos_)
@@ -129,17 +137,19 @@ KusoMarshmallowUp::KusoMarshmallowUp(Objects& objects_, Vec2 pos_)
 {
 	vec = { 1,0 };
 	speed = 600;
+	prevPos = pos_;
 	type = MaroType::Up;
 }
 
 void KusoMarshmallowUp::move()
 {
+	prevPos = pos;
 	vec.y -= 1.5  * Scene::DeltaTime();
 	pos += vec * speed * Scene::DeltaTime();
 }
 
 void KusoMarshmallowUp::draw() {
-	TextureAsset(U"KusomaroUp").scaled(3).drawAt(pos);
+	TextureAsset(U"KusomaroUp").scaled(3).rotated( (pos-prevPos).getAngle() + 90_deg +180_deg ).drawAt(pos);
 	//Debug
 	//RectF(Arg::center(pos), 20, 20).draw(ColorF(1, 0, 0));
 }
@@ -151,17 +161,19 @@ KusoMarshmallowDown::KusoMarshmallowDown(Objects& objects_, Vec2 pos_)
 {
 	vec = { 1,0 };
 	speed = 600;
+	prevPos = pos_;
 	type = MaroType::Down;
 }
 
 void KusoMarshmallowDown::move()
 {
+	prevPos = pos;
 	vec.y += 1.5 * Scene::DeltaTime();
 	pos += vec * speed * Scene::DeltaTime();
 }
 
 void KusoMarshmallowDown::draw() {
-	TextureAsset(U"KusomaroDown").scaled(3).drawAt(pos);
+	TextureAsset(U"KusomaroDown").scaled(3).rotated((pos - prevPos).getAngle() + 90_deg + 180_deg).drawAt(pos);
 	//Debug
 	//RectF(Arg::center(pos), 20, 20).draw(ColorF(1, 0, 0));
 }
@@ -173,11 +185,13 @@ KusoMarshmallowSine::KusoMarshmallowSine(Objects& objects_, Vec2 pos_)
 {
 	vec = { 1,0 };
 	speed =500;
+	prevPos = pos_;
 	type = MaroType::Sine;
 }
 
 void KusoMarshmallowSine::move()
 {
+	prevPos = pos;
 	vec.y = 1.5 * Math::Sin(timer*10 - 90_deg);
 	pos += vec * speed * Scene::DeltaTime();
 
@@ -185,7 +199,7 @@ void KusoMarshmallowSine::move()
 }
 
 void KusoMarshmallowSine::draw() {
-	TextureAsset(U"KusomaroSine").scaled(3).drawAt(pos);
+	TextureAsset(U"KusomaroSine").scaled(3).rotated(vec.getAngle()+90_deg+180_deg).drawAt(pos);
 	//Debug
 	//RectF(Arg::center(pos), 7, 7).draw(ColorF(1, 0, 0));
 }
@@ -240,6 +254,7 @@ Beam::Beam(Objects& objects_, Vec2 pos_)
 {
 	damageAmount = 4;
 	type = MaroType::Empty;
+	//Print << U"pop";
 }
 
 void Beam::update() {
@@ -278,7 +293,7 @@ void Beam::move() {
 
 bool Beam::isDestroy() {
 	if (isEndBeam) return true;
-	else false;
+	else return false;
 }
 
 void Beam::backGroundDraw()const {

@@ -8,6 +8,7 @@ enum class MaroType {
 	Down,
 	Sine,
 	Beam,
+	Heal,
 	Empty
 };
 
@@ -63,12 +64,20 @@ protected:
 	bool isHit=false;
 	Array<int>idOfEnemyHitOnce;
 	bool isDestroyNextFrame=false;
+	bool isHitTwice = false;
+	Vec2 prevPos;
 };
 
 class NormalMarshmallow : public BaseBullet {
 public:
 	NormalMarshmallow(Objects& objects_, Vec2 pos_);
 	void move()override;
+};
+
+class HealMarshmallow : public NormalMarshmallow {
+public:
+	HealMarshmallow(Objects& objects_, Vec2 pos_);
+	void draw()override;
 };
 
 class KusoMarshmallowUp : public BaseBullet {
