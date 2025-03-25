@@ -542,8 +542,8 @@ inline void configDraw() {
 	//FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220, Scene::CenterF().y + 33 + 108 + 66 }, ColorF(0.9));
 	//FontAsset(U"GameUI_BestTenDot")(U"Enterで決定/").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220-140 + 3, Scene::CenterF().y + 33 + 108 + 66 + 3 }, ColorF(0.3));
 	//FontAsset(U"GameUI_BestTenDot")(U"Enterで決定/").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220-140, Scene::CenterF().y + 33 + 108 + 66 }, ColorF(0.9));
-	FontAsset(U"GameUI_BestTenDot")(U"Enterで決定 / Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220 - 5 + 3, Scene::CenterF().y + 33 + 108 + 66 + 3 }, ColorF(0.3));
-	FontAsset(U"GameUI_BestTenDot")(U"Enterで決定 / Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220 - 5, Scene::CenterF().y + 33 + 108 + 66 }, ColorF(0.9));
+	FontAsset(U"GameUI_BestTenDot")(U"Enterで決定／Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220 - 5 + 3, Scene::CenterF().y + 33 + 108 + 66 + 3 }, ColorF(0.3));
+	FontAsset(U"GameUI_BestTenDot")(U"Enterで決定／Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 220 - 5, Scene::CenterF().y + 33 + 108 + 66 }, ColorF(0.9));
 }
 
 using App = SceneManager<State, GameData>;
