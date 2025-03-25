@@ -118,6 +118,8 @@
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Ranking\LeaderBoard.cpp" />
+    <ClCompile Include="Result.cpp" />
     <ClCompile Include="SpawnEnemyData.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -129,6 +131,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Title.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -339,10 +342,14 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Load.h" />
+    <ClInclude Include="Ranking\LeaderBoard.h" />
+    <ClInclude Include="Result.h" />
     <ClInclude Include="SpawnEnemyData.h" />
     <ClInclude Include="GameSceneForEditor.h" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Title.h" />
     <ClInclude Include="TwoQuads.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="StageEditor.h" />
