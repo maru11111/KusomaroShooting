@@ -1752,6 +1752,19 @@ void GameScene::drawBackground()const {
 			TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
 			TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
 			break;
+
+	case Stage::Editor:
+		TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+
+		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, 0 }, ColorF(1.0, 0.9));
+		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, 0 }, ColorF(1.0, 0.9));
+		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ 0, -Scene::Size().y }, ColorF(1.0, 0.9));
+		//TextureAsset(U"Rain").scaled(3).draw(rainPos + Vec2{ Scene::Size().x, -Scene::Size().y }, ColorF(1.0, 0.9));
 		}
 
 		if (currentStage == Stage::AfterNoon || currentStage == Stage::Evening) {
