@@ -1023,9 +1023,9 @@ void GameScene::collisionAndRemoveUpdate() {
 			if (enemy->collision().intersects(objects.player->attackCollision())) {
 				//ダメージエフェクト
 				if (not enemy->isInvincibility()) effect.add<DamageEffect>(enemy->getPos());
-				bool isDead = enemy->damage(objects.player->getDamageAmount(), true, currentScore);
+				bool isDead = enemy->damage(objects.player->getDamageAmount(), true);
 				//スコアを加算
-				addScore(enemy->score);
+				if(isDead && currentStage!=Stage::MidNight && gameState != GameState::Tutorial) addScore(enemy->score);
 			}
 		}
 	}
