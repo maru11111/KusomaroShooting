@@ -1032,12 +1032,17 @@ void GameScene::collisionAndRemoveUpdate() {
 	//プレイヤーの攻撃で倒された敵を破壊
 	destroyObjects();
 	//プレイヤー本体と敵本体
-	for (auto& enemy : objects.enemies) {
-		if (enemy->collision().intersects(objects.player->bodyCollision())) {
+	for (int i = 0; i < objects.enemies.size();i++) {
+		if (objects.enemies[i]->collision().intersects(objects.player->bodyCollision())) {
 			//ダメージ時画面エフェクト
-			if (not objects.player->isInvincibility())effect.add<DamageScreenEffect>();
+			if (not objects.player->isInvincibility() && objects.enemies[i]->name != U"HealUmbrella")effect.add<DamageScreenEffect>();
 			//ダメージ
-			objects.player->damage(enemy->getDamageAmount(), false);
+			if (gameState != GameState::Tutorial && objects.enemies[i]->name != U"HealUmbrella") objects.player->damage(objects.enemies[i]->getDamageAmount(), false);
+			//回復
+			else if (objects.enemies[i]->name == U"HealUmbrella") {
+				objects.player->heal(1);
+				//削除
+				objects.enemies.erase(objects.enemies.begin() + i);
 		}
 	}
 
