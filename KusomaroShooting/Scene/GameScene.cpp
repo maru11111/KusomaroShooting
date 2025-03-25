@@ -65,7 +65,9 @@ GameScene::GameScene(const InitData& init)
 	loadJson(U"stage/stage1.json");
 
 	//スコア
-	currentScore = getData().lastContinueScore;
+		//currentScore = getData().lastContinueScore;
+		scoreAnimTimer = 1;
+	}
 
 	//Debug
 	//ボス
