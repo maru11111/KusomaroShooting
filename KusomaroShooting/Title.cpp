@@ -390,8 +390,8 @@ void Title::draw()const {
 		TextureAsset(U"SettingStr").scaled(0.5).draw();
 
 		//操作方法
-		FontAsset(U"GameUI_BestTenDot")(U"矢印キーまたはWASDで移動 / Enterで決定 / Shiftで戻る").draw(Arg::bottomLeft = Vec2{ 0 + 6 + 3, Scene::Size().y - 6 + 3}, ColorF(0.25));
-		FontAsset(U"GameUI_BestTenDot")(U"矢印キーまたはWASDで移動 / Enterで決定 / Shiftで戻る").draw(Arg::bottomLeft = Vec2{ 0 + 6    , Scene::Size().y - 6 }, ColorF(0.9));
+		FontAsset(U"GameUI_BestTenDot")(U"矢印キーまたはWASDで移動／Enterで決定／Shiftで戻る").draw(Arg::bottomLeft = Vec2{ 0 + 6 + 3, Scene::Size().y - 6 + 3}, ColorF(0.25));
+		FontAsset(U"GameUI_BestTenDot")(U"矢印キーまたはWASDで移動／Enterで決定／Shiftで戻る").draw(Arg::bottomLeft = Vec2{ 0 + 6    , Scene::Size().y - 6 }, ColorF(0.9));
 
 		//FontAsset(U"GameUI_BestTenDot")(U"・矢印キーまたはWASDで移動").draw(Arg::bottomLeft = Vec2{ 0 + 3, Scene::Size().y - 3 + 3}, ColorF(0.25));
 		//FontAsset(U"GameUI_BestTenDot")(U"・矢印キーまたはWASDで移動").draw(Arg::bottomLeft = Vec2{ 0    , Scene::Size().y - 3 }, ColorF(0.9));
