@@ -193,7 +193,7 @@ void GameScene::drawMarshmallowUI() const {
 
 	//Print << U"ease*mar" << easeBossAppear * marshmallowUIOffset;
 	//次のマシュマロを表示
-	TextureAsset(U"MarshmallowBox").scaled(6).drawAt((320 / 2 - 5) * 3 + damageUIEffectOffsetX, 24*3 + 8 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
+	TextureAsset(U"MarshmallowBox").scaled(6).drawAt((320 / 2 - 5) * 3 + damageUIEffectOffsetX, 24*3 + 8 - 6 + 1.5 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY);
 
 	switch (objects.player->getNextMaro()) {
 	case MaroType::Normal: TextureAsset(U"Marshmallow").scaled(6).rotated(-90_deg).drawAt((320 / 2 - 5)*3 + damageUIEffectOffsetX, 24*3 + 6 - 6 - easeBossAppear * marshmallowUIOffset + damageUIEffectOffsetY); break;
