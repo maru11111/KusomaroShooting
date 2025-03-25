@@ -1185,6 +1185,7 @@ void GameScene::updateWithHitStop() {
 			slowTimer = 0;
 			isInitDyingVar = true;
 			AudioManager::Instance()->stopAllSE();
+			AudioManager::Instance()->stop(AudioManager::Instance()->currentBGMName, 0.5s);
 			AudioManager::Instance()->play(U"ReceiveDamageDying");
 		}
 
