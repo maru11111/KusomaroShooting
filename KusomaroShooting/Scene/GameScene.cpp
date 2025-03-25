@@ -984,6 +984,36 @@ void GameScene::update() {
 	isFadingIn = false;
 }
 
+void GameScene::bossFallingUpdate() {
+	//背景を動かす
+	getData().backgroundDrawTimer += Scene::DeltaTime()/4.0;
+	//更新
+	objects.player->defeatBossUpdate();
+	for (int i = 0; i < objects.marshmallows.size(); i++) {
+		objects.marshmallows[i]->update();
+	}
+	for (int i = 0; i < objects.enemies.size(); i++) {
+		if(objects.enemies[i]->getId() != -1)objects.enemies[i]->update();
+	}
+	bossPtr->dyingUpdate();
+}
+
+void GameScene::toMountainUpdate() {
+	//背景を速く動かす
+	getData().backgroundDrawTimer += Scene::DeltaTime() / 4.0 * backGroundSpeedEase;
+	//更新
+	//山に向かう
+	if(frontCityPosX < -Scene::Size().x/2.0 && middleCityPosX < -Scene::Size().x/2.0  && backCityPosX < -Scene::Size().x/2.0 ) objects.player->toMountainUpdate();
+
+	for (int i = 0; i < objects.marshmallows.size(); i++) {
+		objects.marshmallows[i]->update();
+	}
+	for (int i = 0; i < objects.enemies.size(); i++) {
+		if (objects.enemies[i]->getId() != -1)objects.enemies[i]->update();
+	}
+	bossPtr->dyingUpdate();
+}
+
 void GameScene::collisionAndRemoveUpdate() {
 //当たり判定
 //プレイヤーと敵本体
