@@ -514,7 +514,7 @@ void GameScene::update() {
 					//プレイヤーが登場
 					if(currentStage == getData().startStage) objects.player->toStartPos();
 					//次に進む
-					if (0.5 <= stageStartTimer) {
+					if (1.0 <= stageStartTimer) {
 						stageStartState = StageStartState::Start;
 						stageStartTimer = 0;
 						stageStartEaseTimer = 0;
