@@ -601,8 +601,8 @@ void GameScene::update() {
 		easeTimer1 += Scene::DeltaTime();
 		easeTimer2 += Scene::DeltaTime();
 		easeTimer3 += Scene::DeltaTime();
-		//背景を動かす
-		drawTimer += Scene::DeltaTime()/2.0;
+		//背景をゆっくり動かす
+		getData().backgroundDrawTimer += Scene::DeltaTime()/2.0;
 
 		if (not isSpawnBoss) {
 			//ボス
