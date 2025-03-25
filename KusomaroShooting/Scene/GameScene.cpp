@@ -323,6 +323,16 @@ void GameScene::update() {
 	//クリアタイム時間を測る(後でポーズ画面では行わないようにする)
 	currentTime += Scene::DeltaTime();
 
+	//Debug
+	if (KeyShift.pressed() && Key0.pressed()) {
+		AudioManager::Instance()->pauseAllAudio();
+		changeScene(State::Result, 0s);
+	}
+	if (KeyShift.pressed() && KeyE.pressed()) {
+		AudioManager::Instance()->pauseAllAudio();
+		changeScene(State::StageEditor, 0s);
+	}
+
 	switch (gameState) {
 	case GameState::Tutorial:
 		break;
