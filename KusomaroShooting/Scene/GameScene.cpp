@@ -335,6 +335,130 @@ void GameScene::update() {
 
 	switch (gameState) {
 	case GameState::Tutorial:
+
+		switch (tutorialState) {
+		case TutorialState::Move:
+			// 移動チュートリアル
+			//背景を動かす
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+			//次へ
+			if ( KeyRight.down() || KeyD.down() || confirmInput()) {
+				AudioManager::Instance()->playOneShot(U"Paper");
+				tutorialState = TutorialState::Attack;
+			}
+		break;
+
+		case TutorialState::Attack:
+			//// 攻撃チュートリアル
+			//背景を動かす
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+			//戻る
+			if (KeyLeft.down() || KeyA.down()) {
+				tutorialState = TutorialState::Move;
+				AudioManager::Instance()->playOneShot(U"Paper");
+			}
+			//次へ
+			if (KeyRight.down() || KeyD.down() || confirmInput()) {
+				AudioManager::Instance()->playOneShot(U"Paper");
+				tutorialState = TutorialState::Maro1;
+			}
+			break;
+
+		case TutorialState::Maro1:
+			// マシュマロの説明１
+			//背景を動かす
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+			//戻る
+			if (KeyLeft.down() || KeyA.down()) {
+				tutorialState = TutorialState::Attack;
+				AudioManager::Instance()->playOneShot(U"Paper");
+			}
+			//次へ
+			if (KeyRight.down() || KeyD.down() || confirmInput()) {
+				AudioManager::Instance()->playOneShot(U"Paper");
+				tutorialState = TutorialState::Maro2;
+			}
+			break;
+
+		case TutorialState::Maro2:
+			// マシュマロの説明２
+			//背景を動かす
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+			//戻る
+			if (KeyLeft.down() || KeyA.down()) {
+				tutorialState = TutorialState::Maro1;
+				AudioManager::Instance()->playOneShot(U"Paper");
+			}
+			//次へ
+			if (KeyRight.down() || KeyD.down() || confirmInput()) {
+				AudioManager::Instance()->playOneShot(U"Paper");
+				tutorialState = TutorialState::Score;
+			}
+			break;
+
+		case TutorialState::Score:
+			// スコア(ランキング)の説明
+			//背景を動かす
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+			//戻る
+			if (KeyLeft.down() || KeyA.down()) {
+				tutorialState = TutorialState::Maro2;
+				AudioManager::Instance()->playOneShot(U"Paper");
+			}
+			//次へ
+			if (KeyRight.down() || KeyD.down() || confirmInput()) {
+				AudioManager::Instance()->playOneShot(U"Paper");
+				tutorialState = TutorialState::Pause;
+			}
+			break;
+
+		case TutorialState::Pause:
+			//ポーズの説明
+			//背景を動かす
+			getData().backgroundDrawTimer += Scene::DeltaTime();
+			//戻る
+			if (KeyLeft.down() || KeyA.down()) {
+				tutorialState = TutorialState::Score;
+				AudioManager::Instance()->playOneShot(U"Paper");
+			}
+			//次へ
+			if (KeyRight.down() || KeyD.down() || confirmInput()) {
+				AudioManager::Instance()->playOneShot(U"Paper");
+				tutorialState = TutorialState::Try;
+			}
+			break;
+
+		case TutorialState::Try:
+			//お試し部屋
+			//ポーズ入力受付
+			if (KeyShift.down() && not objects.player->getIsBeamAttacking()) {
+				prevGameState = gameState;
+				gameState = GameState::Pause;
+				AudioManager::Instance()->pauseAllAudio();
+				AudioManager::Instance()->playOneShot(U"Select");
+				break;
+			}
+
+			//説明書を開く
+			if (Rect(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 10 + TextureAsset(U"UIBack").size().y * 6, TextureAsset(U"Question").size() * 5).leftClicked()) {
+				tutorialState = TutorialState::Move;
+				AudioManager::Instance()->playOneShot(U"Select");
+				break;
+			}
+
+			//更新
+			updateWithHitStop();
+			
+			//敵を出す
+			if (not objects.player->getIsBeamAttacking()) {
+				spawnTimer += Scene::DeltaTime();
+			}
+			if (5.0 <= spawnTimer) {
+				objects.enemies << std::make_unique<GarbageBagNormal>(objects, Vec2(Scene::Size().x+10, Random(TextureAsset(U"UIBack").size().y*6+50, Scene::Size().y-50)));
+				spawnTimer -= 5.0;
+			}
+			break;
+		}
 		break;
 
 	case GameState::StageStart:
