@@ -666,7 +666,7 @@ void GameScene::update() {
 				//プレイヤーの位置を基準位置に
 				objects.player->bossAppearStateUpdate(easeTimer2);
 				//枠を出す
-				ease = EaseOutQuint(gameStateTimer / 2.0);
+				ease = Min(EaseOutQuint(gameStateTimer / 2.0), 1.0);
 			}
 			else {
 				//タイマーリセット
