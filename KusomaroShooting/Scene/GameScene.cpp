@@ -605,9 +605,15 @@ void GameScene::update() {
 		getData().backgroundDrawTimer += Scene::DeltaTime()/2.0;
 
 		if (not isSpawnBoss) {
-			//ボス
+			//ボス追加
 			objects.enemies << std::make_unique<GarbageBox>(objects, Vec2(Scene::Size().x + 100, (Scene::Size().y - TextureAsset(U"UIBack").size().y * 6) / 2.0 + TextureAsset(U"UIBack").size().y * 6));
 			isSpawnBoss = true;
+			//ボス保存
+			for (int i = 0; i < objects.enemies.size(); i++) {
+				if (objects.enemies[i]->getId() == -1) {
+					bossPtr = static_cast<GarbageBox*>(objects.enemies[i].get());
+		}
+			}
 		}
 
 		//Print << U"bossAppearState:" << (int)bossAppearState;
