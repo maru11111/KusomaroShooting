@@ -1220,7 +1220,9 @@ void GameScene::updateWithHitStop() {
 				if (confirmInput()) {
 					getData().startStage = Stage::Morning;
 					SpawnEnemyData::spawnTimer = 0;
-					getData().lastContinueScore = 0;
+					//getData().lastContinueScore = 0;
+					//getData().isNoContinueClear = true;
+					AudioAsset(AudioManager::Instance()->currentBGMName).stop();
 					AudioManager::Instance()->play(U"Select");
 					changeScene(State::Game, 1.0s);
 				}
