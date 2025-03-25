@@ -1313,7 +1313,7 @@ void GameScene::stageUpdate() {
 	//敵が停止していない
 	else {
 		//背景を動かす
-		drawTimer += Scene::DeltaTime();
+		if(not isFadingIn) getData().backgroundDrawTimer += Scene::DeltaTime();
 		//更新
 		objects.player->update();
 		for (int i = 0; i < objects.marshmallows.size(); i++) {
@@ -1334,7 +1334,7 @@ void GameScene::stageUpdate() {
 
 void GameScene::dyingUpdate() {
 	//背景を動かす
-	drawTimer += Scene::DeltaTime()/4.0;
+	getData().backgroundDrawTimer += Scene::DeltaTime()/4.0;
 	//更新
 	objects.player->dyingUpdate();
 	for (int i = 0; i < objects.marshmallows.size(); i++) {
