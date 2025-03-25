@@ -1709,12 +1709,12 @@ void GameScene::drawBackground()const {
 			break;
 
 		case Stage::Evening:
-			TextureAsset(U"CloudSmallMorning").scaled(3).draw(cloudSmallPosX, 0);
-			TextureAsset(U"CloudSmallMorning").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
-			TextureAsset(U"CloudNormalMorning").scaled(3).draw(cloudNormalPosX, 0);
-			TextureAsset(U"CloudNormalMorning").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
-			TextureAsset(U"CloudBigMorning").scaled(3).draw(cloudBigPosX, 0);
-			TextureAsset(U"CloudBigMorning").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
+		TextureAsset(U"CloudSmallEvening").scaled(3).draw(cloudSmallPosX, 0);
+		TextureAsset(U"CloudSmallEvening").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0);
+		TextureAsset(U"CloudNormalEvening").scaled(3).draw(cloudNormalPosX, 0);
+		TextureAsset(U"CloudNormalEvening").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
+		TextureAsset(U"CloudBigEvening").scaled(3).draw(cloudBigPosX, 0);
+		TextureAsset(U"CloudBigEvening").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
 			TextureAsset(U"CloudSmallRain").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
 			TextureAsset(U"CloudSmallRain").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
 			TextureAsset(U"CloudNormalRain").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
