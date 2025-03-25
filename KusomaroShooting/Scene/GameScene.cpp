@@ -1893,8 +1893,8 @@ void GameScene::commonDraw()const {
 				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 + 1.5, -10 - 10 + 1.5), shadowColor);
 				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10, -10 - 10), inactiveColor);
 
-				FontAsset(U"GameUI_BestTenDot")(U"                 現在のステージの初めからやり直します。\nただし、これを選んでクリアした場合、ランキングにデータは保存されません。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot")(U"                 現在のステージの初めからやり直します。\nただし、これを選んでクリアした場合、ランキングにデータは保存されません。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				FontAsset(U"GameUI_BestTenDot")(U"現在のステージの初めからやり直します。\n  ただし、スコアはリセットされます。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot")(U"現在のステージの初めからやり直します。\n  ただし、スコアはリセットされます。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
 				break;
 
 			case SelectedButton::BackToTitle:
