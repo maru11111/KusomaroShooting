@@ -2058,26 +2058,26 @@ void GameScene::draw() const {
 		switch (stageStartState) {
 		case StageStartState::Start:
 			drawSpriteAnimForTimerAt(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos+Vec2{3.0, 3.0}, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(0.95, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0+3.0, 34+3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(0.95, 1.0 * Min(0.05+EaseInQuart(stageStartEaseTimer * 2.0), 1.0)) );
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos + Vec2{ 3.0, 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(0.95, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
+			FontAsset(U"GameUI_BestTenDot")(U"～", stageSubName[(int)currentStage], U"～").drawAt(stageNameTextPos + Vec2{ 0 + 3.0, 34 + 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
+			FontAsset(U"GameUI_BestTenDot")(U"～", stageSubName[(int)currentStage], U"～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(0.95, 1.0 * Min(0.05 + EaseInQuart(stageStartEaseTimer * 2.0), 1.0)));
 			break;
 
 		case StageStartState::Middle:
 			drawSpriteAnimForTimerAt(U"StageNameIn", 7, 0.080, Scene::CenterF(), stageStartAnimTimer);
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos+Vec2{3.0, 3.0}, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos + Vec2{ 3.0, 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
 			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos, ColorF(0.95));
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0 + 3.0, 34 + 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 }, ColorF(0.95));
+			FontAsset(U"GameUI_BestTenDot")(U"～", stageSubName[(int)currentStage], U"～").drawAt(stageNameTextMiddlePos + Vec2{ 0 + 3.0, 34 + 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0));
+			FontAsset(U"GameUI_BestTenDot")(U"～", stageSubName[(int)currentStage], U"～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 }, ColorF(0.95));
 			break;
 
 		case StageStartState::End:
 			drawSpriteAnimForTimerAt(U"StageNameOut", 6, 0.100, Scene::CenterF(), stageStartAnimTimer);
-			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos+Vec2{3.0, 3.0}, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
+			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos + Vec2{ 3.0, 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
 			FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos, ColorF(0.95, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0+3.0, 34+3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * (1.0-Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))) );
-			FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(0.95, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
+			FontAsset(U"GameUI_BestTenDot")(U"～", stageSubName[(int)currentStage], U"～").drawAt(stageNameTextPos + Vec2{ 0 + 3.0, 34 + 3.0 }, ColorF(139 / 255.0, 26 / 255.0, 26 / 255.0, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
+			FontAsset(U"GameUI_BestTenDot")(U"～", stageSubName[(int)currentStage], U"～").drawAt(stageNameTextPos + Vec2{ 0, 34 }, ColorF(0.95, 1.0 * (1.0 - Min(EaseInQuart(stageStartEaseTimer * 2.0), 1.0))));
 			break;
 		}
 		break;
