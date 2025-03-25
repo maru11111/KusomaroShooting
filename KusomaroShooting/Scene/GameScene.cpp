@@ -741,6 +741,18 @@ void GameScene::update() {
 				isChangeGameState = true;
 			}
 
+			//ボスのhpバーupdate
+			if (bossPtr != nullptr) {
+				if (isHpAnimationStart && not isHpAnimationEnd) {
+					if (not isPlayHpAnimation) {
+						AudioManager::Instance()->play(U"BossHpAnimation");
+						isPlayHpAnimation = true;
+					}
+					easeBossHpAnimationTimer += Scene::DeltaTime();
+				}
+			}
+
+
 			//2Dカメラ更新
 			camera.update();
 
