@@ -5,26 +5,6 @@
 #include "StageEditor.h"
 #include "Result.h"
 
-//class PlayerBullet : public BaseBullet {
-//public:
-//
-//	PlayerBullet(Vec2 vec_, double speed_, int power_)
-//		: BaseBullet(vec_, speed_, power_)
-//	{
-//
-//	}
-//};
-
-//class EnemyBullet : public BaseBullet {
-//public:
-//
-//	EnemyBullet(Vec2 vec_, double speed_, int power_)
-//		: BaseBullet(vec_, speed_, power_)
-//	{
-//
-//	}
-//};
-
 void Main()
 {
 	// 
@@ -40,13 +20,32 @@ void Main()
 	//オーディオマネージャー
 	AudioManager::Init();
 
-	//
+	//タイトル変更
 	Window::SetTitle(U"クソマロシューティング？");
 
 	//ロード画面で使うフォントだけロード
 	FontAsset::Register(U"GameUI_Kei", 20, Resource(U"font/keifont.ttf"));
 	FontAsset::Load(U"GameUI_Kei");
 
+	//escで終了しないように		
+	System::SetTerminationTriggers(UserAction::CloseButtonClicked);
+
+	//クレジット
+	LicenseManager::AddLicense({
+		.title = U"しぐれういのクソマロシューティング",
+		.copyright = U"(C) 2025 ma-re"});
+
+	LicenseManager::AddLicense({
+	.title = U"プログラム、イラスト全般、一部BGM",
+	.copyright = U"ma-re" });
+
+	LicenseManager::AddLicense({
+	.title = U"クリア画面のイラスト",
+	.copyright = U"妹" });
+
+	LicenseManager::AddLicense({
+	.title = U"音楽、効果音",
+	.copyright = U"イワシロ音楽素材(https://iwashiro-sounds.work/)\nザ・マッチメイカァズ(https://osabisi.sakura.ne.jp/m2/)\nOtoLogic(https://otologic.jp/)\nOn-Jin ～音人～(https://on-jin.com/)" });
 
 	App manager;
 	manager.add<Load>(State::Load);
