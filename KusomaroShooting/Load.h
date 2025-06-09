@@ -103,7 +103,7 @@ public:
 			TextureAsset::Register(U"HealMaro", Resource(U"texture/HealMaro.png"));
 			TextureAsset::Register(U"HealEffect", Resource(U"texture/HealEffect.png"));
 			TextureAsset::Register(U"Batu", Resource(U"texture/Batu.png"));
-			TextureAsset::Register(U"ClearStill", U"texture/ClearStill.png");
+			TextureAsset::Register(U"ClearStill", Resource(U"texture/ClearStill.png"));
 			TextureAsset::Register(U"Trophy", Resource(U"texture/Trophy.png"));
 			TextureAsset::Register(U"Pause", Resource(U"texture/Pause.png"));
 			TextureAsset::Register(U"Config", Resource(U"texture/Config.png"));
@@ -125,10 +125,12 @@ public:
 			TextureAsset::Register(U"TutorialButton", Resource(U"texture/TutorialButton.png"));
 			TextureAsset::Register(U"StartButton", Resource(U"texture/StartButton.png"));
 			TextureAsset::Register(U"RankingButton", Resource(U"texture/RankingButton.png"));
+			TextureAsset::Register(U"CreditButton", Resource(U"texture/CreditButton.png"));
 			TextureAsset::Register(U"SettingButton", Resource(U"texture/SettingButton.png"));
 			TextureAsset::Register(U"TutorialStr", Resource(U"texture/TutorialStr.png"));
 			TextureAsset::Register(U"StartStr", Resource(U"texture/StartStr.png"));
 			TextureAsset::Register(U"RankingStr", Resource(U"texture/RankingStr.png"));
+			TextureAsset::Register(U"CreditStr", Resource(U"texture/CreditStr.png"));
 			TextureAsset::Register(U"SettingStr", Resource(U"texture/SettingStr.png"));
 
 
@@ -296,10 +298,12 @@ public:
 			TextureAsset::LoadAsync(U"TutorialButton");
 			TextureAsset::LoadAsync(U"StartButton");
 			TextureAsset::LoadAsync(U"RankingButton");
+			TextureAsset::LoadAsync(U"CreditButton");
 			TextureAsset::LoadAsync(U"SettingButton");
 			TextureAsset::LoadAsync(U"TutorialStr");
 			TextureAsset::LoadAsync(U"StartStr");
 			TextureAsset::LoadAsync(U"RankingStr");
+			TextureAsset::LoadAsync(U"CreditStr");
 			TextureAsset::LoadAsync(U"SettingStr");
 			TextureAsset::LoadAsync(U"CloudSmallEvening");
 			TextureAsset::LoadAsync(U"CloudBigEvening");
@@ -373,8 +377,8 @@ public:
 
 		//ロードが終了していたら
 		if (flag) {
-			//changeScene(State::Title, 3s);
-			changeScene(State::StageEditor, 3s);
+			changeScene(State::Title, 3s);
+			//changeScene(State::StageEditor, 3s);
 		}
 	}
 
