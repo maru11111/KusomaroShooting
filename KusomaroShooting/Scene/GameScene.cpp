@@ -816,6 +816,8 @@ void GameScene::update() {
 					getData().startFromTitle = false;
 					//開始ステージリセット
 					getData().startStage = Stage::Morning;
+					//ダメージを受けた回数リセット
+					getData().damageCount = 0;
 					changeScene(State::Result, 1.0s);
 				}
 				break;
