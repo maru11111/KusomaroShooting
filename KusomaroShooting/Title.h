@@ -45,6 +45,7 @@ public:
 	double startButtonTimer = 0;
 	double tutorialButtonTimer = 0;
 	double rankingButtonTimer = 0;
+	double creditButtonTimer = 0;
 	double settingButtonTimer = 0;
 	double titleTimer = 0;
 	double uiBackTimer = 0;
@@ -61,6 +62,7 @@ public:
 	bool fade7 = false;
 	bool fade8 = false;
 	bool fade9 = false;
+	bool fade10 = false;
 
 	bool bgmStopFlag=false;
 
@@ -76,6 +78,7 @@ public:
 		Start,
 		Tutorial,
 		Ranking,
+		Credit,
 		Config
 	};
 	Button button = Button::Start;

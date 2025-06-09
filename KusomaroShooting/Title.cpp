@@ -89,6 +89,24 @@ void Title::selectStateUpdate() {
 			buttonAnimTimer = 0;
 		}
 		if (KeyS.down() || KeyDown.down()) {
+			button = Button::Credit;
+			AudioManager::Instance()->playOneShot(U"ChangeButton");
+			buttonAnimTimer = 0;
+		}
+		break;
+
+	case Button::Credit:
+		//クレジットを開く
+		if (confirmInput()) {
+			LicenseManager::ShowInBrowser();
+		}
+		//移動
+		if (KeyW.down() || KeyUp.down()) {
+			button = Button::Ranking;
+			AudioManager::Instance()->playOneShot(U"ChangeButton");
+			buttonAnimTimer = 0;
+		}
+		if (KeyS.down() || KeyDown.down()) {
 			button = Button::Config;
 			AudioManager::Instance()->playOneShot(U"ChangeButton");
 			buttonAnimTimer = 0;
@@ -104,7 +122,7 @@ void Title::selectStateUpdate() {
 		
 		//移動
 		if (KeyW.down() || KeyUp.down()) {
-			button = Button::Ranking;
+			button = Button::Credit;
 			AudioManager::Instance()->playOneShot(U"ChangeButton");
 			buttonAnimTimer = 0;
 		}
@@ -194,6 +212,14 @@ void Title::updateFadeOut(double t) {
 			if (not fade2) {
 				AudioManager::Instance()->playOneShot(U"FadeOut");
 				fade2 = true;
+			}
+			creditButtonTimer += Scene::DeltaTime() * 1.1;
+		}
+
+		if (0.175 <= creditButtonTimer) {
+			if (not fade10) {
+				AudioManager::Instance()->playOneShot(U"FadeOut");
+				fade10 = true;
 			}
 			rankingButtonTimer += Scene::DeltaTime() * 1.1;
 		}
@@ -331,11 +357,13 @@ void Title::drawFadeOut(double t)const {
 		TextureAsset(U"StartButton").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(startButtonTimer, 1.0)), 0);
 		TextureAsset(U"TutorialButton").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(tutorialButtonTimer, 1.0)), 0);
 		TextureAsset(U"RankingButton").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(rankingButtonTimer, 1.0)), 0);
+		TextureAsset(U"CreditButton").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(creditButtonTimer, 1.0)), 0);
 		TextureAsset(U"SettingButton").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(settingButtonTimer, 1.0)), 0);
 
 		TextureAsset(U"StartStr").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(startButtonTimer, 1.0)), 0);
 		TextureAsset(U"TutorialStr").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(tutorialButtonTimer, 1.0)), 0);
 		TextureAsset(U"RankingStr").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(rankingButtonTimer, 1.0)), 0);
+		TextureAsset(U"CreditStr").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(creditButtonTimer, 1.0)), 0);
 		TextureAsset(U"SettingStr").scaled(0.5).draw(fadeOutPosX * EaseInOutQuart(Min(settingButtonTimer, 1.0)), 0);
 		break;
 	}
@@ -361,24 +389,35 @@ void Title::draw()const {
 			TextureAsset(U"StartButton").scaled(0.5).draw(ColorF(1.0, buttonAnimTimer / 2.0 + 0.4));
 			TextureAsset(U"TutorialButton").scaled(0.5).draw();
 			TextureAsset(U"RankingButton").scaled(0.5).draw();
+			TextureAsset(U"CreditButton").scaled(0.5).draw();
 			TextureAsset(U"SettingButton").scaled(0.5).draw();
 			break;
 		case Button::Tutorial:
 			TextureAsset(U"StartButton").scaled(0.5).draw();
 			TextureAsset(U"TutorialButton").scaled(0.5).draw(ColorF(1.0, buttonAnimTimer / 2.0 + 0.4));
 			TextureAsset(U"RankingButton").scaled(0.5).draw();
+			TextureAsset(U"CreditButton").scaled(0.5).draw();
 			TextureAsset(U"SettingButton").scaled(0.5).draw();
 			break;
 		case Button::Ranking:
 			TextureAsset(U"StartButton").scaled(0.5).draw();
 			TextureAsset(U"TutorialButton").scaled(0.5).draw();
 			TextureAsset(U"RankingButton").scaled(0.5).draw(ColorF(1.0, buttonAnimTimer / 2.0 + 0.4));
+			TextureAsset(U"CreditButton").scaled(0.5).draw();
+			TextureAsset(U"SettingButton").scaled(0.5).draw();
+			break;
+		case Button::Credit:
+			TextureAsset(U"StartButton").scaled(0.5).draw();
+			TextureAsset(U"TutorialButton").scaled(0.5).draw();
+			TextureAsset(U"RankingButton").scaled(0.5).draw();
+			TextureAsset(U"CreditButton").scaled(0.5).draw(ColorF(1.0, buttonAnimTimer / 2.0 + 0.4));
 			TextureAsset(U"SettingButton").scaled(0.5).draw();
 			break;
 		case Button::Config:
 			TextureAsset(U"StartButton").scaled(0.5).draw();
 			TextureAsset(U"TutorialButton").scaled(0.5).draw();
 			TextureAsset(U"RankingButton").scaled(0.5).draw();
+			TextureAsset(U"CreditButton").scaled(0.5).draw();
 			TextureAsset(U"SettingButton").scaled(0.5).draw(ColorF(1.0, buttonAnimTimer / 2.0 + 0.4));
 			break;
 		}
@@ -387,6 +426,7 @@ void Title::draw()const {
 		TextureAsset(U"StartStr").scaled(0.5).draw();
 		TextureAsset(U"TutorialStr").scaled(0.5).draw();
 		TextureAsset(U"RankingStr").scaled(0.5).draw();
+		TextureAsset(U"CreditStr").scaled(0.5).draw();
 		TextureAsset(U"SettingStr").scaled(0.5).draw();
 
 		//操作方法
