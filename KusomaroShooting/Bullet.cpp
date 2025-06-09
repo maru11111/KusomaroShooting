@@ -17,6 +17,13 @@ Array<String> BaseBullet::kusomaroTexts =
 	U"きれいに咲いたしらたき",
 	U"鋭利なみかん",
 	U"トントントントン　カニのうどん",
+	U"銭湯にいるクジラ\nウシロナガスクジラ",
+	U"オーストリアのコンビニの入り口「ウィーン」\nｗｗｗ",
+	U"しぐれWii",
+	U"ぞういん「増えるが？」",
+	U"ういのウインクってね！",
+	U"ランチョンマッチョ",
+	U"ういビーン！"
 };
 
 Array<String> BaseBullet::beamTexts =
@@ -277,6 +284,7 @@ void Beam::update() {
 	}
 
 	if (beamColTime <= beamColTimer) {
+		hitNum++;
 		isColliderActive = true;
 		beamColTimer -= beamColTime;
 	}

@@ -52,6 +52,8 @@ public:
 
 	virtual void draw();
 
+	//ヒット回数
+	int hitNum = 0;
 protected:
 	Objects& objects;
 	Vec2 vec;
