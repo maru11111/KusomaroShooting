@@ -230,12 +230,14 @@ Resource(texture/TitleButton.png)
 Resource(texture/TutorialButton.png)
 Resource(texture/StartButton.png)
 Resource(texture/RankingButton.png)
+Resource(texture/CreditButton.png)
 Resource(texture/SettingButton.png)
 Resource(texture/TutorialStr.png)
 Resource(texture/StartStr.png)
 Resource(texture/RankingStr.png)
+Resource(texture/CreditStr.png)
 Resource(texture/SettingStr.png)
-
+Resource(texture/ClearStill.png)
 
 //フォント
 Resource(font/keifont.ttf)
