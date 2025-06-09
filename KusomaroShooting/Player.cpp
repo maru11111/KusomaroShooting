@@ -240,7 +240,7 @@ void Player::update() {
 
 		//エフェクト追加
 		if (not isAttackEffectStarted) {
-			effectBack.add<AttackEffect>(pos.movedBy(20 * 3 + 5, -20), &drawTimer);
+			effectBack.add<AttackEffect>(pos.movedBy(20 * 3 - 0, -20), &drawTimer);
 			isAttackEffectStarted = true;
 		}
 
@@ -441,7 +441,7 @@ void Player::toMountainUpdate() {
 	drawTimer += Scene::DeltaTime();
 	toMountainTimer += Scene::DeltaTime();
 
-	pos = prevPos.lerp(toMountainPos, EaseInQuad(toMountainTimer / 4.0));
+	pos = prevPos.lerp(toMountainPos, EaseInQuad(toMountainTimer / 5.0));
 }
 
 void Player::bossAppearStateUpdate(double timer) {
