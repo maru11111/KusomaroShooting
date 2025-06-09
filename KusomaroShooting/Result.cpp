@@ -23,7 +23,7 @@ void Result::update() {
 			resultTimer = 0;
 		}
 		//スキップ入力受付
-		if (KeyEnter.pressed() || KeyZ.down() || KeyN.down() || MouseL.pressed()) {
+		if (KeyEnter.pressed() || KeyZ.down() || KeyN.down() || (Rect(0,0,Scene::Size()).contains(Cursor::Pos()) && MouseL.pressed())) {
 			skipAnimTimer += Scene::DeltaTime();
 		}
 		else {
@@ -160,6 +160,7 @@ void Result::draw()const {
 			RectF(0, 0, Scene::Size().x, Scene::Size().y).draw(UIBacColor);
 			FontAsset(U"GameUI_BestTenDot45")(U"スコアをランキングに登録しますか？").drawAt(Scene::CenterF().movedBy(0, 0 - 50), ColorF(1.0, opacity));
 			FontAsset(U"GameUI_BestTenDot")(U"※登録した情報は全世界のユーザーに公開されます。").drawAt(Scene::CenterF().movedBy(0, 70 - 50), ColorF(0.90, opacity));
+			FontAsset(U"GameUI_BestTenDot")(U"今回のスコア:", getData().lastClearScore).drawAt(Scene::CenterF().movedBy(0, 90), ColorF(0.90, opacity));
 
 			switch (stillButton) {
 			case RegisterOrNotButton::Yes:
