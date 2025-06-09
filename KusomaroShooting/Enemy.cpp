@@ -829,7 +829,8 @@ void GarbageBox::move() {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
-				pos.x += ease * 1.1 *Periodic::Square1_1(0.1s);
+				vec.x = Periodic::Square1_1(0.1s);
+				pos.x = basePos.x + 1.1 * vec.x;
 			}
 			else {
 				rollingState = RollingState::Rolling;
@@ -843,8 +844,9 @@ void GarbageBox::move() {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCubic(easeTimer / 1.0);
 				currentAngle = -ease * rollingAngle;
-				pos.x -= 20 * Math::Cos(timers[(int)state].timer*Math::Pi);
-				pos.y -= 16 * Math::Cos(timers[(int)state].timer * Math::Pi*2.0);
+				vec = Vec2{ Math::Cos(timers[(int)state].timer * Math::Pi), Math::Cos(timers[(int)state].timer * Math::Pi * 2.0) };
+				pos.x -= 20 * vec.x*Scene::DeltaTime()*60;
+				pos.y -= 16 * vec.y*Scene::DeltaTime()*60;
 			}
 			else {
 				//PreActionに戻す
@@ -878,7 +880,7 @@ void GarbageBox::move() {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCirc(Min(easeTimer / 2.25, 1.0));
 				currentAngle = ease * firstAngle;
-				pos.x += ease * 3.0 * Periodic::Square1_1(0.1s);
+				pos.x = basePos.x + 3.0 * Periodic::Square1_1(0.1s);
 			}
 			else {
 				rollingState = RollingState::Rolling;
@@ -892,8 +894,9 @@ void GarbageBox::move() {
 				easeTimer += Scene::DeltaTime();
 				ease = EaseOutCubic(easeTimer / 1.0);
 				currentAngle = -ease * rollingAngle;
-				pos.x -= 30 * Math::Cos(timers[(int)state].timer * Math::Pi/1.0);
-				pos.y -= 13 * Math::Cos(timers[(int)state].timer * Math::Pi * 2.0/1.0);
+				vec = Vec2{ Math::Cos(timers[(int)state].timer * Math::Pi), Math::Cos(timers[(int)state].timer * Math::Pi * 2.0) };
+				pos.x -= 30 * vec.x * Scene::DeltaTime()*60;
+				pos.y -= 13 * vec.y * Scene::DeltaTime() * 60;
 			}
 			else {
 				//PreActionに戻す
