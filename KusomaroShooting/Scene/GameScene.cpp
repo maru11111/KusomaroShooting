@@ -307,6 +307,7 @@ void GameScene::update() {
 	//}
 	//AudioManager::Instance()->play(U"MidBoss");
 	//Debug
+	//Print << getData().damageCount;
 	
 	//Debug
 	if (Key1.pressed()) currentStage = (Stage)0;
@@ -321,11 +322,11 @@ void GameScene::update() {
 
 	//Debug
 	if (KeyShift.pressed() && Key0.pressed()) {
-		AudioManager::Instance()->pauseAllAudio();
+		AudioManager::Instance()->stopAllAudio();
 		changeScene(State::Result, 0s);
 	}
 	if (KeyShift.pressed() && KeyE.pressed()) {
-		AudioManager::Instance()->pauseAllAudio();
+		AudioManager::Instance()->stopAllAudio();
 		changeScene(State::StageEditor, 0s);
 	}
 
@@ -810,8 +811,8 @@ void GameScene::update() {
 				cityTimer += Scene::DeltaTime()/4.0 * backGroundSpeedEase;
 				toMountainUpdate();
 				if (Scene::Size().x+29 <= objects.player->getPos().x) {
-					//スコアを保存
-					getData().lastClearScore = currentScore;
+					//スコアを計算
+					getData().lastClearScore = currentScore + 10000/(double)getData().damageCount;
 					//フラグリセット
 					getData().startFromTitle = false;
 					//開始ステージリセット
@@ -882,6 +883,7 @@ void GameScene::update() {
 				AudioManager::Instance()->stopAllAudio();
 				AudioManager::Instance()->play(U"Select");
 				getData().startFromTitle = false;
+				getData().damageCount = 0;
 				changeScene(State::Game, 1.0s);
 			}
 			break;
@@ -915,6 +917,7 @@ void GameScene::update() {
 				AudioManager::Instance()->play(U"Select");
 				getData().isTutorial = false;
 				getData().startFromTitle = false;
+				getData().damageCount = 0;
 				changeScene(State::Title, 1.0s);
 
 			}
@@ -1030,7 +1033,11 @@ void GameScene::collisionAndRemoveUpdate() {
 			//ダメージ時画面エフェクト
 			if (not objects.player->isInvincibility() && objects.enemies[i]->name != U"HealUmbrella")effect.add<DamageScreenEffect>();
 			//ダメージ
-			if (gameState != GameState::Tutorial && objects.enemies[i]->name != U"HealUmbrella") objects.player->damage(objects.enemies[i]->getDamageAmount(), false);
+			if (gameState != GameState::Tutorial && objects.enemies[i]->name != U"HealUmbrella") {
+				//ダメージを受けた回数をカウント
+				if (not objects.player->isInvincibility())getData().damageCount++;
+				objects.player->damage(objects.enemies[i]->getDamageAmount(), false);
+			}
 			//回復
 			else if (objects.enemies[i]->name == U"HealUmbrella") {
 				objects.player->heal(1);
@@ -1058,9 +1065,16 @@ void GameScene::collisionAndRemoveUpdate() {
 					//IDを受け取る
 					maro->addId(enemy->getId());
 					//敵にダメージを与える
-					bool isDead = enemy->damage(maro->getDamageAmount(), false);
+					bool isDead;
+					if (bossPtr != nullptr && maro->getType() == MaroType::Empty && enemy.get() == bossPtr) {
+						//ビームはボスに大ダメ―ジ
+						isDead = enemy->damage(maro->getDamageAmount()*4, false);
+					}
+					else {
+						isDead = enemy->damage(maro->getDamageAmount(), false);
+					}
 					//スコアを加算
-					if (not (enemy->name == U"HealUmbrella")) {
+					if (enemy->name == U"HealUmbrella") {
 						//攻撃できない
 					}
 					else if (isDead && currentStage != Stage::MidNight && gameState!=GameState::Tutorial) addScore(enemy->score);
@@ -1080,12 +1094,21 @@ void GameScene::collisionAndRemoveUpdate() {
 				}
 				else {
 					//ビームは多段ヒットあり
+					bool isDead;
 					if (enemy->name == U"HealUmbrella") {
 						//攻撃できない
 					}
 					else if (maro->getType() == MaroType::Empty) {
 						//敵にダメージを与える
-						bool isDead = enemy->damage(maro->getDamageAmount(), false);
+						if (enemy.get() == bossPtr) {
+							//ビームはボスに大ダメ―ジ
+							if(maro->getIsHit())
+							//ヒットするごとにダメージ増加
+							isDead = enemy->damage(maro->getDamageAmount()*4*(maro->hitNum+1), false);
+						}
+						else {
+							isDead = enemy->damage(maro->getDamageAmount(), false);
+						}
 						//エフェクトを追加
 						effect.add<DamageEffect>(enemy->getPos());
 						//スコアを加算
@@ -1218,6 +1241,7 @@ void GameScene::updateWithHitStop() {
 					AudioAsset(AudioManager::Instance()->currentBGMName).stop();
 					AudioManager::Instance()->play(U"Select");
 					getData().startFromTitle = false;
+					getData().damageCount = 0;
 					changeScene(State::Game, 1.0s);
 				}
 
@@ -1260,6 +1284,7 @@ void GameScene::updateWithHitStop() {
 					AudioAsset(AudioManager::Instance()->currentBGMName).stop();
 					getData().startFromTitle = false;
 					AudioManager::Instance()->play(U"Select");
+					getData().damageCount = 0;
 					changeScene(State::Title, 1.0s);
 				}
 
@@ -1723,12 +1748,12 @@ void GameScene::drawBackground()const {
 		TextureAsset(U"CloudNormalRain").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0);
 		TextureAsset(U"CloudBigRain").scaled(3).draw(cloudBigPosX, 0);
 		TextureAsset(U"CloudBigRain").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0);
-		TextureAsset(U"CloudSmall").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-		TextureAsset(U"CloudSmall").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
-		TextureAsset(U"CloudNormal").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-		TextureAsset(U"CloudNormal").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
-		TextureAsset(U"CloudBig").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
-		TextureAsset(U"CloudBig").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmallEvening").scaled(3).draw(cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudSmallEvening").scaled(3).draw(Scene::Size().x + cloudSmallPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalEvening").scaled(3).draw(cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudNormalEvening").scaled(3).draw(Scene::Size().x + cloudNormalPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigEvening").scaled(3).draw(cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
+		TextureAsset(U"CloudBigEvening").scaled(3).draw(Scene::Size().x + cloudBigPosX, 0, ColorF(1.0, backGroundOpacity));
 		break;
 
 	case Stage::MidNight:
