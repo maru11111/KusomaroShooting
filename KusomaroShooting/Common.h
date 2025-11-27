@@ -24,10 +24,8 @@ struct GameData
 {
 	int lastClearScore=0;
 	double lastClearTime=0;
-	//int lastContinueScore = 0;
 	bool isTutorial = false;
 	Stage startStage = Stage::Morning;
-	//bool isNoContinueClear = true;
 	double backgroundDrawTimer = 0;
 	bool startFromTitle = false;
 	int damageCount=0;
