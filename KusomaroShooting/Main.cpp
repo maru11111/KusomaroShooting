@@ -7,11 +7,7 @@
 
 void Main()
 {
-	// 
-	const int scaling = 3;
-	//Scene::Resize(Size(320, 214) * scaling);
-
-	// 最近傍補間
+	// 最近傍補間(ドット絵表示のため)
 	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
 	// ウィンドウリサイズ
@@ -47,6 +43,7 @@ void Main()
 	.title = U"音楽、効果音",
 	.copyright = U"イワシロ音楽素材(https://iwashiro-sounds.work/)\nザ・マッチメイカァズ(https://osabisi.sakura.ne.jp/m2/)\nOtoLogic(https://otologic.jp/)\nOn-Jin ～音人～(https://on-jin.com/)" });
 
+	//シーン機能
 	App manager;
 	manager.add<Load>(State::Load);
 	manager.add<Title>(State::Title);
@@ -54,7 +51,7 @@ void Main()
 	manager.add<StageEditor>(State::StageEditor);
 	manager.add<Result>(State::Result);
 
-	//-から開始
+	//ロードシーンから開始する
 	manager.init(State::Load, 1s);
 
 	//manager.init(State::Title, 0s);
@@ -64,7 +61,6 @@ void Main()
 
 	while (System::Update())
 	{
-		ClearPrint();
 		{
 			if (not manager.update())
 			{
