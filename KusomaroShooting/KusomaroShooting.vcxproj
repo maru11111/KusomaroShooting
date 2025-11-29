@@ -116,15 +116,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AudioManager.cpp" />
-    <ClCompile Include="Bullet.cpp" />
-    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Entity\Bullet.cpp" />
+    <ClCompile Include="Entity\Enemy.cpp" />
+    <ClCompile Include="Entity\Player.cpp" />
     <ClCompile Include="Ranking\LeaderBoard.cpp" />
     <ClCompile Include="Scene\Result.cpp" />
     <ClCompile Include="Scene\StageEditor.cpp" />
     <ClCompile Include="Scene\Title.cpp" />
     <ClCompile Include="SpawnEnemyData.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene\GameScene.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -339,9 +339,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Common.h" />
-    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Entity\Bullet.h" />
+    <ClInclude Include="Entity\Enemy.h" />
+    <ClInclude Include="Entity\Objects.h" />
+    <ClInclude Include="Entity\Player.h" />
     <ClInclude Include="Ranking\LeaderBoard.h" />
     <ClInclude Include="Scene\GameSceneForEditor.h" />
     <ClInclude Include="Scene\Load.h" />
@@ -349,8 +351,6 @@
     <ClInclude Include="Scene\StageEditor.h" />
     <ClInclude Include="Scene\Title.h" />
     <ClInclude Include="SpawnEnemyData.h" />
-    <ClInclude Include="Objects.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="TwoQuads.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="stdafx.h" />

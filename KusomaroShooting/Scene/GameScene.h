@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
-#include "Objects.h"
+#include "../Entity/Objects.h"
 #include "GameScene.h"
 #include "SpawnEnemyData.h"
 
