@@ -156,22 +156,22 @@
     <ClCompile Include="Scene\GameScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StageEditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SpawnEnemyData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AudioManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Result.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Ranking\LeaderBoard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Title.cpp">
+    <ClCompile Include="Scene\Result.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\StageEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Title.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -860,14 +860,8 @@
     <ClInclude Include="Scene\GameScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StageEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TwoQuads.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSceneForEditor.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SpawnEnemyData.h">
       <Filter>Source Files</Filter>
@@ -875,17 +869,23 @@
     <ClInclude Include="AudioManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Result.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Ranking\LeaderBoard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Title.h">
+    <ClInclude Include="Scene\GameSceneForEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Load.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Scene\Load.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\StageEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Title.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
