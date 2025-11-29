@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Common.h"
+#include "../Util/Common.h"
 
 class Load : public App::Scene {
 public:

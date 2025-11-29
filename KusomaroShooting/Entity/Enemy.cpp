@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Enemy.h"
 #include "Objects.h"
-#include "Common.h"
+#include "../Util/Common.h"
 
 BaseEnemy::BaseEnemy(Objects& objects_, Vec2 pos_)
 	: objects{ objects_ }

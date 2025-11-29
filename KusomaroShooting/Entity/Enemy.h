@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "TwoQuads.h"
+#include "../Util/TwoQuads.h"
 
 struct Objects;
 

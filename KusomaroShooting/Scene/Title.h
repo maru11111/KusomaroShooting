@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Common.h"
+#include "../Util/Common.h"
 #include "GameScene.h"
 
 class Title : public App::Scene

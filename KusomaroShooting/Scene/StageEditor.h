@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "Common.h"
+#include "../Util/Common.h"
 #include "../Entity/Objects.h"
 #include "GameSceneForEditor.h"
-#include "SpawnEnemyData.h"
+#include "../Util/SpawnEnemyData.h"
 
 enum class Mode {
 	EditMode,

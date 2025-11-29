@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "Common.h"
+#include "../Util/Common.h"
 #include "../Entity/Objects.h"
 #include "GameScene.h"
-#include "SpawnEnemyData.h"
+#include "../Util/SpawnEnemyData.h"
 
 class GameScene : public App::Scene
 {

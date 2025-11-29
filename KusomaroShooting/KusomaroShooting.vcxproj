@@ -115,7 +115,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Entity\Bullet.cpp" />
     <ClCompile Include="Entity\Enemy.cpp" />
     <ClCompile Include="Entity\Player.cpp" />
@@ -123,7 +122,6 @@
     <ClCompile Include="Scene\Result.cpp" />
     <ClCompile Include="Scene\StageEditor.cpp" />
     <ClCompile Include="Scene\Title.cpp" />
-    <ClCompile Include="SpawnEnemyData.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Scene\GameScene.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</PrecompiledHeaderFile>
@@ -132,6 +130,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Util\AudioManager.cpp" />
+    <ClCompile Include="Util\SpawnEnemyData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -338,8 +338,6 @@
     <Xml Include="App\example\xml\test.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="Common.h" />
     <ClInclude Include="Entity\Bullet.h" />
     <ClInclude Include="Entity\Enemy.h" />
     <ClInclude Include="Entity\Objects.h" />
@@ -350,10 +348,12 @@
     <ClInclude Include="Scene\Result.h" />
     <ClInclude Include="Scene\StageEditor.h" />
     <ClInclude Include="Scene\Title.h" />
-    <ClInclude Include="SpawnEnemyData.h" />
-    <ClInclude Include="TwoQuads.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Util\AudioManager.h" />
+    <ClInclude Include="Util\Common.h" />
+    <ClInclude Include="Util\SpawnEnemyData.h" />
+    <ClInclude Include="Util\TwoQuads.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App\example\obj\blacksmith.obj">

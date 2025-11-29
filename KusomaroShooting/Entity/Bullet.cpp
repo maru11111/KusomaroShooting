@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Bullet.h"
-#include "Common.h"
+#include "../Util/Common.h"
 #include "Objects.h"
 
 int BaseBullet::numInstances = 0;

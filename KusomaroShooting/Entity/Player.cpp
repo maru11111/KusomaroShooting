@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Objects.h"
 #include "Player.h"
-#include "Common.h"
+#include "../Util/Common.h"
 
 struct AttackEffect : IEffect
 {

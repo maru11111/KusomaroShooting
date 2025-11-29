@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameScene.h"
-#include "Common.h"
+#include "../Util/Common.h"
 
 /// @brief 最大のアルファ値を書き込むブレンドステートを返します。
 BlendState MaxAlphaBlend()
