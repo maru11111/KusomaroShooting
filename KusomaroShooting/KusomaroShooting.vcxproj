@@ -118,6 +118,7 @@
     <ClCompile Include="Entity\Bullet.cpp" />
     <ClCompile Include="Entity\Enemy.cpp" />
     <ClCompile Include="Entity\Player.cpp" />
+    <ClCompile Include="Entity\SpawnEnemyData.cpp" />
     <ClCompile Include="Ranking\LeaderBoard.cpp" />
     <ClCompile Include="Scene\Result.cpp" />
     <ClCompile Include="Scene\StageEditor.cpp" />
@@ -342,6 +343,7 @@
     <ClInclude Include="Entity\Enemy.h" />
     <ClInclude Include="Entity\Objects.h" />
     <ClInclude Include="Entity\Player.h" />
+    <ClInclude Include="Entity\SpawnEnemyData.h" />
     <ClInclude Include="Ranking\LeaderBoard.h" />
     <ClInclude Include="Scene\GameSceneForEditor.h" />
     <ClInclude Include="Scene\Load.h" />
