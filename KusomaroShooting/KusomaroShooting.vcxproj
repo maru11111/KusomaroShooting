@@ -119,6 +119,7 @@
     <ClCompile Include="Entity\Enemy.cpp" />
     <ClCompile Include="Entity\Player.cpp" />
     <ClCompile Include="Entity\SpawnEnemyData.cpp" />
+    <ClCompile Include="Scene\GameScene\GameSceneUI.cpp" />
     <ClCompile Include="Manager\AudioManager.cpp" />
     <ClCompile Include="Ranking\LeaderBoard.cpp" />
     <ClCompile Include="Scene\Result.cpp" />
@@ -343,6 +344,7 @@
     <ClInclude Include="Entity\Objects.h" />
     <ClInclude Include="Entity\Player.h" />
     <ClInclude Include="Entity\SpawnEnemyData.h" />
+    <ClInclude Include="Scene\GameScene\GameSceneUI.h" />
     <ClInclude Include="Manager\AudioManager.h" />
     <ClInclude Include="Ranking\LeaderBoard.h" />
     <ClInclude Include="Scene\GameSceneForEditor.h" />
