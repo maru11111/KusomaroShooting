@@ -1,7 +1,7 @@
 ﻿#include "../Util/Common.h"
 #include "Load.h"
 #include "Title.h"
-#include "GameScene.h"
+#include "GameScene/GameScene.h"
 #include "StageEditor.h"
 #include "Result.h"
 

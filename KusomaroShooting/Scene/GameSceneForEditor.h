@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "GameScene.h"
+#include "GameScene/GameScene.h"
 #include "../Util/Common.h"
 
 class GameSceneForEditor :public GameScene {

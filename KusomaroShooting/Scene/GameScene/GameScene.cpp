@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "GameScene/GameScene.h"
+#include "GameScene.h"
 #include "../Util/Common.h"
 
 /// @brief 最大のアルファ値を書き込むブレンドステートを返します。
