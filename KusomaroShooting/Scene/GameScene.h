@@ -2,7 +2,7 @@
 #include "../Util/Common.h"
 #include "../Entity/Objects.h"
 #include "GameScene.h"
-#include "../Util/SpawnEnemyData.h"
+#include "../Entity/SpawnEnemyData.h"
 
 class GameScene : public App::Scene
 {

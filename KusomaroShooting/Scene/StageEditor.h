@@ -2,7 +2,7 @@
 #include "../Util/Common.h"
 #include "../Entity/Objects.h"
 #include "GameSceneForEditor.h"
-#include "../Util/SpawnEnemyData.h"
+#include "../Entity/SpawnEnemyData.h"
 
 enum class Mode {
 	EditMode,

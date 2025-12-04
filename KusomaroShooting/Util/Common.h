@@ -1,6 +1,6 @@
 ﻿#pragma once
 # include<Siv3D.hpp> // Siv3D v0.6.14
-#include "AudioManager.h"
+#include "../Manager/AudioManager.h"
 #include "Ranking/LeaderBoard.h"
 
 const ColorF activeColor = ColorF(0.9);

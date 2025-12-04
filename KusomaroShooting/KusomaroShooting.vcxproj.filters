@@ -168,12 +168,6 @@
     <ClCompile Include="Entity\Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Util\AudioManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Util\SpawnEnemyData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Entity\SpawnEnemyData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -881,13 +875,7 @@
     <ClInclude Include="Entity\Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Util\AudioManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Util\Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\SpawnEnemyData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Util\TwoQuads.h">
