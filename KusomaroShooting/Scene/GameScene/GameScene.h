@@ -30,7 +30,6 @@ public:
 	void destroyObjects();
 
 	void commonDraw()const;
-	void commonUIDraw()const;
 
 	void drawBackground()const;
 
@@ -39,6 +38,10 @@ public:
 	void draw()const override;
 
 	Objects& getObj();
+
+	double getBackDrawTimer() {
+		return getData().backgroundDrawTimer;
+	}
 
 	bool isHitStopping = false;;
 	const double hitStopTime = 0.15;
@@ -57,25 +60,27 @@ public:
 
 	void loadJson(String path)const;
 
-	void drawUIUimm(double offsetX, double offsetY)const;
-	void drawHpBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, double healEase, double damageEase)const;
-	void drawMaroBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, double healEase)const;
-	void drawBossBar(double currentNum, double maxNum, TextureAsset backBar, TextureAsset frontBar, int posX, int posY, BaseBoss *boss)const;
-	void drawMarshmallowUI()const;
+	/* ==== UI分離時publicに移動 ==== */
+	Objects objects;
+	bool isHpAnimationStart = false;
+	bool isHpAnimationEnd = false;
 
-private:
-	// UIマネージャー
-	GameSceneUI *gameUI;
+	//BossAppearのステート
+	enum class BossAppearState {
+		ChangeBackGround,
+		HideUI,
+		DrawRect,
+		AppearBoss
+	};
+	BossAppearState bossAppearState = BossAppearState::ChangeBackGround;
+	double marshmallowUIOffset = TextureAsset(U"UIBack").size().y * 6;
+	double easeBossAppear = 0.0;
 
-	void changeStage(Stage nextStage);
+	//ボスのポインタ
+	GarbageBox* bossPtr = nullptr;
+	mutable double easeBossHpAnimationTimer = 0;
 
-	//スコア
-	int currentScore = 0;
-	int stageStartScore = 0;
-	double prevScore = 0;
-	double currentTime = 0;
-	double scoreAnimTimer = 0;
-	bool isPlayScoreAnim = false;
+	RenderTexture fontRenderTexture{ Size(320, 214) * 3 };
 
 	//GameSceneのステート
 	enum class GameState {
@@ -88,52 +93,14 @@ private:
 	};
 	GameState gameState = GameState::StageStart;
 	GameState prevGameState;
-	bool isChangeGameState=false;
-	GameState nextState;
-	double gameStateTimer=0;
-	double easeTimer1 = 0;
-	double easeTimer2 = 0;
-	double easeTimer3 = 0;
-	double easeTimer4 = 0;
-	double easeTimer5 = 0;
-	double easeTimer6 = 0;
-	double easeTimer7 = 0;
 
-
-	bool isHpAnimationStart = false;
-	bool isHpAnimationEnd = false;
-	mutable double easeBossHpAnimationTimer = 0;
-	mutable bool isPlayHpAnimation = false;
-
-	double ease=0;
-	double maxTopRectHeight = 50 + TextureAsset(U"UIBack").size().y*6;
-	double maxBottomRectHeight = 50;
-
-	//BossAppearのステート
-	enum class BossAppearState {
-		ChangeBackGround,
-		HideUI,
-		DrawRect,
-		AppearBoss
-	};
-	BossAppearState bossAppearState = BossAppearState::ChangeBackGround;
-	double marshmallowUIOffset = TextureAsset(U"UIBack").size().y * 6;
-	double easeBossAppear=0.0;
-	Camera2D camera{ Vec2{Scene::Center() + Vec2{0,-1}}, 1.0 , CameraControl::None_};
-	bool isSpawnBoss = false;
-
-	RenderTexture renderTexture{ Size(320, 214)*3 };
-	RenderTexture fontRenderTexture{ Size(320, 214) * 3 };
-	Effect effect;
-	bool isEnemyTimeStopped=false;	
-
-	//ステージ
+	//ステージ名
 	Array<String>stageName = {
 		U"Uinitial Dawning",
 		U"Breezy Noon",
 		U"E Rain",
 		U"Amber Sunset",
-		U"Mortal Night", 
+		U"Mortal Night",
 		U"-",
 		U"EDITOR"
 	};
@@ -147,25 +114,13 @@ private:
 		U"デバッグ"
 	};
 
-	//ステージ開始演出
-	enum class StageStartState {
-		Start,
-		Middle,
-		End
-	};
-	double stageStartTimer = 0;
-	double stageStartEaseTimer = 0;
-	double stageStartAnimTimer = 0;
-	Vec2 stageNameTextPos;
-	Vec2 stageNameTextEndPos = Scene::CenterF() + Vec2{ -Scene::CenterF().x*1.5, 55};
-	Vec2 stageNameTextMiddlePos = Scene::CenterF() + Vec2{0, 55};
-	Vec2 stageNameTextStartPos = Scene::CenterF() + Vec2{ Scene::CenterF().x*1.5, 55 };
-	StageStartState stageStartState = StageStartState::Start;
+	// 現在ステージ
+	Stage currentStage = Stage::Morning;
 
-	//ステージ移動演出
-	double backGroundOpacity = 1.0;
-	double rainOpacity = 0.0;
-	double changeStageTimer = 0;
+	// スコア
+	int currentScore = 0;
+	double prevScore = 0;
+	double scoreAnimTimer = 0;
 
 	//ゲームオーバー
 	enum class SelectedButton {
@@ -175,13 +130,92 @@ private:
 	};
 	mutable SelectedButton selectedButton = SelectedButton::ReStart;
 	double gameOverTimer = 0;
-	//String currentBGMName=U"Start";
+
+	//チュートリアル
+	enum class TutorialState {
+		Move,
+		Attack,
+		Maro1,
+		Maro2,
+		Score,
+		Pause,
+		Try
+	};
+	TutorialState tutorialState = TutorialState::Move;
+
+	//ステージ開始演出
+	enum class StageStartState {
+		Start,
+		Middle,
+		End
+	};
+	StageStartState stageStartState = StageStartState::Start;
+	double stageStartAnimTimer = 0;
+	double stageStartEaseTimer = 0;
+
+	Vec2 stageNameTextMiddlePos = Scene::CenterF() + Vec2{ 0, 55 };
+	Vec2 stageNameTextPos;
+
+	double ease = 0;
+	double maxTopRectHeight = 50 + TextureAsset(U"UIBack").size().y * 6;
+	double maxBottomRectHeight = 50;
+
+	Camera2D camera{ Vec2{Scene::Center() + Vec2{0,-1}}, 1.0 , CameraControl::None_ };
+
+	//ポーズ画面
+	enum class PauseState {
+		GoBack,
+		Retry,
+		Title,
+		Config,
+		ConfigMode
+	};
+	PauseState pauseState = PauseState::GoBack;
+	const double PauseTriangleSize = 22.5;
+	double pauseTriangleTimer = 0;
+	/* ============================== */
+
+private:
+	// UIマネージャー
+	GameSceneUI *gameUI;
+
+	void changeStage(Stage nextStage);
+
+	//スコア
+	int stageStartScore = 0;
+	double currentTime = 0;
+	bool isPlayScoreAnim = false;
+
+	bool isChangeGameState=false;
+	GameState nextState;
+	double gameStateTimer=0;
+	double easeTimer1 = 0;
+	double easeTimer2 = 0;
+	double easeTimer3 = 0;
+	double easeTimer4 = 0;
+	double easeTimer5 = 0;
+	double easeTimer6 = 0;
+	double easeTimer7 = 0;
+
+	mutable bool isPlayHpAnimation = false;
+
+	bool isSpawnBoss = false;
+
+	RenderTexture renderTexture{ Size(320, 214)*3 };
+	Effect effect;
+	bool isEnemyTimeStopped=false;	
+
+	double stageStartTimer = 0;
+	Vec2 stageNameTextEndPos = Scene::CenterF() + Vec2{ -Scene::CenterF().x*1.5, 55};
+	Vec2 stageNameTextStartPos = Scene::CenterF() + Vec2{ Scene::CenterF().x*1.5, 55 };
+
+	//ステージ移動演出
+	double backGroundOpacity = 1.0;
+	double rainOpacity = 0.0;
+	double changeStageTimer = 0;
 
 	//ヒットストップ時audio停止用フラグ
 	bool isPlayAfterPause=false;
-
-	//ボスのポインタ
-	GarbageBox* bossPtr=nullptr;
 
 	//ボス撃破後の動き
 	enum class DefeatBossState {
@@ -204,29 +238,6 @@ private:
 	mutable double middleCityPosX;
 	mutable double backCityPosX;
 
-	//ポーズ画面
-	enum class PauseState {
-		GoBack,
-		Retry,
-		Title,
-		Config,
-		ConfigMode
-	};
-	PauseState pauseState = PauseState::GoBack;
-	const double PauseTriangleSize=22.5;
-	double pauseTriangleTimer = 0;
-
-	//チュートリアル
-	enum class TutorialState {
-		Move,
-		Attack,
-		Maro1,
-		Maro2,
-		Score,
-		Pause,
-		Try
-	};
-	TutorialState tutorialState = TutorialState::Move;
 	double spawnTimer = 0;
 
 	//フェードイン
@@ -235,8 +246,6 @@ private:
 	double fadeInTimer = 0;
 
 protected:
-	Objects objects;
 	mutable Array<SpawnEnemyData> spawnEnemyData;
-	Stage currentStage = Stage::Morning;
 };
 
