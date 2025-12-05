@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "GameScene.h"
 #include "../Util/Common.h"
+#include "GameSceneUI.h"
 
 /// @brief 最大のアルファ値を書き込むブレンドステートを返します。
 BlendState MaxAlphaBlend()
@@ -51,6 +52,9 @@ struct DamageEffect : IEffect
 GameScene::GameScene(const InitData& init)
 	: IScene{ init }
 {
+	// UIマネージャー生成。自身のポインタを渡す。（この辺も後でどうにかしたい...）
+	gameUI = new GameSceneUI(this);
+
 	objects.player = std::make_unique<Player>(objects);
 
 	if (getData().isTutorial) {
@@ -2239,4 +2243,6 @@ void GameScene::draw() const {
 		}
 		break;
 	}
+
+	gameUI->draw();
 }

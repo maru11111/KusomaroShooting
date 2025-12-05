@@ -4,6 +4,8 @@
 #include "GameScene.h"
 #include "../Entity/SpawnEnemyData.h"
 
+class GameSceneUI;
+
 class GameScene : public App::Scene
 {
 public:
@@ -61,6 +63,9 @@ public:
 	void drawMarshmallowUI()const;
 
 private:
+	// UIマネージャー
+	GameSceneUI *gameUI;
+
 	void changeStage(Stage nextStage);
 
 	//スコア
