@@ -1835,10 +1835,6 @@ void GameScene::commonDraw()const {
 			}
 		}
 
-
-		//UI
-		drawMarshmallowUI();
-
 		//エフェクトを再生
 		//前面プレイヤー攻撃エフェクト
 		objects.player->drawEffectFront();
@@ -1858,90 +1854,8 @@ void GameScene::commonDraw()const {
 		//TextureAsset(U"Umbrella").scaled(3).draw(300,200);
 
 	}
-
-	// シーン転送時の拡大縮小方法を最近傍法にする
-	//Scene::SetTextureFilter(TextureFilter::Nearest);
 	//文字以外のレンダーテクスチャをdraw
 	renderTexture.draw();
-
-	// シーン転送時の拡大縮小方法をバイリニア法にする
-	Scene::SetTextureFilter(TextureFilter::Linear);
-	//文字のレンダーテクスチャをdraw
-	fontRenderTexture.draw();
-
-	//プレイヤー生存時
-	if (objects.player->getHp() != 0) {
-	}
-	//プレイヤー死亡時
-	else {
-		
-		if (1.5 <= hitStopTimer) {
-			//Print << 1.0 * Clamp(EaseOutCubic(gameOverTimer), 0.0, 1.0);
-			//不透明度を上げる
-			const ScopedColorMul2D colorMul{ ColorF(1.0, 1.0 * Min(EaseOutCubic(gameOverTimer/1.5), 1.0)) };
-
-			Rect(0, 0, Scene::Size()).draw(ColorF(0, 0.6));
-			//GameOver 
-			FontAsset(U"GameUI_BestTenDot90")(U"Game Over").drawAt(Scene::CenterF().movedBy(3, -50 + 3), shadowColor);
-			FontAsset(U"GameUI_BestTenDot90")(U"Game Over").drawAt(Scene::CenterF().movedBy(0, -50), ColorF(0.90));
-
-			switch (selectedButton) {
-			case SelectedButton::ReStart:
-
-				Triangle(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-110, 2.25), 35).rotated(90_deg).draw(ColorF(activeColor, 1-Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
-
-				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10+3, 0+3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), activeColor);
-
-				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10+3, 0+3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), inactiveColor);
-
-				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 +1.5, -10 - 10 +1.5), shadowColor);
-				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10, -10 - 10), inactiveColor);
-
-				FontAsset(U"GameUI_BestTenDot")(U"初めのステージからやり直します。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), ColorF(0.2));
-				FontAsset(U"GameUI_BestTenDot")(U"初めのステージからやり直します。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
-				break;
-
-			case SelectedButton::Continue:
-
-				Triangle(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-140, 2.25), 35).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
-
-				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), inactiveColor);
-
-				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10 + 3, 0 + 3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), activeColor);
-
-				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 + 1.5, -10 - 10 + 1.5), shadowColor);
-				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10, -10 - 10), inactiveColor);
-
-				FontAsset(U"GameUI_BestTenDot")(U"現在のステージの初めからやり直します。\n  ただし、スコアはリセットされます。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot")(U"現在のステージの初めからやり直します。\n  ただし、スコアはリセットされます。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
-				break;
-
-			case SelectedButton::BackToTitle:
-
-				Triangle(Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-205-10, -23-10), 25).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time()+0.9135/2)));
-
-				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), inactiveColor);
-
-				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10+3, 0+3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), inactiveColor);
-
-				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10 + 1.5, -10-10 + 1.5), shadowColor);
-				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10-10, -10-10), activeColor);
-
-				FontAsset(U"GameUI_BestTenDot")(U"タイトルに戻ります。").drawAt(Scene::CenterF().movedBy(0+3, 100+3), shadowColor);
-				FontAsset(U"GameUI_BestTenDot")(U"タイトルに戻ります。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
-				break;
-			}
-
-		}
-	}
-	//操作方法
-	if (isDrawGuide && gameState!=GameState::Tutorial) TextureAsset(U"Manual").scaled(0.5).draw(ColorF(1.0, 0.5));
 }
 
 void GameScene::updateFadeIn(double t) {
@@ -1972,13 +1886,94 @@ void GameScene::updateFadeIn(double t) {
 	}
 }
 
+void GameScene::commonUIDraw()const {
+	// マシュマロUI
+	drawMarshmallowUI();
+
+	//文字のレンダーテクスチャをdraw
+	fontRenderTexture.draw();
+
+	//プレイヤー生存時
+	if (objects.player->getHp() != 0) {
+	}
+	//プレイヤー死亡時
+	else {
+
+		if (1.5 <= hitStopTimer) {
+			//Print << 1.0 * Clamp(EaseOutCubic(gameOverTimer), 0.0, 1.0);
+			//不透明度を上げる
+			const ScopedColorMul2D colorMul{ ColorF(1.0, 1.0 * Min(EaseOutCubic(gameOverTimer / 1.5), 1.0)) };
+
+			Rect(0, 0, Scene::Size()).draw(ColorF(0, 0.6));
+			//GameOver 
+			FontAsset(U"GameUI_BestTenDot90")(U"Game Over").drawAt(Scene::CenterF().movedBy(3, -50 + 3), shadowColor);
+			FontAsset(U"GameUI_BestTenDot90")(U"Game Over").drawAt(Scene::CenterF().movedBy(0, -50), ColorF(0.90));
+
+			switch (selectedButton) {
+			case SelectedButton::ReStart:
+
+				Triangle(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-110, 2.25), 35).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), activeColor);
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 + 1.5, -10 - 10 + 1.5), shadowColor);
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10, -10 - 10), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot")(U"初めのステージからやり直します。").drawAt(Scene::CenterF().movedBy(0 + 3, 100 + 3), ColorF(0.2));
+				FontAsset(U"GameUI_BestTenDot")(U"初めのステージからやり直します。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				break;
+
+			case SelectedButton::Continue:
+
+				Triangle(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-140, 2.25), 35).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), activeColor);
+
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 + 1.5, -10 - 10 + 1.5), shadowColor);
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10, -10 - 10), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot")(U"現在のステージの初めからやり直します。\n  ただし、スコアはリセットされます。").drawAt(Scene::CenterF().movedBy(0 + 3, 100 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot")(U"現在のステージの初めからやり直します。\n  ただし、スコアはリセットされます。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				break;
+
+			case SelectedButton::BackToTitle:
+
+				Triangle(Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-205 - 10, -23 - 10), 25).rotated(90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(0.9135s, Scene::Time() + 0.9135 / 2)));
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Restart").drawAt(Scene::CenterF().movedBy(-Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10 + 3, 0 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot45")(U"Continue").drawAt(Scene::CenterF().movedBy(Scene::CenterF().x / 2.0, Scene::CenterF().y / 2.0).movedBy(-10, 0), inactiveColor);
+
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10 + 1.5, -10 - 10 + 1.5), shadowColor);
+				FontAsset(U"GameUI_BestTenDot30")(U"BackToTitle").draw(Arg::bottomRight = Vec2{ Scene::Size().x, Scene::Size().y }.movedBy(-10 - 10, -10 - 10), activeColor);
+
+				FontAsset(U"GameUI_BestTenDot")(U"タイトルに戻ります。").drawAt(Scene::CenterF().movedBy(0 + 3, 100 + 3), shadowColor);
+				FontAsset(U"GameUI_BestTenDot")(U"タイトルに戻ります。").drawAt(Scene::CenterF().movedBy(0, 100), activeColor);
+				break;
+			}
+
+		}
+	}
+	//操作方法
+	if (isDrawGuide && gameState != GameState::Tutorial) TextureAsset(U"Manual").scaled(0.5).draw(ColorF(1.0, 0.5));
+}
+
 void GameScene::drawFadeIn(double t)const {
 	draw();
 	if (getData().isTutorial)RectF(0, 0, Scene::Size()).draw(ColorF(0.0, 1.0 - t));
 }
 
 void GameScene::draw() const {
-
 	switch (gameState) {
 	case GameState::Tutorial:
 
@@ -1986,6 +1981,125 @@ void GameScene::draw() const {
 		case TutorialState::Move:
 			// 移動
 			commonDraw();
+			break;
+
+		case TutorialState::Attack:
+			// 攻撃方法
+			commonDraw();
+			break;
+
+		case TutorialState::Maro1:
+			// マシュマロの説明1
+			commonDraw();
+			break;
+
+		case TutorialState::Maro2:
+			//マシュマロの説明2
+			commonDraw();
+			break;
+
+		case TutorialState::Score:
+			// スコア(ランキング)の説明
+			commonDraw();
+			break;
+
+		case TutorialState::Pause:
+			//ポーズ画面の説明
+			commonDraw();
+			break;
+
+		case TutorialState::Try:
+			//お試し部屋
+			commonDraw();
+			break;
+		}
+		break;
+
+	case GameState::StageStart:
+		commonDraw();
+
+		switch (stageStartState) {
+		case StageStartState::Start:
+			break;
+
+		case StageStartState::Middle:
+			break;
+
+		case StageStartState::End:
+
+			break;
+		}
+		break;
+
+	case GameState::Stage:
+		commonDraw();
+		break;
+
+	case GameState::BossAppear:
+		switch (bossAppearState) {
+		case BossAppearState::ChangeBackGround:
+			commonDraw();
+			break;
+
+		case BossAppearState::HideUI:
+			commonDraw();
+			break;
+
+		case BossAppearState::DrawRect:
+			commonDraw();
+			break;
+
+		case BossAppearState::AppearBoss:
+		{
+			// 2D カメラの設定から Transformer2D を作成
+			const auto t = camera.createTransformer();
+
+			//描画
+			commonDraw();
+		}
+		break;
+		}
+		break;
+
+	case GameState::BossBattle:
+		commonDraw();
+		break;
+
+	case GameState::Pause:
+		commonDraw();
+
+		//背景を暗く
+		RectF(0, 0, Scene::Size()).draw(ColorF(0.0, 0.3));
+
+		//ボタン
+		switch (pauseState) {
+		case PauseState::GoBack:
+
+			break;
+
+		case PauseState::Retry:
+			break;
+
+		case PauseState::Title:
+			break;
+
+		case PauseState::Config:
+			break;
+
+		case PauseState::ConfigMode:
+			break;
+		}
+		break;
+	}
+
+	//  以下UI //////////////////////////// 以下UI //
+
+	switch (gameState) {
+	case GameState::Tutorial:
+		switch (tutorialState) {
+		case TutorialState::Move:
+			commonUIDraw();
+
 			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
 			TextureAsset(U"TutorialMove").scaled(0.5).draw();
 
@@ -1994,8 +2108,7 @@ void GameScene::draw() const {
 			break;
 
 		case TutorialState::Attack:
-			// 攻撃方法
-			commonDraw();
+			commonUIDraw();
 			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
 			TextureAsset(U"TutorialAttack").scaled(0.5).draw();
 
@@ -2006,11 +2119,9 @@ void GameScene::draw() const {
 			break;
 
 		case TutorialState::Maro1:
-			// マシュマロの説明1
-			commonDraw();
+			commonUIDraw();
 			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
 			TextureAsset(U"TutorialMaro1").scaled(0.5).draw();
-
 			//左三角
 			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
 			//右三角
@@ -2018,8 +2129,7 @@ void GameScene::draw() const {
 			break;
 
 		case TutorialState::Maro2:
-			//マシュマロの説明2
-			commonDraw();
+			commonUIDraw();
 			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
 			TextureAsset(U"TutorialMaro2").scaled(0.5).draw();
 
@@ -2030,8 +2140,7 @@ void GameScene::draw() const {
 			break;
 
 		case TutorialState::Score:
-			// スコア(ランキング)の説明
-			commonDraw();
+			commonUIDraw();
 			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
 			TextureAsset(U"TutorialScore").scaled(0.5).draw();
 
@@ -2042,41 +2151,28 @@ void GameScene::draw() const {
 			break;
 
 		case TutorialState::Pause:
-			//ポーズ画面の説明
-			commonDraw();
+			commonUIDraw();
 			Rect(0, 0, Scene::Size()).draw(ColorF(0.0, 0.6));
+
 			TextureAsset(U"TutorialPause").scaled(0.5).draw();
+
 			//左三角
 			Triangle(Scene::CenterF().movedBy(-360, 0), 60).rotated(-90_deg).draw(ColorF(activeColor, 1 - Periodic::Sawtooth0_1(1.25s)));
 			break;
 
 		case TutorialState::Try:
-			//お試し部屋
-			commonDraw();
+			commonUIDraw();
 			TextureAsset(U"Manual").scaled(0.5).draw(ColorF(1.0, 0.8));
-
-			if(Rect(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 10 + TextureAsset(U"UIBack").size().y * 6, TextureAsset(U"Question").size() * 5).mouseOver()) TextureAsset(U"Question").scaled(5).draw(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 4 + TextureAsset(U"UIBack").size().y * 6, ColorF(1.0, 1));
+			// ↓ボタンクラスを作って処理と分割したい
+			if (Rect(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 10 + TextureAsset(U"UIBack").size().y * 6, TextureAsset(U"Question").size() * 5).mouseOver()) TextureAsset(U"Question").scaled(5).draw(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 4 + TextureAsset(U"UIBack").size().y * 6, ColorF(1.0, 1));
 			else TextureAsset(U"Question").scaled(5).draw(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 4 + TextureAsset(U"UIBack").size().y * 6, ColorF(1.0, 0.6));
 			//Rect(Scene::Size().x - 10 - TextureAsset(U"Question").size().x * 5, 0 + 10 + TextureAsset(U"UIBack").size().y * 6, TextureAsset(U"Question").size()*5).draw(ColorF(1.0, 0.6));
+			break;
 		}
 		break;
-	break;
 
 	case GameState::StageStart:
-		commonDraw();
-
-		//if (stageStartTimer <= 1.0) {
-		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos);
-		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 });
-		//}
-		//else if (stageStartTimer < 1.5) {
-		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextMiddlePos);
-		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextMiddlePos + Vec2{ 0, 34 });
-		//}
-		//else if (1.5 <= stageStartTimer) {
-		//	FontAsset(U"GameUI_BestTenDot30")(U"Stage", (int)currentStage + 1, U": ", stageName[(int)currentStage]).drawAt(stageNameTextPos);
-		//	FontAsset(U"GameUI_BestTenDot")(U"～始まりの朝～").drawAt(stageNameTextPos + Vec2{ 0, 34 });
-		//}
+		commonUIDraw();
 
 		switch (stageStartState) {
 		case StageStartState::Start:
@@ -2106,68 +2202,64 @@ void GameScene::draw() const {
 		break;
 
 	case GameState::Stage:
-		commonDraw();
-
-	break;
+		commonUIDraw();
+		break;
 
 	case GameState::BossAppear:
 		switch (bossAppearState) {
 		case BossAppearState::ChangeBackGround:
-			commonDraw();
+			commonUIDraw();
 			break;
 
 		case BossAppearState::HideUI:
-			commonDraw();
+			commonUIDraw();
 			break;
 
 		case BossAppearState::DrawRect:
-			commonDraw();
+			commonUIDraw();
 			RectF(0, 0, Scene::Size().x, ease * maxTopRectHeight).draw(ColorF(0, 0, 0, 0.9));
 			RectF(0, Scene::Size().y - ease * maxBottomRectHeight, Scene::Size().x, maxBottomRectHeight).draw(ColorF(0, 0, 0, 0.85));
 			break;
 
-		case BossAppearState::AppearBoss:
+		case BossAppearState::AppearBoss:// 要検証
 		{
 			// 2D カメラの設定から Transformer2D を作成
 			const auto t = camera.createTransformer();
 
 			//描画
-			commonDraw();
-			RectF(0, 0, Scene::Size().x, ease * maxTopRectHeight).draw(ColorF(0, 0, 0, 0.9));
+			commonUIDraw();
+			RectF(0, 0, Scene::Size().x, ease* maxTopRectHeight).draw(ColorF(0, 0, 0, 0.9));
 			RectF(0, Scene::Size().y - ease * maxBottomRectHeight, Scene::Size().x, maxBottomRectHeight).draw(ColorF(0, 0, 0, 0.85));
-
+		}
+			break;
 		}
 		break;
-		}
-	break;
 
 	case GameState::BossBattle:
-			commonDraw();
-			break;
+		commonUIDraw();
+		break;
 
 	case GameState::Pause:
-		commonDraw();
+		commonUIDraw();
 
-		//背景を暗く
-		RectF(0, 0, Scene::Size()).draw(ColorF(0.0, 0.3));
-		//UIグラ
+		//ポーズ画像
 		TextureAsset(U"Pause").scaled(6).draw();
 
 		//ボタン
 		switch (pauseState) {
 		case PauseState::GoBack:
 			//三角
-			Triangle(Vec2(Scene::Size().x / 5.0 * 1 + 30 - FontAsset(U"GameUI_BestTenDot30")(U"戻る").region().w/2.0 - PauseTriangleSize/2.0 -15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0/5.0) * 0.75, 0.75) + 0.2 )));
+			Triangle(Vec2(Scene::Size().x / 5.0 * 1 + 30 - FontAsset(U"GameUI_BestTenDot30")(U"戻る").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
 
 			//FontAsset(U"GameUI_BestTenDot30")(U"ポーズ").drawAt(Scene::CenterF().movedBy(0, 33), activeColor);
-			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
-			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30   , Scene::CenterF().y + 36 + 33), activeColor);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 + 30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 + 30, Scene::CenterF().y + 36 + 33), activeColor);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2 , Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3 , Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4-30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
@@ -2177,14 +2269,14 @@ void GameScene::draw() const {
 			//三角
 			Triangle(Vec2(Scene::Size().x / 5.0 * 2 - FontAsset(U"GameUI_BestTenDot30")(U"リトライ").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
 
-			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 + 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
-			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2       , Scene::CenterF().y + 36 + 33), activeColor);
+			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2, Scene::CenterF().y + 36 + 33), activeColor);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
@@ -2194,14 +2286,14 @@ void GameScene::draw() const {
 			//三角
 			Triangle(Vec2(Scene::Size().x / 5.0 * 3 - FontAsset(U"GameUI_BestTenDot30")(U"タイトル").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
 
-			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 + 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
-			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3       , Scene::CenterF().y + 36 + 33), activeColor);
+			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), activeColor);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
@@ -2211,29 +2303,28 @@ void GameScene::draw() const {
 			//三角
 			Triangle(Vec2(Scene::Size().x / 5.0 * 4 - 30 - FontAsset(U"GameUI_BestTenDot30")(U"設定").region().w / 2.0 - PauseTriangleSize / 2.0 - 15, Scene::CenterF().y + 36 + 33 + 3), PauseTriangleSize).rotated(90_deg).draw(ColorF(activeColor, (0.75 - Min(pauseTriangleTimer * (4.0 / 5.0) * 0.75, 0.75) + 0.2)));
 
-			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 + 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), activeColor);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30, Scene::CenterF().y + 36 + 33), activeColor);
 
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));
 			break;
 
 		case PauseState::ConfigMode:
-
-			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 +30, Scene::CenterF().y + 36 + 33), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"戻る").drawAt(Vec2(Scene::Size().x / 5.0 * 1 + 30, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"リトライ").drawAt(Vec2(Scene::Size().x / 5.0 * 2 - 40, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
 			FontAsset(U"GameUI_BestTenDot30")(U"タイトル").drawAt(Vec2(Scene::Size().x / 5.0 * 3, Scene::CenterF().y + 36 + 33), inactiveColor2);
 
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30  + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
-			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 -30, Scene::CenterF().y + 36 + 33), activeColor);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30 + 3.25, Scene::CenterF().y + 36 + 33 + 3.25), inactiveColor2);
+			FontAsset(U"GameUI_BestTenDot30")(U"設定").drawAt(Vec2(Scene::Size().x / 5.0 * 4 - 30, Scene::CenterF().y + 36 + 33), activeColor);
 
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30 + 3, Scene::CenterF().y + 33 + 108 + 3 }, ColorF(0.3));
 			FontAsset(U"GameUI_BestTenDot")(U"Shiftで戻る").draw(Arg::bottomRight = Vec2{ Scene::Size().x - 30    , Scene::CenterF().y + 33 + 108 }, ColorF(0.9));

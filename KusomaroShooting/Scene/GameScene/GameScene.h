@@ -30,6 +30,7 @@ public:
 	void destroyObjects();
 
 	void commonDraw()const;
+	void commonUIDraw()const;
 
 	void drawBackground()const;
 
