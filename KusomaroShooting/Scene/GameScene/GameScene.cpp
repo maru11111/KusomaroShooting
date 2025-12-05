@@ -1660,41 +1660,36 @@ void GameScene::drawFadeIn(double t)const {
 void GameScene::draw() const {
 	switch (gameState) {
 	case GameState::Tutorial:
+		// 共通描画
+		commonDraw();
 
 		switch (tutorialState) {
 		case TutorialState::Move:
 			// 移動
-			commonDraw();
 			break;
 
 		case TutorialState::Attack:
 			// 攻撃方法
-			commonDraw();
 			break;
 
 		case TutorialState::Maro1:
 			// マシュマロの説明1
-			commonDraw();
 			break;
 
 		case TutorialState::Maro2:
 			//マシュマロの説明2
-			commonDraw();
 			break;
 
 		case TutorialState::Score:
 			// スコア(ランキング)の説明
-			commonDraw();
 			break;
 
 		case TutorialState::Pause:
 			//ポーズ画面の説明
-			commonDraw();
 			break;
 
 		case TutorialState::Try:
 			//お試し部屋
-			commonDraw();
 			break;
 		}
 		break;
@@ -1758,7 +1753,6 @@ void GameScene::draw() const {
 		//ボタン
 		switch (pauseState) {
 		case PauseState::GoBack:
-
 			break;
 
 		case PauseState::Retry:
